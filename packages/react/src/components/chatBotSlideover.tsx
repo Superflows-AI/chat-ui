@@ -3,18 +3,12 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { LoadingSpinner } from "./loadingspinner";
 import { classNames, convertToRenderable } from "../lib/utils";
 import { AutoGrowingTextArea } from "./autoGrowingTextarea";
-import {ChatItem, Json, StreamingStep, Styling} from "../lib/types";
+import { ChatItem, Json, StreamingStep, Styling } from "../lib/types";
 import { DevChatItem, UserChatItem } from "./chatItems";
 
 export default function ChatBotSlideover(props: {
@@ -83,7 +77,9 @@ export default function ChatBotSlideover(props: {
       });
 
       if (!response.ok) {
-        const responseJson: {error: string} = await response.json() as {error: string};
+        const responseJson: { error: string } = (await response.json()) as {
+          error: string;
+        };
         throw new Error(responseJson.error);
       }
 
@@ -139,7 +135,7 @@ export default function ChatBotSlideover(props: {
       killSwitchClicked.current,
       alreadyRunning.current,
       props.language,
-    ],
+    ]
   );
 
   return (
@@ -158,7 +154,7 @@ export default function ChatBotSlideover(props: {
             <div
               className={classNames(
                 "pointer-events-none fixed inset-y-0 flex max-w-full",
-                props.styling?.slideoverSide === "left" ? "left-0" : "right-0",
+                props.styling?.slideoverSide === "left" ? "left-0" : "right-0"
               )}
             >
               <Transition.Child
@@ -186,7 +182,7 @@ export default function ChatBotSlideover(props: {
                           `py-4 px-3 min-h-[3.75rem]`,
                           props.styling?.sidebarHeaderTextColor === "light"
                             ? "text-gray-50"
-                            : "text-gray-900 border-b border-gray-200",
+                            : "text-gray-900 border-b border-gray-200"
                         )}
                         style={{ backgroundColor: props.styling?.brandColor }}
                       >
@@ -194,7 +190,7 @@ export default function ChatBotSlideover(props: {
                           {props.AIname && (
                             <Dialog.Title
                               className={classNames(
-                                "block text-xl font-semibold leading-6",
+                                "block text-xl font-semibold leading-6"
                               )}
                             >
                               {props.AIname}
@@ -205,7 +201,7 @@ export default function ChatBotSlideover(props: {
                               "absolute top-0 left-0 flex h-7 items-center",
                               props.styling?.slideoverSide === "right"
                                 ? "order-first"
-                                : "order-last",
+                                : "order-last"
                             )}
                           >
                             <button
@@ -269,15 +265,19 @@ export default function ChatBotSlideover(props: {
                               } else if (chatItem.role === "function") {
                                 let contentString;
                                 const functionJsonResponse: Json = JSON.parse(
-                                  chatItem.content,
+                                  chatItem.content
                                 ) as Json;
                                 if (functionJsonResponse === null) {
                                   throw new Error(
-                                    `Function response is null. This should not happen.`,
+                                    `Function response is null. This should not happen.`
                                   );
-                                } else if (typeof functionJsonResponse === "string" || typeof functionJsonResponse === "number" || typeof functionJsonResponse === "boolean") {
+                                } else if (
+                                  typeof functionJsonResponse === "string" ||
+                                  typeof functionJsonResponse === "number" ||
+                                  typeof functionJsonResponse === "boolean"
+                                ) {
                                   throw new Error(
-                                    `Function response once parsed into JSON is a ${typeof functionJsonResponse}: "${functionJsonResponse.toString()}". This should not happen.`,
+                                    `Function response once parsed into JSON is a ${typeof functionJsonResponse}: "${functionJsonResponse.toString()}". This should not happen.`
                                   );
                                 }
                                 if (
@@ -344,12 +344,16 @@ export default function ChatBotSlideover(props: {
                           "text-sm resize-none mx-1 rounded py-2 border-gray-300 focus:border-purple-300 focus:ring-1 focus:ring-purple-300 placeholder:text-gray-400",
                           userText.length > 300
                             ? "overflow-auto-y"
-                            : "overflow-hidden",
+                            : "overflow-hidden"
                         )}
                         placeholder={"Send a message"}
                         value={userText}
-                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setUserText(e.target.value)}
-                        onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                          setUserText(e.target.value)
+                        }
+                        onKeyDown={(
+                          e: React.KeyboardEvent<HTMLTextAreaElement>
+                        ) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
                             if (userText.length > 3) {
@@ -384,7 +388,7 @@ export default function ChatBotSlideover(props: {
                             "flex flex-row gap-x-1 place-items-center ml-4 justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm",
                             loading
                               ? "bg-gray-500 cursor-not-allowed"
-                              : `hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 bg-purple-500`,
+                              : `hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 bg-purple-500`
                           )}
                           onClick={() => {
                             if (!loading && userText.length > 3) {
