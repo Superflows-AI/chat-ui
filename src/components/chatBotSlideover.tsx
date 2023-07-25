@@ -1,4 +1,3 @@
-import * as React from "react";
 import {
   ArrowPathIcon,
   ChevronLeftIcon,
@@ -7,9 +6,19 @@ import {
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { LoadingSpinner } from "./loadingspinner";
-import { classNames, convertToRenderable } from "../lib/utils";
+import {
+  classNames,
+  convertToRenderable,
+  functionNameToDisplay,
+} from "../lib/utils";
 import { AutoGrowingTextArea } from "./autoGrowingTextarea";
-import { ChatItem, Json, StreamingStep, Styling } from "../lib/types";
+import {
+  ChatItem,
+  Json,
+  StreamingStep,
+  StreamingStepInput,
+  Styling,
+} from "../lib/types";
 import { DevChatItem, UserChatItem } from "./chatItems";
 
 export default function ChatBotSlideover(props: {
@@ -17,7 +26,6 @@ export default function ChatBotSlideover(props: {
   setOpen: (open: boolean) => void;
   superflowsApiKey: string;
   hostname?: string;
-  language?: "English" | "Espanol";
   AIname?: string;
   userApiKey?: string;
   userDescription?: string;
@@ -40,7 +48,9 @@ export default function ChatBotSlideover(props: {
   // const [suggestions, setSuggestions] = useState<string[]>(props.suggestions ?? []);
 
   const [conversationId, setConversationId] = useState<number | null>(null);
-  const [devChatContents, setDevChatContents] = useState<ChatItem[]>([]);
+  const [devChatContents, setDevChatContents] = useState<StreamingStepInput[]>(
+    []
+  );
 
   useEffect(() => {
     const ele = document.getElementById("scrollable-chat-contents");
@@ -55,7 +65,7 @@ export default function ChatBotSlideover(props: {
   const hostname = props.hostname ?? "https://dashboard.superflows.ai";
 
   const callSuperflowsApi = useCallback(
-    async (chat: ChatItem[]) => {
+    async (chat: StreamingStepInput[]) => {
       setDevChatContents(chat);
       if (loading || alreadyRunning.current) return;
       alreadyRunning.current = true;
@@ -69,7 +79,6 @@ export default function ChatBotSlideover(props: {
         body: JSON.stringify({
           user_input: chat[chat.length - 1].content,
           conversation_id: conversationId,
-          language: props.language,
           user_api_key: props.userApiKey,
           user_description: props.userDescription,
           test_mode: props.testMode ?? false,
@@ -135,7 +144,60 @@ export default function ChatBotSlideover(props: {
       setDevChatContents,
       killSwitchClicked.current,
       alreadyRunning.current,
-      props.language,
+    ]
+  );
+  const onConfirm = useCallback(
+    async (confirm: boolean): Promise<void> => {
+      setLoading(true);
+      const response = await fetch("/api/v1/confirm", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${props.superflowsApiKey}`,
+        },
+        body: JSON.stringify({
+          conversation_id: conversationId,
+          user_api_key: props.userApiKey,
+          confirm: confirm,
+          test_mode: props.testMode,
+        }),
+      });
+
+      const json = (await response.json()) as {
+        outs: StreamingStepInput[];
+        error: string;
+      };
+      if (response.status === 200) {
+        const newChat = [...devChatContents, ...json.outs];
+        setDevChatContents(newChat);
+        if (confirm) {
+          // TODO: This adds an empty message to the DB and GPT chat history.
+          //  This is hacky, since all we actually want to do is restart Angela with the existing
+          //  chat history. We should refactor this to do that instead.
+          await callSuperflowsApi([...newChat, { role: "user", content: "" }]);
+        }
+      } else {
+        // Handle errors here - add them to chat
+        console.error(json.error);
+        setDevChatContents((prevState) => [
+          ...prevState,
+          {
+            role: "error",
+            content: json.error,
+          },
+        ]);
+      }
+
+      setLoading(false);
+    },
+    [
+      devChatContents,
+      setDevChatContents,
+      callSuperflowsApi,
+      conversationId,
+      setLoading,
+      props.userApiKey,
+      props.testMode,
     ]
   );
 
@@ -245,80 +307,80 @@ export default function ChatBotSlideover(props: {
                         )}
                         <div className="mt-6 flex-1 px-1 shrink-0 flex flex-col justify-end gap-y-2">
                           {devChatContents.map((chatItem, idx) => {
-                            if (props.devMode || chatItem.role === "user")
+                            if (
+                              props.devMode ||
+                              ["error", "confirmation", "user"].includes(
+                                chatItem.role
+                              )
+                            ) {
                               return (
                                 <DevChatItem
+                                  key={idx.toString() + chatItem.content}
                                   chatItem={chatItem}
-                                  key={idx}
-                                  AIname={props.AIname}
+                                  onConfirm={onConfirm}
                                 />
                               );
-                            else {
-                              if (chatItem.role === "debug") return <></>;
-                              else if (chatItem.role === "error") {
-                                return (
-                                  <DevChatItem
-                                    chatItem={chatItem}
-                                    key={idx}
-                                    AIname={props.AIname}
-                                  />
-                                );
-                              } else if (chatItem.role === "function") {
-                                let contentString;
-                                const functionJsonResponse: Json = JSON.parse(
-                                  chatItem.content
-                                ) as Json;
-                                if (functionJsonResponse === null) {
-                                  throw new Error(
-                                    `Function response is null. This should not happen.`
-                                  );
-                                } else if (
-                                  typeof functionJsonResponse === "string" ||
-                                  typeof functionJsonResponse === "number" ||
-                                  typeof functionJsonResponse === "boolean"
-                                ) {
-                                  throw new Error(
-                                    `Function response once parsed into JSON is a ${typeof functionJsonResponse}: "${functionJsonResponse.toString()}". This should not happen.`
-                                  );
-                                }
-                                if (
-                                  Array.isArray(functionJsonResponse) &&
-                                  functionJsonResponse.length === 0
-                                ) {
-                                  contentString = "No results found.";
-                                } else if (
-                                  // To guard against null
-                                  functionJsonResponse &&
+                            } else if (chatItem.role === "debug") return <></>;
+                            else if (chatItem.role === "function") {
+                              let contentString = "";
+                              const functionJsonResponse = JSON.parse(
+                                chatItem.content
+                              ) as Json;
+                              if (
+                                // Empty array
+                                (Array.isArray(functionJsonResponse) &&
+                                  functionJsonResponse.length === 0) ||
+                                // Empty object
+                                (functionJsonResponse &&
                                   typeof functionJsonResponse === "object" &&
                                   Object.entries(functionJsonResponse)
-                                    .length === 0
+                                    .length === 0)
+                              ) {
+                                if (
+                                  devChatContents[idx - 1].role ===
+                                    "function" ||
+                                  devChatContents[idx + 1].role === "function"
                                 ) {
-                                  contentString = "No results found.";
-                                } else {
-                                  console.log("chatItem", chatItem);
-                                  contentString =
-                                    chatItem.name +
-                                    "called:\n" +
-                                    convertToRenderable(functionJsonResponse);
+                                  // If the function call is adjacent to other function calls we don't need to tell them it
+                                  // was empty - otherwise we get a lot of empty messages clogging up the chat interface
+                                  return (
+                                    <div
+                                      key={idx.toString() + chatItem.content}
+                                    />
+                                  );
                                 }
-                                return (
-                                  <DevChatItem
-                                    chatItem={{
-                                      ...chatItem,
-                                      content: contentString,
-                                    }}
-                                    key={idx}
-                                    AIname={props.AIname}
-                                  />
+                                contentString = "No data returned";
+                              } else if (
+                                functionJsonResponse &&
+                                typeof functionJsonResponse === "object"
+                              ) {
+                                contentString = convertToRenderable(
+                                  functionJsonResponse,
+                                  `${functionNameToDisplay(
+                                    chatItem?.name ?? ""
+                                  )} result`
                                 );
                               }
                               return (
-                                <UserChatItem chatItem={chatItem} key={idx} />
+                                <DevChatItem
+                                  chatItem={{
+                                    ...chatItem,
+                                    content: contentString,
+                                  }}
+                                  key={idx.toString() + chatItem.content}
+                                />
                               );
                             }
+                            return (
+                              <UserChatItem
+                                chatItem={chatItem}
+                                key={idx.toString() + chatItem.content}
+                              />
+                            );
                           })}
                           {devChatContents.length === 0 &&
-                            props.suggestions && (
+                            props.suggestions &&
+                            props.suggestions.length > 0 && (
                               <div className="py-4 px-1.5">
                                 <h2 className="ml-2 font-medium">
                                   Suggestions
@@ -339,6 +401,7 @@ export default function ChatBotSlideover(props: {
                         </div>
                       </div>
                     </div>
+                    {/* Textbox user types into */}
                     <div className="flex flex-col pt-4">
                       <AutoGrowingTextArea
                         className={classNames(

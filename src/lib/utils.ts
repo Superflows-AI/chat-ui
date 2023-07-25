@@ -4,62 +4,77 @@ export function classNames(
   return classes.filter(Boolean).join(" ");
 }
 
-export function parseKeyValues(
-  keyValueText: string,
-): { key: string; value: string }[] {
-  console.log("Parsing key values from", keyValueText);
-  return keyValueText.split("<br/>").map((line) => {
+export function functionNameToDisplay(name: string): string {
+  return (
+    name
+      // Insert a space before all camelCased and PascalCased characters
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      // Replace underscores with a space
+      .replace(/_/g, " ")
+      // Convert all text to lower case
+      .toLowerCase()
+      // Capitalize the first letter of each word
+      .replace(/\b[a-z](?=[a-z]{1})/g, (letter) => letter.toUpperCase())
+  );
+}
+
+export function parseTableTags(text: string): { key: string; value: string }[] {
+  const captionRegex = /<caption>(.*?)<\/caption>/;
+  const caption = {
+    key: "caption",
+    value: text.match(captionRegex)?.[1] ?? "",
+  };
+  text = text.replace(captionRegex, "");
+
+  const rows = text.split("<br/>").map((line) => {
     const [key, ...value] = line.split(":");
     return { key: key.trim(), value: value.join(":").trim() };
   });
+  return [caption, ...rows];
 }
 
 export function convertToRenderable(
   functionOutput: Record<string, any> | any[],
+  caption?: string
 ): string {
-  let output = "";
+  let output = "<table>";
+  if (caption) {
+    output += `<caption>${caption}</caption>`;
+  }
   if (Array.isArray(functionOutput)) {
     if (
       typeof functionOutput[0] === "object" &&
       !Array.isArray(functionOutput[0])
     ) {
       // Format: [{a,b}, {a,b}]
-      functionOutput.forEach((item) => {
-        output += "<table>";
+      functionOutput.forEach((item: Record<string, any>) => {
         Object.entries(item).forEach(([key, value]) => {
-          output += `${camelToCapitalizedWords(key)}: ${
+          output += `${functionNameToDisplay(key)}: ${
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             typeof value === "object" ? JSON.stringify(value) : value
           }<br/>`;
         });
-        output += "</table>";
       });
     } else {
       // Format: [x, y, z]
-      output += "<table>";
       functionOutput.forEach((val) => {
-        output += `Value: ${camelToCapitalizedWords(val)}<br/>`;
+        output += `Value: ${functionNameToDisplay(String(val))}<br/>`;
       });
-      output += "</table>";
     }
   } else {
     // Format: {data: {a, b}}
     if ("data" in functionOutput) {
-      functionOutput = functionOutput.data;
+      functionOutput = functionOutput.data as Record<string, any>;
     }
     // Format: {a, b}
-    output += "<table>";
     Object.entries(functionOutput).forEach(([key, value]) => {
-      output += `${camelToCapitalizedWords(key)}: ${
+      output += `${functionNameToDisplay(key)}: ${
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         typeof value === "object" ? JSON.stringify(value) : value
       }<br/>`;
     });
-    output += "</table>";
+    output = output.slice(0, -5);
   }
+  output += "</table>";
   return output;
-}
-
-export function camelToCapitalizedWords(camelCaseStr: string): string {
-  return camelCaseStr
-    .replace(/([A-Z])/g, " $1") // Add a space before each uppercase letter
-    .replace(/^./, (match) => match.toUpperCase()); // Capitalize the first letter
 }

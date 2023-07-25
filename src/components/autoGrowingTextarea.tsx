@@ -1,4 +1,3 @@
-import * as React from "react";
 import { useEffect, useRef } from "react";
 
 export function AutoGrowingTextArea(props: {
@@ -11,20 +10,21 @@ export function AutoGrowingTextArea(props: {
   maxHeight?: number;
   onBlur?: React.FocusEventHandler<HTMLTextAreaElement>;
 }) {
-  const ref = useRef(null);
+  const ref: React.MutableRefObject<any> = useRef(null);
 
   useEffect(() => {
     if (ref.current === null) return;
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ref.current.style.height = "5px";
 
-    let maxH = props.maxHeight ?? 500;
-    let minH = props.minHeight ?? 0;
+    const maxH = props.maxHeight ?? 500;
+    const minH = props.minHeight ?? 0;
 
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ref.current.style.height =
-      // @ts-ignore
-      Math.max(Math.min(ref.current.scrollHeight, maxH), minH) + "px";
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+      Math.max(Math.min(ref.current.scrollHeight, maxH), minH).toString() +
+      "px";
   }, [ref.current, props.value]);
 
   return (
@@ -34,8 +34,8 @@ export function AutoGrowingTextArea(props: {
       placeholder={props.placeholder}
       value={props.value}
       onChange={props.onChange}
-      onKeyDown={props.onKeyDown ?? (() => {})}
-      onBlur={props.onBlur ?? (() => {})}
+      onKeyDown={props.onKeyDown}
+      onBlur={props.onBlur}
     />
   );
 }
