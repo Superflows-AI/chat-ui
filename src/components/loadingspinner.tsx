@@ -1,3 +1,4 @@
+import * as React from "react";
 import { classNames } from "../lib/utils";
 
 export function LoadingSpinner({ classes }: { classes: string }) {
