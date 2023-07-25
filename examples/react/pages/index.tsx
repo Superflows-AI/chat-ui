@@ -9,7 +9,6 @@ export default function App() {
         <link rel="icon" href="/favicon.png" />
       </Head>
       <div className="w-screen top-0 min-h-full bg-gray-100 flex flex-row justify-end px-20">
-          WWOOOOO
         <SuperflowsButton
           superflowsApiKey={"abcd"}
           suggestions={[

@@ -1,7 +1,3 @@
-export type StreamingStep =
-  | { role: "assistant" | "error" | "debug"; content: string; id: number }
-  | { role: "function"; name: string; content: string; id: number };
-
 export type Json =
   | string
   | number
@@ -23,3 +19,21 @@ export interface Styling {
   // This sets the colour of the text on the header of the react. Set "dark" if using a white background
   sidebarHeaderTextColor?: "dark" | "light";
 }
+
+export type ChatGPTMessage =
+  | {
+      role: "system" | "user" | "assistant";
+      content: string;
+    }
+  | {
+      role: "function";
+      content: string;
+      name: string;
+    };
+
+type NonSystemGPTMessage = Exclude<ChatGPTMessage, { role: "system" }>;
+
+export type StreamingStepInput =
+  | NonSystemGPTMessage
+  | { role: "error" | "debug" | "confirmation"; content: string };
+export type StreamingStep = StreamingStepInput & { id: number };
