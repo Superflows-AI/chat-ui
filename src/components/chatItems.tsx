@@ -1,3 +1,4 @@
+import * as React from "react";
 import { useEffect, useState } from "react";
 import { classNames, parseKeyValues } from "../lib/utils";
 import {
@@ -47,7 +48,7 @@ export function DevChatItem(props: { chatItem: ChatItem; AIname?: string }) {
           ? "bg-green-100"
           : props.chatItem.role === "function"
           ? "bg-purple-100"
-          : "",
+          : ""
       )}
     >
       <p className="text-xs text-gray-600 mb-1">
@@ -90,7 +91,7 @@ export function DevChatItem(props: { chatItem: ChatItem; AIname?: string }) {
               <div
                 className={classNames(
                   "flex flex-row place-items-center gap-x-1",
-                  saveSuccessfulFeedback ? "visible" : "invisible",
+                  saveSuccessfulFeedback ? "visible" : "invisible"
                 )}
               >
                 <CheckCircleIcon className="h-5 w-5 text-green-500" />
@@ -219,7 +220,7 @@ export function UserChatItem(props: { chatItem: ChatItem; AIname?: string }) {
               <div
                 className={classNames(
                   "flex flex-row place-items-center gap-x-1",
-                  saveSuccessfulFeedback ? "visible" : "invisible",
+                  saveSuccessfulFeedback ? "visible" : "invisible"
                 )}
               >
                 <CheckCircleIcon className="h-5 w-5 text-green-500" />

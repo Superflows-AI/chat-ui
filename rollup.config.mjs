@@ -1,5 +1,5 @@
-import typescript from "rollup-plugin-typescript";
 import tailwind from "rollup-plugin-tailwindcss";
+import typescript from "@rollup/plugin-typescript";
 
 import pkg from "./package.json" assert { type: "json" };
 
@@ -23,5 +23,5 @@ export default {
     }),
     typescript({}),
   ],
-  external: ["react", "react-dom"],
+  external: ["react", "react-dom", "@headlessui/react", "@heroicons/react"]
 };

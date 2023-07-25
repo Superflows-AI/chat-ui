@@ -3,15 +3,21 @@
 	"version": "1.0.0",
 	"main": "dist/index.js",
 	"devDependencies": {
+		"@rollup/plugin-typescript": "^11.1.2",
+		"rollup-plugin-tailwindcss": "^1.0.0",
 		"@types/react": "^18.2.0",
 		"prettier": "^3.0.0",
-		"typescript": "^5.1.6",
 		"react": "^18.2.0",
-		"react-dom": "^18.2.0"
+		"react-dom": "^18.2.0",
+		"typescript": "^5.1.6",
+		"@headlessui/react": "^1.7.15",
+		"@heroicons/react": "^2.0.18"
 	},
 	"peerDependencies": {
 		"react": "^18.2.0",
-		"react-dom": "^18.2.0"
+		"react-dom": "^18.2.0",
+		"@headlessui/react": "^1.7.15",
+		"@heroicons/react": "^2.0.18"
 	},
 	"scripts": {
 		"build": "rollup -c",
@@ -22,8 +28,6 @@
 		"dist"
 	],
 	"dependencies": {
-		"next": "^13.4.12",
-		"rollup-plugin-tailwindcss": "^1.0.0",
-		"rollup-plugin-typescript": "^1.0.1"
+		"next": "^13.4.12"
 	}
 }
