@@ -23,5 +23,5 @@ export default {
     }),
     typescript({}),
   ],
-  external: ["react", "react-dom", "@headlessui/react", "@heroicons/react"]
+  external: ["react", "react-dom", "@headlessui/react", "@heroicons/react"],
 };
