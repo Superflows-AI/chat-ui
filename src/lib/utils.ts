@@ -5,19 +5,18 @@ export function classNames(
 }
 
 export function functionNameToDisplay(name: string): string {
-  return (
-    name
-      // Insert a space before all camelCased and PascalCased characters
-      .replace(/([a-z])([A-Z])/g, "$1 $2")
-      // Replace underscores with a space
-      .replace(/_/g, " ")
-      // Convert all text to lower case
-      .toLowerCase()
-      // Capitalize the first letter of each word
-      .replace(/\b[a-z](?=[a-z]{1})/g, (letter) => letter.toUpperCase())
-  );
-}
+  let result = name
+    // Insert a space before all camelCased and PascalCased characters
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    // Replace underscores with a space
+    .replace(/_/g, " ")
+    // Convert all text to lower case
+    .toLowerCase()
+    // Capitalize the first letter of each word
+    .replace(/\b[a-z](?=[a-z]{1})/g, (letter) => letter.toUpperCase());
 
+  return result;
+}
 export function parseTableTags(text: string): { key: string; value: string }[] {
   const captionRegex = /<caption>(.*?)<\/caption>/;
   const caption = {
@@ -32,7 +31,6 @@ export function parseTableTags(text: string): { key: string; value: string }[] {
   });
   return [caption, ...rows];
 }
-
 export function convertToRenderable(
   functionOutput: Record<string, any> | any[],
   caption?: string
@@ -47,10 +45,9 @@ export function convertToRenderable(
       !Array.isArray(functionOutput[0])
     ) {
       // Format: [{a,b}, {a,b}]
-      functionOutput.forEach((item: Record<string, any>) => {
+      functionOutput.forEach((item) => {
         Object.entries(item).forEach(([key, value]) => {
           output += `${functionNameToDisplay(key)}: ${
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             typeof value === "object" ? JSON.stringify(value) : value
           }<br/>`;
         });
@@ -58,18 +55,17 @@ export function convertToRenderable(
     } else {
       // Format: [x, y, z]
       functionOutput.forEach((val) => {
-        output += `Value: ${functionNameToDisplay(String(val))}<br/>`;
+        output += `Value: ${functionNameToDisplay(val)}<br/>`;
       });
     }
   } else {
     // Format: {data: {a, b}}
     if ("data" in functionOutput) {
-      functionOutput = functionOutput.data as Record<string, any>;
+      functionOutput = functionOutput.data;
     }
     // Format: {a, b}
     Object.entries(functionOutput).forEach(([key, value]) => {
       output += `${functionNameToDisplay(key)}: ${
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         typeof value === "object" ? JSON.stringify(value) : value
       }<br/>`;
     });

@@ -158,7 +158,7 @@ export default function ChatBotSlideover(props: {
         },
         body: JSON.stringify({
           conversation_id: conversationId,
-          user_api_key: props.userApiKey,
+          user_api_key: props.userApiKey ?? "", // Need a fallback or zod fails
           confirm: confirm,
           test_mode: props.testMode,
         }),
@@ -208,7 +208,7 @@ export default function ChatBotSlideover(props: {
       {/* @ts-ignore */}
       <Dialog
         as="div"
-        // className="relative z-10"
+        className="relative z-50"
         onClose={props.setOpen}
         initialFocus={ref}
       >
@@ -251,15 +251,13 @@ export default function ChatBotSlideover(props: {
                         style={{ backgroundColor: props.styling?.brandColor }}
                       >
                         <div className="relative flex flex-row place-items-center justify-center">
-                          {props.AIname && (
-                            <Dialog.Title
-                              className={classNames(
-                                "block text-xl font-semibold leading-6"
-                              )}
-                            >
-                              {props.AIname}
-                            </Dialog.Title>
-                          )}
+                          <Dialog.Title
+                            className={classNames(
+                              "block text-xl font-semibold leading-6"
+                            )}
+                          >
+                            {props.AIname ?? "Chatbot"}
+                          </Dialog.Title>
                           <div
                             className={classNames(
                               "absolute top-0 left-0 flex h-7 items-center",
@@ -432,11 +430,14 @@ export default function ChatBotSlideover(props: {
                         }}
                       />
                       <div className="flex flex-shrink-0 w-full justify-between px-1 pb-4 pt-2">
-                        {loading && (
+                        {
                           <button
-                            className={
-                              "flex flex-row gap-x-1 place-items-center ml-4 justify-center rounded-md px-3 py-2 text-sm text-gray-500 shadow-sm bg-gray-100 hover:bg-gray-200 border border-gray-300"
-                            }
+                            className={classNames(
+                              "flex flex-row gap-x-1 place-items-center ml-4 justify-center rounded-md px-3 py-2 text-sm text-gray-500 shadow-sm bg-gray-100 border border-gray-300",
+                              !loading
+                                ? "bg-gray-200 cursor-not-allowed"
+                                : "hover:bg-gray-200 "
+                            )}
                             onClick={() => {
                               killSwitchClicked.current = true;
                               alreadyRunning.current = false;
@@ -445,13 +446,13 @@ export default function ChatBotSlideover(props: {
                           >
                             Cancel
                           </button>
-                        )}
+                        }
                         <button
                           ref={ref}
                           type="submit"
                           className={classNames(
                             "flex flex-row gap-x-1 place-items-center ml-4 justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm",
-                            loading
+                            loading || userText.length <= 3
                               ? "bg-gray-500 cursor-not-allowed"
                               : `hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 bg-purple-500`
                           )}

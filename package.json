@@ -1,6 +1,6 @@
 {
 	"name": "superflows-chatui",
-	"version": "1.0.0",
+	"version": "1.0.28",
 	"main": "dist/index.js",
 	"devDependencies": {
 		"@rollup/plugin-typescript": "^11.1.2",

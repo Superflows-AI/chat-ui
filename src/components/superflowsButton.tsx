@@ -8,7 +8,6 @@ import { Styling } from "../lib/types";
 export default function SuperflowsButton(props: {
   superflowsApiKey: string;
   hostname?: string;
-  language?: "English" | "Espanol";
   AIname?: string;
   userApiKey?: string;
   userDescription?: string;
@@ -16,6 +15,7 @@ export default function SuperflowsButton(props: {
   devMode?: boolean;
   testMode?: boolean;
   styling?: Styling;
+  buttonStyling?: string; // TODO: weird mismatch in type between this and styling
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -27,8 +27,7 @@ export default function SuperflowsButton(props: {
         onClick={() => setOpen(!open)}
       >
         <SparklesIcon
-          className="h-5 w-5"
-          style={{ height: "1.25rem", width: "1.25rem" }}
+          className={props.buttonStyling || "h-5 w-5"}
           aria-hidden="true"
         />
       </button>
