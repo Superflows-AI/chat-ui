@@ -1,3 +1,4 @@
+import SuperflowsSidebar from "./components/SuperflowsSidebar";
 import {
   DevChatItem,
   UserChatItem,
@@ -28,4 +29,5 @@ export {
   FunctionCall,
   getLastSectionName,
   parseOutput,
+  SuperflowsSidebar,
 }; // Add more exports here

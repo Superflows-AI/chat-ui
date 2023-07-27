@@ -1,7 +1,7 @@
 import * as React from "react";
 import { classNames } from "../lib/utils";
 import { SparklesIcon } from "@heroicons/react/24/outline";
-import ChatBotSlideover from "./chatBotSlideover";
+import SuperflowsSidebar from "./SuperflowsSidebar";
 import { useState } from "react";
 import { Styling } from "../lib/types";
 
@@ -13,7 +13,7 @@ export default function SuperflowsButton(props: {
   userDescription?: string;
   suggestions?: string[];
   devMode?: boolean;
-  testMode?: boolean;
+  mockApiResponses?: boolean;
   styling?: Styling;
   buttonStyling?: string; // TODO: weird mismatch in type between this and styling
 }) {
@@ -31,7 +31,7 @@ export default function SuperflowsButton(props: {
           aria-hidden="true"
         />
       </button>
-      <ChatBotSlideover open={open} setOpen={setOpen} {...props} />
+      <SuperflowsSidebar open={open} setOpen={setOpen} {...props} />
     </>
   );
 }

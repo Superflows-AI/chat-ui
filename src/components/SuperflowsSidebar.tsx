@@ -22,7 +22,7 @@ import {
 } from "../lib/types";
 import { DevChatItem, UserChatItem } from "./chatItems";
 
-export default function ChatBotSlideover(props: {
+export default function SuperflowsSidebar(props: {
   open: boolean;
   setOpen: (open: boolean) => void;
   superflowsApiKey: string;
@@ -32,7 +32,7 @@ export default function ChatBotSlideover(props: {
   userDescription?: string;
   suggestions?: string[];
   devMode?: boolean;
-  testMode?: boolean;
+  mockApiResponses?: boolean;
   styling?: Styling;
 }) {
   const ref = useRef(null);
@@ -82,7 +82,7 @@ export default function ChatBotSlideover(props: {
           conversation_id: conversationId,
           user_api_key: props.userApiKey,
           user_description: props.userDescription,
-          test_mode: props.testMode ?? false,
+          mock_api_responses: props.mockApiResponses ?? false,
           stream: true,
         }),
       });
@@ -160,7 +160,7 @@ export default function ChatBotSlideover(props: {
           conversation_id: conversationId,
           user_api_key: props.userApiKey ?? "", // Need a fallback or zod fails
           confirm: confirm,
-          test_mode: props.testMode,
+          mock_api_responses: props.mockApiResponses,
         }),
       });
 
@@ -198,7 +198,7 @@ export default function ChatBotSlideover(props: {
       conversationId,
       setLoading,
       props.userApiKey,
-      props.testMode,
+      props.mockApiResponses,
     ]
   );
 
