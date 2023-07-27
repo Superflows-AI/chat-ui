@@ -86,6 +86,10 @@ export function parseOutput(gptString: string): ParsedOutput {
         } catch (e) {}
       });
   }
+  // When the response is not in the expected format, for example if the user says "hi"
+  if (!reasoningIn && !planIn && !tellUserIn && !commandsIn) {
+    return { reasoning, plan, tellUser: gptString, commands, completed: true };
+  }
   // Note: this gives true while streaming in. This is of course, incorrect!
   const completed =
     (commandsIn || tellUserIn || planIn) && commands.length === 0;
@@ -104,6 +108,7 @@ export function getLastSectionName(gptString: string): string {
     return "reasoning";
   }
 }
+
 export function parseFunctionCall(text: string): FunctionCall {
   const functionCallRegex = /(\w+)\(([^)]*)\)/;
   const argumentRegex = /([\w-]+)=({.*?}|'.*?'|".*?"|\[.*?\]|[^,]*)/g;
