@@ -1,23 +1,24 @@
 {
-	"name": "superflows-chatui",
-	"version": "1.0.28",
+	"name": "@superflows/chat-ui-react",
+	"version": "1.0.71",
 	"main": "dist/index.js",
 	"devDependencies": {
+		"@headlessui/react": "^1.7.15",
+		"@heroicons/react": "^2.0.18",
 		"@rollup/plugin-typescript": "^11.1.2",
-		"rollup-plugin-tailwindcss": "^1.0.0",
 		"@types/react": "^18.2.0",
 		"prettier": "^3.0.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"typescript": "^5.1.6",
-		"@headlessui/react": "^1.7.15",
-		"@heroicons/react": "^2.0.18"
+		"rollup-plugin-postcss": "^4.0.2",
+		"rollup-plugin-tailwindcss": "^1.0.0",
+		"typescript": "^5.1.6"
 	},
 	"peerDependencies": {
-		"react": "^18.2.0",
-		"react-dom": "^18.2.0",
 		"@headlessui/react": "^1.7.15",
-		"@heroicons/react": "^2.0.18"
+		"@heroicons/react": "^2.0.18",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0"
 	},
 	"scripts": {
 		"build": "rollup -c",

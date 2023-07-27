@@ -1,5 +1,6 @@
 import tailwind from "rollup-plugin-tailwindcss";
 import typescript from "@rollup/plugin-typescript";
+import postcss from "rollup-plugin-postcss";
 
 import pkg from "./package.json" assert { type: "json" };
 
@@ -15,11 +16,14 @@ export default {
     },
   ],
   plugins: [
+    postcss({
+      extensions: [".css"],
+    }),
     tailwind({
-      input: "path/to/entry.css", // required
+      input: "src/index.css",
       // Tailor the emitted stylesheet to the bundle by removing any unused CSS
       // (highly recommended when packaging for distribution).
-      purge: false,
+      purge: true,
     }),
     typescript({}),
   ],
