@@ -40,3 +40,6 @@ storybook-static/
 
 # turbo
 .turbo
+
+# tar
+*.tgz
