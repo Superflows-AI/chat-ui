@@ -433,7 +433,7 @@ export default function SuperflowsSidebar(props: {
                         {
                           <button
                             className={classNames(
-                              "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-text-gray-500 sf-shadow-sm sf-bg-gray-100 sf-border sf-border-gray-300",
+                              "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-text-gray-500 sf-shadow-sm sf-bg-gray-100 sf-border sf-border-gray-300",
                               !loading
                                 ? "sf-bg-gray-200 sf-cursor-not-allowed"
                                 : "hover:sf-bg-gray-200 "
@@ -451,10 +451,10 @@ export default function SuperflowsSidebar(props: {
                           ref={ref}
                           type="submit"
                           className={classNames(
-                            "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
+                            "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
                             loading || userText.length <= 3
                               ? "sf-bg-gray-500 sf-cursor-not-allowed"
-                              : `hover:sf-opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 sf-bg-purple-500`
+                              : `hover:sf-opacity-90 focus-visible:sf-outline focus-visible:sf-outline-2 focus-visible:sf-outline-offset-2 focus-visible:sf-outline-sky-500 sf-bg-purple-500`
                           )}
                           onClick={() => {
                             if (!loading && userText.length > 3) {

@@ -1,6 +1,6 @@
 {
 	"name": "@superflows/chat-ui-react",
-	"version": "1.0.108",
+	"version": "1.1.0-beta.2",
 	"main": "dist/index.js",
 	"devDependencies": {
 		"@headlessui/react": "^1.7.16",

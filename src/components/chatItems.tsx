@@ -187,7 +187,7 @@ export function DevChatItem(props: {
         return (
           <p
             key={idx}
-            className="sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-all"
+            className="sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-words"
           >
             {text}
           </p>
@@ -257,7 +257,7 @@ export function Table(props: { chatKeyValueText: string }) {
             {parsedValues.map(
               (keyValue) =>
                 keyValue.key !== "caption" && (
-                  <tr key={keyValue.key} className="even:bg-[#DADDE3]">
+                  <tr key={keyValue.key} className="even:sf-bg-[#DADDE3]">
                     <td className="sf-whitespace-nowrap sf-px-3 sf-py-2.5 sf-text-sm sf-font-medium sf-text-gray-900">
                       {keyValue.key}
                     </td>
