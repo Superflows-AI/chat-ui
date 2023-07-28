@@ -208,78 +208,78 @@ export default function SuperflowsSidebar(props: {
       {/* @ts-ignore */}
       <Dialog
         as="div"
-        className="relative z-50"
+        className="sf-relative sf-z-50"
         onClose={props.setOpen}
         initialFocus={ref}
       >
-        <div className="fixed inset-0" />
-        <div className="fixed inset-0 overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden">
+        <div className="sf-fixed sf-inset-0" />
+        <div className="sf-fixed sf-inset-0 sf-overflow-hidden">
+          <div className="sf-absolute sf-inset-0 sf-overflow-hidden">
             <div
               className={classNames(
-                "pointer-events-none fixed inset-y-0 flex max-w-full",
-                props.styling?.slideoverSide === "left" ? "left-0" : "right-0"
+                "sf-pointer-events-none sf-fixed sf-inset-y-0 sf-flex sf-max-w-full",
+                props.styling?.slideoverSide === "left" ? "sf-left-0" : "sf-right-0"
               )}
             >
               <Transition.Child
                 as={Fragment}
-                enter="transform transition ease-in-out duration-200 sm:duration-200"
+                enter="sf-transform sf-transition sf-ease-in-out sf-duration-200 sm:sf-duration-200"
                 enterFrom={
                   props.styling?.slideoverSide === "left"
-                    ? "-translate-x-full"
-                    : "translate-x-full"
+                    ? "sf--translate-x-full"
+                    : "sf-translate-x-full"
                 }
-                enterTo="translate-x-0"
-                leave="transform transition ease-in-out duration-200 sm:duration-200"
-                leaveFrom="translate-x-0"
+                enterTo="sf-translate-x-0"
+                leave="sf-transform sf-transition sf-ease-in-out sf-duration-200 sm:sf-duration-200"
+                leaveFrom="sf-translate-x-0"
                 leaveTo={
                   props.styling?.slideoverSide === "left"
-                    ? "-translate-x-full"
-                    : "translate-x-full"
+                    ? "sf--translate-x-full"
+                    : "sf-translate-x-full"
                 }
               >
-                <Dialog.Panel className="pointer-events-auto w-96">
-                  <div className="flex h-full flex-col divide-y divide-gray-200 bg-white shadow-xl">
-                    <div className="flex min-h-0 flex-1 flex-col pb-1">
+                <Dialog.Panel className="sf-pointer-events-auto sf-w-96">
+                  <div className="sf-flex sf-h-full sf-flex-col sf-divide-y sf-divide-gray-200 sf-bg-white sf-shadow-xl">
+                    <div className="sf-flex sf-min-h-0 sf-flex-1 sf-flex-col sf-pb-1">
                       <div
                         className={classNames(
-                          `py-4 px-3 min-h-[3.75rem]`,
+                          `sf-py-4 sf-px-3 sf-min-h-[3.75rem]`,
                           props.styling?.sidebarHeaderTextColor === "light"
-                            ? "text-gray-50"
-                            : "text-gray-900 border-b border-gray-200"
+                            ? "sf-text-gray-50"
+                            : "sf-text-gray-900 sf-border-b sf-border-gray-200"
                         )}
                         style={{ backgroundColor: props.styling?.brandColor }}
                       >
-                        <div className="relative flex flex-row place-items-center justify-center">
+                        <div className="sf-relative sf-flex sf-flex-row sf-place-items-center sf-justify-center">
                           <Dialog.Title
                             className={classNames(
-                              "block text-xl font-semibold leading-6"
+                              "sf-block sf-text-xl sf-font-semibold sf-leading-6"
                             )}
                           >
                             {props.AIname ?? "Chatbot"}
                           </Dialog.Title>
                           <div
                             className={classNames(
-                              "absolute top-0 left-0 flex h-7 items-center",
+                              "sf-absolute sf-top-0 sf-left-0 sf-flex sf-h-7 sf-items-center",
                               props.styling?.slideoverSide === "right"
-                                ? "order-first"
-                                : "order-last"
+                                ? "sf-order-first"
+                                : "sf-order-last"
                             )}
                           >
                             <button
                               type="button"
-                              className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 hover:opacity-60 transition focus:outline-none focus:ring-2 focus:ring-gray-500"
+                              className="sf-p-1.5 sf-rounded-md sf-text-gray-400 hover:sf-text-gray-700 hover:sf-bg-gray-100 hover:sf-opacity-60 sf-transition focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500"
                               onClick={() => props.setOpen(false)}
                             >
-                              <span className="sr-only">Close panel</span>
+                              <span className="sf-sr-only">Close panel</span>
                               {props.styling?.slideoverSide === "left" ? (
                                 <ChevronLeftIcon
-                                  className="h-6 w-6"
+                                  className="sf-h-6 sf-w-6"
                                   aria-hidden="true"
                                 />
                               ) : (
                                 <ChevronRightIcon
-                                  className="h-6 w-6"
+                                  className="sf-h-6 sf-w-6"
                                   aria-hidden="true"
                                 />
                               )}
@@ -288,23 +288,23 @@ export default function SuperflowsSidebar(props: {
                         </div>
                       </div>
                       <div
-                        className="relative overflow-y-auto h-full flex flex-col"
+                        className="sf-relative sf-overflow-y-auto sf-h-full sf-flex sf-flex-col"
                         id={"scrollable-chat-contents"}
                       >
                         {/* Show clear chat button only when there is chat to clear */}
                         {devChatContents.length > 0 && (
                           <button
                             className={
-                              "absolute top-2 right-2 flex flex-row place-items-center gap-x-1 px-2 py-1 rounded-md bg-white border focus:outline-none focus:ring-2 focus:ring-gray-500 transition border-gray-300 hover:border-gray-400 text-gray-500 hover:text-gray-600"
+                              "sf-absolute sf-top-2 sf-right-2 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-px-2 sf-py-1 sf-rounded-md sf-bg-white sf-border focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500 sf-transition sf-border-gray-300 hover:sf-border-gray-400 sf-text-gray-500 hover:sf-text-gray-600"
                             }
                             onClick={() => {
                               setDevChatContents([]);
                             }}
                           >
-                            <ArrowPathIcon className="h-4 w-4" /> Clear chat
+                            <ArrowPathIcon className="sf-h-4 sf-w-4" /> Clear chat
                           </button>
                         )}
-                        <div className="mt-6 flex-1 px-1 shrink-0 flex flex-col justify-end gap-y-2">
+                        <div className="sf-mt-6 sf-flex-1 sf-px-1 sf-shrink-0 sf-flex sf-flex-col sf-justify-end sf-gap-y-2">
                           {devChatContents.map((chatItem, idx) => {
                             if (
                               props.devMode ||
@@ -380,15 +380,15 @@ export default function SuperflowsSidebar(props: {
                           {devChatContents.length === 0 &&
                             props.suggestions &&
                             props.suggestions.length > 0 && (
-                              <div className="py-4 px-1.5">
-                                <h2 className="ml-2 font-medium">
+                              <div className="sf-py-4 sf-px-1.5">
+                                <h2 className="sf-ml-2 sf-font-medium">
                                   Suggestions
                                 </h2>
-                                <div className="mt-1 flex flex-col gap-y-2 place-items-baseline">
+                                <div className="sf-mt-1 sf-flex sf-flex-col sf-gap-y-2 sf-place-items-baseline">
                                   {props.suggestions.map((text) => (
                                     <button
                                       key={text}
-                                      className="text-left px-2 py-1 rounded-md border bg-white text-little text-gray-800 shadow hover:shadow-md"
+                                      className="sf-text-left sf-px-2 sf-py-1 sf-rounded-md sf-border sf-bg-white sf-text-little sf-text-gray-800 sf-shadow hover:sf-shadow-md"
                                       onClick={() => setUserText(text)}
                                     >
                                       {text}
@@ -401,13 +401,13 @@ export default function SuperflowsSidebar(props: {
                       </div>
                     </div>
                     {/* Textbox user types into */}
-                    <div className="flex flex-col pt-4">
+                    <div className="sf-flex sf-flex-col sf-pt-4">
                       <AutoGrowingTextArea
                         className={classNames(
-                          "text-sm resize-none mx-1 rounded py-2 border-gray-300 focus:border-purple-300 focus:ring-1 focus:ring-purple-300 placeholder:text-gray-400",
+                          "sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border focus:sf-border-purple-300 focus:sf-ring-1 focus:sf-ring-purple-300 focus:sf-outline-0 placeholder:sf-text-gray-400",
                           userText.length > 300
-                            ? "overflow-auto-y"
-                            : "overflow-hidden"
+                            ? "sf-overflow-auto-y"
+                            : "sf-overflow-hidden"
                         )}
                         placeholder={"Send a message"}
                         value={userText}
@@ -429,14 +429,14 @@ export default function SuperflowsSidebar(props: {
                           }
                         }}
                       />
-                      <div className="flex flex-shrink-0 w-full justify-between px-1 pb-4 pt-2">
+                      <div className="sf-flex sf-flex-shrink-0 sf-w-full sf-justify-between sf-px-1 sf-pb-4 sf-pt-2">
                         {
                           <button
                             className={classNames(
-                              "flex flex-row gap-x-1 place-items-center ml-4 justify-center rounded-md px-3 py-2 text-sm text-gray-500 shadow-sm bg-gray-100 border border-gray-300",
+                              "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-text-gray-500 sf-shadow-sm sf-bg-gray-100 sf-border sf-border-gray-300",
                               !loading
-                                ? "bg-gray-200 cursor-not-allowed"
-                                : "hover:bg-gray-200 "
+                                ? "sf-bg-gray-200 sf-cursor-not-allowed"
+                                : "hover:sf-bg-gray-200 "
                             )}
                             onClick={() => {
                               killSwitchClicked.current = true;
@@ -451,10 +451,10 @@ export default function SuperflowsSidebar(props: {
                           ref={ref}
                           type="submit"
                           className={classNames(
-                            "flex flex-row gap-x-1 place-items-center ml-4 justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm",
+                            "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
                             loading || userText.length <= 3
-                              ? "bg-gray-500 cursor-not-allowed"
-                              : `hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 bg-purple-500`
+                              ? "sf-bg-gray-500 sf-cursor-not-allowed"
+                              : `hover:sf-opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 sf-bg-purple-500`
                           )}
                           onClick={() => {
                             if (!loading && userText.length > 3) {
@@ -467,7 +467,7 @@ export default function SuperflowsSidebar(props: {
                             }
                           }}
                         >
-                          {loading && <LoadingSpinner classes="h-4 w-4" />}
+                          {loading && <LoadingSpinner classes="sf-h-4 sf-w-4" />}
                           Submit
                         </button>
                       </div>

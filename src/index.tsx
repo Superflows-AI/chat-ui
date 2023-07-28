@@ -16,6 +16,7 @@ import {
   functionNameToDisplay,
   parseTableTags,
 } from "./lib/utils";
+import "./index.css";
 
 export {
   SuperflowsButton,

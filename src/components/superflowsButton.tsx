@@ -22,12 +22,12 @@ export default function SuperflowsButton(props: {
     <>
       <button
         className={classNames(
-          "something p-1 focus:outline-none bg-transparent text-gray-500 hover:text-[#146ef5]"
+          "sf-p-1 focus:sf-outline-none sf-bg-transparent sf-text-gray-500 hover:sf-text-[#146ef5]"
         )}
         onClick={() => setOpen(!open)}
       >
         <SparklesIcon
-          className={props.buttonStyling || "h-5 w-5"}
+          className={props.buttonStyling || "sf-h-5 sf-w-5"}
           aria-hidden="true"
         />
       </button>

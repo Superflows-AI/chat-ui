@@ -1,17 +1,18 @@
 {
 	"name": "@superflows/chat-ui-react",
-	"version": "1.0.87",
+	"version": "1.0.108",
 	"main": "dist/index.js",
 	"devDependencies": {
-		"@headlessui/react": "^1.7.15",
+		"@headlessui/react": "^1.7.16",
 		"@heroicons/react": "^2.0.18",
 		"@rollup/plugin-typescript": "^11.1.2",
 		"@types/react": "^18.2.0",
 		"prettier": "^3.0.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
+		"rollup": "^3.26.3",
 		"rollup-plugin-postcss": "^4.0.2",
-		"rollup-plugin-tailwindcss": "^1.0.0",
+		"rollup-plugin-tailwindcss": "file:../rollup-plugin-tailwindcss/rollup-plugin-tailwindcss-1.0.1.tgz",
 		"typescript": "^5.1.6"
 	},
 	"peerDependencies": {

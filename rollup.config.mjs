@@ -17,7 +17,14 @@ export default {
   ],
   plugins: [
     postcss({
+      config: {
+        path: "./postcss.config.js",
+      },
       extensions: [".css"],
+      minimize: true,
+        inject: {
+            insertAt: 'top'
+        }
     }),
     tailwind({
       input: "src/index.css",

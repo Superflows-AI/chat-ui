@@ -88,24 +88,24 @@ export function DevChatItem(props: {
   const matches = splitContentByParts(content);
 
   return (
-    <div
+     <div
       className={classNames(
-        "py-4 px-1.5 rounded flex flex-col",
+        "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col",
         props.chatItem.role === "user"
-          ? "bg-gray-100 text-right place-items-end"
-          : "bg-gray-200 text-left place-items-baseline",
+          ? "sf-bg-gray-100 sf-text-right sf-place-items-end"
+          : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
         props.chatItem.role === "error"
-          ? "bg-red-200"
+          ? "sf-bg-red-200"
           : props.chatItem.role === "debug"
-          ? "bg-green-100"
+          ? "sf-bg-green-100"
           : props.chatItem.role === "function"
-          ? "bg-green-200"
+          ? "sf-bg-green-200"
           : props.chatItem.role === "confirmation"
-          ? "bg-blue-100"
+          ? "sf-bg-blue-100"
           : ""
       )}
     >
-      <p className="text-xs text-gray-600 mb-1">
+      <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
         {props.chatItem.role === "assistant"
           ? (props.AIname ?? "Assistant") + " AI"
           : props.chatItem.role === "function"
@@ -125,33 +125,33 @@ export function DevChatItem(props: {
           return (
             <div
               key={idx}
-              className="my-5 w-full flex flex-col place-items-center gap-y-2"
+              className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2"
             >
               Did this response answer your question?
-              <div className="flex flex-row gap-x-4">
+              <div className="sf-flex sf-flex-row sf-gap-x-4">
                 <button
                   onClick={() => setSaveSuccessfulFeedback(true)}
-                  className={`flex flex-row gap-x-1.5 font-medium place-items-center text-gray-50 px-4 rounded-md py-2 text-base hover:opacity-90 transition focus:ring-2 focus:ring-offset-2 bg-red-500 ring-red-500 hover:bg-red-600`}
+                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-red-500 sf-ring-red-500 hover:sf-bg-red-600`}
                 >
-                  <HandThumbDownIcon className="h-5 w-5" />
+                  <HandThumbDownIcon className="sf-h-5 sf-w-5" />
                   No
                 </button>
                 <button
                   onClick={() => setSaveSuccessfulFeedback(true)}
-                  className={`flex flex-row gap-x-1.5 font-medium place-items-center text-gray-50 px-4 rounded-md py-2 text-base hover:opacity-90 transition focus:ring-2 focus:ring-offset-2 bg-green-500 ring-green-500 hover:bg-green-600`}
+                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-green-500 sf-ring-green-500 hover:sf-bg-green-600`}
                 >
-                  <HandThumbUpIcon className="h-5 w-5" />
+                  <HandThumbUpIcon className="sf-h-5 sf-w-5" />
                   Yes
                 </button>
               </div>
               <div
                 className={classNames(
-                  "flex flex-row place-items-center gap-x-1",
-                  saveSuccessfulFeedback ? "visible" : "invisible"
+                  "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
+                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
                 )}
               >
-                <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                <div className="text-sm">Thanks for your feedback!</div>
+                <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
+                <div className="sf-text-sm">Thanks for your feedback!</div>
               </div>
             </div>
           );
@@ -161,19 +161,19 @@ export function DevChatItem(props: {
           return (
             <div
               key={idx}
-              className="my-5 w-full flex flex-col place-items-center gap-y-2"
+              className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2"
             >
               <button
                 onClick={() => setSaveSuccessfulFeedback(true)}
-                className={`px-4 rounded-md py-2 text-base hover:opacity-90 transition focus:ring-2 focus:ring-offset-2 ring-purple-600 bg-purple-600 text-white`}
+                className={`sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-ring-purple-600 sf-bg-purple-600 sf-text-white`}
               >
                 {buttonMatches[1].trim()}
               </button>
-              <div className="flex flex-row place-items-center gap-x-1">
+              <div className="sf-flex sf-flex-row sf-place-items-center sf-gap-x-1">
                 {saveSuccessfulFeedback && (
                   <>
-                    <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                    <div className="text-sm">Successful!</div>
+                    <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
+                    <div className="sf-text-sm">Successful!</div>
                   </>
                 )}
               </div>
@@ -187,7 +187,7 @@ export function DevChatItem(props: {
         return (
           <p
             key={idx}
-            className="text-little text-gray-900 whitespace-pre-line break-all"
+            className="sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-all"
           >
             {text}
           </p>
@@ -196,15 +196,15 @@ export function DevChatItem(props: {
       {props.onConfirm &&
         props.chatItem.role === "confirmation" &&
         (confirmed === null ? (
-          <div className="my-5 w-full flex flex-col place-items-center gap-y-2">
+          <div className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2">
             Are you sure you want to continue?
-            <div className="flex flex-row gap-x-8">
+            <div className="sf-flex sf-flex-row sf-gap-x-8">
               <button
                 onClick={() => {
                   setConfirmed(false);
                   void props.onConfirm!(false);
                 }}
-                className={`flex flex-row gap-x-1.5 font-medium place-items-center text-gray-700 px-4 border border-gray-400 rounded-md py-2 text-base hover:opacity-90 transition focus:ring-2 focus:ring-offset-2 bg-gray-100 ring-gray-500 hover:bg-gray-200`}
+                className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-700 sf-px-4 sf-border sf-border-gray-400 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-gray-100 sf-ring-gray-500 hover:sf-bg-gray-200`}
               >
                 Cancel
               </button>
@@ -213,29 +213,29 @@ export function DevChatItem(props: {
                   setConfirmed(true);
                   void props.onConfirm!(true);
                 }}
-                className={`flex flex-row gap-x-1.5 font-medium place-items-center text-gray-50 px-4 rounded-md py-2 text-base hover:opacity-90 transition focus:ring-2 focus:ring-offset-2 bg-blue-500 ring-blue-500 hover:bg-blue-600`}
+                className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-blue-500 sf-ring-blue-500 hover:sf-bg-blue-600`}
               >
                 Confirm
               </button>
             </div>
             <div
               className={classNames(
-                "flex flex-row place-items-center gap-x-1",
-                saveSuccessfulFeedback ? "visible" : "invisible"
+                "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
+                saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
               )}
             >
-              <CheckCircleIcon className="h-5 w-5 text-green-500" />
-              <div className="text-sm">Thanks for your feedback!</div>
+              <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
+              <div className="sf-text-sm">Thanks for your feedback!</div>
             </div>
           </div>
         ) : confirmed ? (
-          <div className="my-5 w-full font-semibold flex flex-row justify-center gap-x-1 place-items-center">
-            <CheckCircleIcon className="h-5 w-5 text-green-500" />
+          <div className="sf-my-5 sf-w-full sf-font-semibold sf-flex sf-flex-row sf-justify-center sf-gap-x-1 sf-place-items-center">
+            <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
             Confirmed
           </div>
         ) : (
-          <div className="my-5 w-full flex flex-row font-semibold justify-center gap-x-2 place-items-center">
-            <XCircleIcon className="h-5 w-5 text-red-500" />
+          <div className="sf-my-5 sf-w-full sf-flex sf-flex-row sf-font-semibold sf-justify-center sf-gap-x-2 sf-place-items-center">
+            <XCircleIcon className="sf-h-5 sf-w-5 sf-text-red-500" />
             Cancelled
           </div>
         ))}
@@ -247,21 +247,21 @@ export function Table(props: { chatKeyValueText: string }) {
   const parsedValues = parseTableTags(props.chatKeyValueText);
 
   return (
-    <div className="inline-block min-w-full py-4 align-middle sm:px-6 lg:px-8">
-      <div className="min-w-full border border-gray-300">
-        <table className="w-full divide-y divide-gray-300">
-          <caption className="text-md text-gray-900 bg-gray-100 py-2 font-extrabold">
+    <div className="sf-inline-block sf-min-w-full sf-py-4 sf-align-middle sm:sf-px-6 lg:sf-px-8">
+      <div className="sf-min-w-full sf-border sf-border-gray-300">
+        <table className="sf-w-full sf-divide-y sf-divide-gray-300">
+          <caption className="sf-text-base sf-text-gray-900 sf-bg-gray-100 sf-py-2 sf-font-extrabold">
             {parsedValues.find((keyValue) => keyValue.key === "caption")?.value}
           </caption>
-          <tbody className="bg-gray-300 rounded-full">
+          <tbody className="sf-bg-gray-300 sf-rounded-full">
             {parsedValues.map(
               (keyValue) =>
                 keyValue.key !== "caption" && (
                   <tr key={keyValue.key} className="even:bg-[#DADDE3]">
-                    <td className="whitespace-nowrap px-3 py-2.5 text-sm font-medium text-gray-900">
+                    <td className="sf-whitespace-nowrap sf-px-3 sf-py-2.5 sf-text-sm sf-font-medium sf-text-gray-900">
                       {keyValue.key}
                     </td>
-                    <td className="whitespace-wrap px-2 py-2.5 text-sm text-gray-700">
+                    <td className="sf-whitespace-wrap sf-px-2 sf-py-2.5 sf-text-sm sf-text-gray-700">
                       {keyValue.value}
                     </td>
                   </tr>
@@ -291,8 +291,8 @@ export function UserChatItem(props: {
 
   const outputObj = parseOutput(props.chatItem.content);
   return (
-    <div className="py-4 px-1.5 rounded flex flex-col bg-gray-200 text-left place-items-baseline">
-      <p className="text-xs text-gray-600 mb-1">
+    <div className="sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-bg-gray-200 sf-text-left sf-place-items-baseline">
+      <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
         {(props.AIname ?? "Assistant") + " AI"}
       </p>
       {matches.map((text, idx) => {
@@ -300,33 +300,33 @@ export function UserChatItem(props: {
           return (
             <div
               key={idx}
-              className="my-5 w-full flex flex-col place-items-center gap-y-2"
+              className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2"
             >
               Did this response answer your question?
-              <div className="flex flex-row gap-x-4">
+              <div className="sf-flex sf-flex-row sf-gap-x-4">
                 <button
                   onClick={() => setSaveSuccessfulFeedback(true)}
-                  className={`flex flex-row gap-x-1.5 font-medium place-items-center text-gray-50 px-4 rounded-md py-2 text-base hover:opacity-90 transition focus:ring-2 focus:ring-offset-2 bg-red-500 ring-red-500 hover:bg-red-600`}
+                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-red-500 sf-ring-red-500 hover:sf-bg-red-600`}
                 >
-                  <HandThumbDownIcon className="h-5 w-5" />
+                  <HandThumbDownIcon className="sf-h-5 sf-w-5" />
                   No
                 </button>
                 <button
                   onClick={() => setSaveSuccessfulFeedback(true)}
-                  className={`flex flex-row gap-x-1.5 font-medium place-items-center text-gray-50 px-4 rounded-md py-2 text-base hover:opacity-90 transition focus:ring-2 focus:ring-offset-2 bg-green-500 ring-green-500 hover:bg-green-600`}
+                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-green-500 sf-ring-green-500 hover:sf-bg-green-600`}
                 >
-                  <HandThumbUpIcon className="h-5 w-5" />
+                  <HandThumbUpIcon className="sf-h-5 sf-w-5" />
                   Yes
                 </button>
               </div>
               <div
                 className={classNames(
-                  "flex flex-row place-items-center gap-x-1",
-                  saveSuccessfulFeedback ? "visible" : "invisible"
+                  "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
+                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
                 )}
               >
-                <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                <div className="text-sm">Thanks for your feedback!</div>
+                <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
+                <div className="sf-text-sm">Thanks for your feedback!</div>
               </div>
             </div>
           );
@@ -336,19 +336,19 @@ export function UserChatItem(props: {
           return (
             <div
               key={idx}
-              className="my-5 w-full flex flex-col place-items-center gap-y-2"
+              className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2"
             >
               <button
                 onClick={() => setSaveSuccessfulFeedback(true)}
-                className={`px-4 rounded-md py-2 text-base hover:opacity-90 transition focus:ring-2 focus:ring-offset-2 ring-purple-600 bg-purple-600 text-white`}
+                className={`px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-ring-purple-600 sf-bg-purple-600 sf-text-white`}
               >
                 {buttonMatches[1].trim()}
               </button>
-              <div className="flex flex-row place-items-center gap-x-1">
+              <div className="sf-flex sf-flex-row sf-place-items-center sf-gap-x-1">
                 {saveSuccessfulFeedback && (
                   <>
-                    <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                    <div className="text-sm">Successful!</div>
+                    <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
+                    <div className="sf-text-sm">Successful!</div>
                   </>
                 )}
               </div>
@@ -360,13 +360,13 @@ export function UserChatItem(props: {
           return <Table chatKeyValueText={tableMatches[1]} key={idx} />;
         }
         return (
-          <div key={idx} className="w-full">
+          <div key={idx} className="sf-w-full">
             {outputObj.reasoning && (
-              <div className="bg-yellow-100 rounded-md px-4 py-2 border border-yellow-300 w-full">
-                <p className="flex flex-row gap-x-1.5 text-yellow-800">
-                  <LightBulbIcon className="h-5 w-5 text-yellow-600" /> Thoughts
+              <div className="sf-bg-yellow-100 sf-rounded-md sf-px-4 sf-py-2 sf-border sf-border-yellow-300 sf-w-full">
+                <p className="sf-flex sf-flex-row sf-gap-x-1.5 sf-text-yellow-800">
+                  <LightBulbIcon className="sf-h-5 sf-w-5 sf-text-yellow-600" /> Thoughts
                 </p>
-                <p className="mt-1 text-little whitespace-pre-line text-gray-700">
+                <p className="sf-mt-1 sf-text-little sf-whitespace-pre-line sf-text-gray-700">
                   {outputObj.reasoning}
                 </p>
               </div>
@@ -374,7 +374,7 @@ export function UserChatItem(props: {
             {outputObj.tellUser && (
               <p
                 key={idx}
-                className="px-2 mt-3 text-base text-gray-900 whitespace-pre-line w-full"
+                className="sf-px-2 sf-mt-3 sf-text-base sf-text-gray-900 sf-whitespace-pre-line sf-w-full"
               >
                 {outputObj.tellUser}
               </p>
