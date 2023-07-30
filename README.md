@@ -4,7 +4,7 @@ Superflows Chat UI is a collection of pre-built UI components that can be used t
 
 The purpose of this library is to allow developers to integrate their Superflows chatbot into their software, but also be able to use their own style/css.
 
-![](./sidebar-screenshot.png)
+<img width="800" alt="Chat UI Visuals" src="https://raw.githubusercontent.com/Superflows-AI/chat-ui/try-npm-deploy/sidebar-screenshot.png">
 
 ## Installation
 
