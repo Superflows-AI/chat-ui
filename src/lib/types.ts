@@ -13,11 +13,11 @@ export type ChatItem =
       content: string;
     };
 
-export interface Styling {
-  brandColor?: string;
+export interface SidebarStyle {
   slideoverSide?: "right" | "left";
-  // This sets the colour of the text on the header of the react. Set "dark" if using a white background
-  sidebarHeaderTextColor?: "dark" | "light";
+  buttonColor?: string;
+  headerBackgroundColor?: string;
+  headerTextColor?: string;
 }
 
 export type ChatGPTMessage =

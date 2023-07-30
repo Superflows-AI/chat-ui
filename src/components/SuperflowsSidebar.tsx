@@ -3,6 +3,7 @@ import {
   ArrowPathIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
@@ -18,7 +19,7 @@ import {
   Json,
   StreamingStep,
   StreamingStepInput,
-  Styling,
+  SidebarStyle,
 } from "../lib/types";
 import { DevChatItem, UserChatItem } from "./chatItems";
 
@@ -26,22 +27,22 @@ export default function SuperflowsSidebar(props: {
   open: boolean;
   setOpen: (open: boolean) => void;
   superflowsApiKey: string;
-  hostname?: string;
+  superflowsUrl?: string;
   AIname?: string;
   userApiKey?: string;
   userDescription?: string;
   suggestions?: string[];
   devMode?: boolean;
   mockApiResponses?: boolean;
-  styling?: Styling;
+  styling?: SidebarStyle;
 }) {
   const ref = useRef(null);
   const [userText, setUserText] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   // This is a hack to prevent the effect from running twice in development
-  // It's because React strict mode runs in development, which renders everything
-  // twice to check for bugs/side effects
+  // It's because React strict mode runs in development in nextjs, which renders everything
+  // twice to check for bugs/side effects (not sure if this is needed any more)
   const alreadyRunning = useRef(false);
 
   // TODO: Grab suggestions from DB if none are provided
@@ -50,7 +51,7 @@ export default function SuperflowsSidebar(props: {
 
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [devChatContents, setDevChatContents] = useState<StreamingStepInput[]>(
-    []
+    [],
   );
 
   useEffect(() => {
@@ -63,7 +64,7 @@ export default function SuperflowsSidebar(props: {
 
   const killSwitchClicked = useRef(false);
 
-  const hostname = props.hostname ?? "https://dashboard.superflows.ai";
+  const hostname = props.superflowsUrl ?? "https://dashboard.superflows.ai";
 
   const callSuperflowsApi = useCallback(
     async (chat: StreamingStepInput[]) => {
@@ -88,10 +89,33 @@ export default function SuperflowsSidebar(props: {
       });
 
       if (!response.ok) {
-        const responseJson: { error: string } = (await response.json()) as {
-          error: string;
-        };
-        throw new Error(responseJson.error);
+        let responseJson: { error: string };
+        if (response.status === 404) {
+          responseJson = {
+            error: `${response.status}: ${response.statusText}. Check the hostname used is correct ${response.url}`,
+          };
+        } else {
+          try {
+            responseJson = (await response.json()) as {
+              error: string;
+            };
+          } catch (e) {
+            responseJson = {
+              error: `${response.status}: ${response.statusText}`,
+            };
+          }
+        }
+
+        console.error(responseJson.error);
+        setDevChatContents([
+          ...chat,
+          {
+            role: "error",
+            content: responseJson.error,
+          },
+        ]);
+        setLoading(false);
+        return;
       }
 
       const data = response.body;
@@ -145,7 +169,7 @@ export default function SuperflowsSidebar(props: {
       setDevChatContents,
       killSwitchClicked.current,
       alreadyRunning.current,
-    ]
+    ],
   );
   const onConfirm = useCallback(
     async (confirm: boolean): Promise<void> => {
@@ -199,286 +223,287 @@ export default function SuperflowsSidebar(props: {
       setLoading,
       props.userApiKey,
       props.mockApiResponses,
-    ]
+    ],
   );
 
   return (
-    <Transition.Root show={props.open} as={Fragment}>
-      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-      {/* @ts-ignore */}
-      <Dialog
-        as="div"
-        className="sf-relative sf-z-50"
-        onClose={props.setOpen}
-        initialFocus={ref}
+    //    eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //    @ts-ignore
+    <Dialog
+      open={props.open}
+      as="div"
+      className="sf-relative sf-z-50"
+      onClose={props.setOpen}
+      initialFocus={ref}
+    >
+      <div
+        className={classNames(
+          "sf-pointer-events-none sf-fixed sf-inset-y-0 sf-flex sf-max-w-full",
+          props.styling?.slideoverSide === "left" ? "sf-left-0" : "sf-right-0",
+        )}
       >
-        <div className="sf-fixed sf-inset-0" />
-        <div className="sf-fixed sf-inset-0 sf-overflow-hidden">
-          <div className="sf-absolute sf-inset-0 sf-overflow-hidden">
-            <div
-              className={classNames(
-                "sf-pointer-events-none sf-fixed sf-inset-y-0 sf-flex sf-max-w-full",
-                props.styling?.slideoverSide === "left" ? "sf-left-0" : "sf-right-0"
-              )}
-            >
-              <Transition.Child
-                as={Fragment}
-                enter="sf-transform sf-transition sf-ease-in-out sf-duration-200 sm:sf-duration-200"
-                enterFrom={
-                  props.styling?.slideoverSide === "left"
-                    ? "sf--translate-x-full"
-                    : "sf-translate-x-full"
-                }
-                enterTo="sf-translate-x-0"
-                leave="sf-transform sf-transition sf-ease-in-out sf-duration-200 sm:sf-duration-200"
-                leaveFrom="sf-translate-x-0"
-                leaveTo={
-                  props.styling?.slideoverSide === "left"
-                    ? "sf--translate-x-full"
-                    : "sf-translate-x-full"
-                }
-              >
-                <Dialog.Panel className="sf-pointer-events-auto sf-w-96">
-                  <div className="sf-flex sf-h-full sf-flex-col sf-divide-y sf-divide-gray-200 sf-bg-white sf-shadow-xl">
-                    <div className="sf-flex sf-min-h-0 sf-flex-1 sf-flex-col sf-pb-1">
-                      <div
-                        className={classNames(
-                          `sf-py-4 sf-px-3 sf-min-h-[3.75rem]`,
-                          props.styling?.sidebarHeaderTextColor === "light"
-                            ? "sf-text-gray-50"
-                            : "sf-text-gray-900 sf-border-b sf-border-gray-200"
-                        )}
-                        style={{ backgroundColor: props.styling?.brandColor }}
+        <Transition
+          show={props.open}
+          as={Fragment}
+          enter="sf-transform sf-transition sf-ease-in-out sf-duration-200 sm:sf-duration-200"
+          enterFrom={
+            props.styling?.slideoverSide === "left"
+              ? "sf--translate-x-full"
+              : "sf-translate-x-full"
+          }
+          enterTo="sf-translate-x-0"
+          leave="sf-transform sf-transition sf-ease-in-out sf-duration-200 sm:sf-duration-200"
+          leaveFrom="sf-translate-x-0"
+          leaveTo={
+            props.styling?.slideoverSide === "left"
+              ? "sf--translate-x-full"
+              : "sf-translate-x-full"
+          }
+        >
+          <Dialog.Overlay className="sf-pointer-events-auto sf-w-screen md:sf-w-96">
+            <div className="sf-flex sf-h-full sf-flex-col sf-divide-y sf-divide-gray-200 sf-bg-white sf-shadow-xl">
+              <div className="sf-flex sf-min-h-0 sf-flex-1 sf-flex-col sf-pb-1">
+                <div
+                  className={classNames(
+                    `sf-py-4 sf-px-3 sf-min-h-[3.75rem] sf-text-gray-900 sf-border-b sf-border-gray-200`,
+                  )}
+                  style={{
+                    backgroundColor: props.styling?.headerBackgroundColor,
+                    color: props.styling?.headerTextColor,
+                  }}
+                >
+                  <div className="sf-relative sf-flex sf-flex-row sf-place-items-center sf-justify-center">
+                    <Dialog.Title
+                      className={classNames(
+                        "sf-block sf-text-xl sf-font-semibold sf-leading-6",
+                      )}
+                    >
+                      {props.AIname ?? "Chatbot"}
+                    </Dialog.Title>
+                    <div
+                      className={classNames(
+                        "sf-absolute sf-top-0 sf-flex sf-h-7 sf-items-center sf-right-0",
+                        // Only set on the left if screen is large and sidebar on the left
+                        props.styling?.slideoverSide === "left"
+                          ? ""
+                          : "md:sf-left-0",
+                      )}
+                    >
+                      <button
+                        type="button"
+                        className="sf-p-1.5 sf-rounded-md sf-text-gray-400 hover:sf-text-gray-700 hover:sf-bg-gray-100 hover:sf-opacity-60 sf-transition focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500"
+                        onClick={() => props.setOpen(false)}
                       >
-                        <div className="sf-relative sf-flex sf-flex-row sf-place-items-center sf-justify-center">
-                          <Dialog.Title
-                            className={classNames(
-                              "sf-block sf-text-xl sf-font-semibold sf-leading-6"
-                            )}
-                          >
-                            {props.AIname ?? "Chatbot"}
-                          </Dialog.Title>
-                          <div
-                            className={classNames(
-                              "sf-absolute sf-top-0 sf-left-0 sf-flex sf-h-7 sf-items-center",
-                              props.styling?.slideoverSide === "right"
-                                ? "sf-order-first"
-                                : "sf-order-last"
-                            )}
-                          >
-                            <button
-                              type="button"
-                              className="sf-p-1.5 sf-rounded-md sf-text-gray-400 hover:sf-text-gray-700 hover:sf-bg-gray-100 hover:sf-opacity-60 sf-transition focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500"
-                              onClick={() => props.setOpen(false)}
-                            >
-                              <span className="sf-sr-only">Close panel</span>
-                              {props.styling?.slideoverSide === "left" ? (
-                                <ChevronLeftIcon
-                                  className="sf-h-6 sf-w-6"
-                                  aria-hidden="true"
-                                />
-                              ) : (
-                                <ChevronRightIcon
-                                  className="sf-h-6 sf-w-6"
-                                  aria-hidden="true"
-                                />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        className="sf-relative sf-overflow-y-auto sf-h-full sf-flex sf-flex-col"
-                        id={"scrollable-chat-contents"}
-                      >
-                        {/* Show clear chat button only when there is chat to clear */}
-                        {devChatContents.length > 0 && (
-                          <button
-                            className={
-                              "sf-absolute sf-top-2 sf-right-2 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-px-2 sf-py-1 sf-rounded-md sf-bg-white sf-border focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500 sf-transition sf-border-gray-300 hover:sf-border-gray-400 sf-text-gray-500 hover:sf-text-gray-600"
-                            }
-                            onClick={() => {
-                              setDevChatContents([]);
-                            }}
-                          >
-                            <ArrowPathIcon className="sf-h-4 sf-w-4" /> Clear chat
-                          </button>
+                        <span className="sf-sr-only">Close panel</span>
+                        {props.styling?.slideoverSide === "left" ? (
+                          <ChevronLeftIcon
+                            className="sf-h-6 sf-w-6 sf-hidden md:sf-block"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <ChevronRightIcon
+                            className="sf-h-6 sf-w-6 sf-hidden md:sf-block"
+                            aria-hidden="true"
+                          />
                         )}
-                        <div className="sf-mt-6 sf-flex-1 sf-px-1 sf-shrink-0 sf-flex sf-flex-col sf-justify-end sf-gap-y-2">
-                          {devChatContents.map((chatItem, idx) => {
-                            if (
-                              props.devMode ||
-                              ["error", "confirmation", "user"].includes(
-                                chatItem.role
-                              )
-                            ) {
-                              return (
-                                <DevChatItem
-                                  key={idx.toString() + chatItem.content}
-                                  chatItem={chatItem}
-                                  onConfirm={onConfirm}
-                                />
-                              );
-                            } else if (chatItem.role === "debug") return <></>;
-                            else if (chatItem.role === "function") {
-                              let contentString = "";
-                              const functionJsonResponse = JSON.parse(
-                                chatItem.content
-                              ) as Json;
-                              if (
-                                // Empty array
-                                (Array.isArray(functionJsonResponse) &&
-                                  functionJsonResponse.length === 0) ||
-                                // Empty object
-                                (functionJsonResponse &&
-                                  typeof functionJsonResponse === "object" &&
-                                  Object.entries(functionJsonResponse)
-                                    .length === 0)
-                              ) {
-                                if (
-                                  devChatContents[idx - 1].role ===
-                                    "function" ||
-                                  devChatContents[idx + 1].role === "function"
-                                ) {
-                                  // If the function call is adjacent to other function calls we don't need to tell them it
-                                  // was empty - otherwise we get a lot of empty messages clogging up the chat interface
-                                  return (
-                                    <div
-                                      key={idx.toString() + chatItem.content}
-                                    />
-                                  );
-                                }
-                                contentString = "No data returned";
-                              } else if (
-                                functionJsonResponse &&
-                                typeof functionJsonResponse === "object"
-                              ) {
-                                contentString = convertToRenderable(
-                                  functionJsonResponse,
-                                  `${functionNameToDisplay(
-                                    chatItem?.name ?? ""
-                                  )} result`
-                                );
-                              }
-                              return (
-                                <DevChatItem
-                                  chatItem={{
-                                    ...chatItem,
-                                    content: contentString,
-                                  }}
-                                  key={idx.toString() + chatItem.content}
-                                />
-                              );
-                            }
-                            return (
-                              <UserChatItem
-                                chatItem={chatItem}
-                                key={idx.toString() + chatItem.content}
-                              />
-                            );
-                          })}
-                          {devChatContents.length === 0 &&
-                            props.suggestions &&
-                            props.suggestions.length > 0 && (
-                              <div className="sf-py-4 sf-px-1.5">
-                                <h2 className="sf-ml-2 sf-font-medium">
-                                  Suggestions
-                                </h2>
-                                <div className="sf-mt-1 sf-flex sf-flex-col sf-gap-y-2 sf-place-items-baseline">
-                                  {props.suggestions.map((text) => (
-                                    <button
-                                      key={text}
-                                      className="sf-text-left sf-px-2 sf-py-1 sf-rounded-md sf-border sf-bg-white sf-text-little sf-text-gray-800 sf-shadow hover:sf-shadow-md"
-                                      onClick={() => setUserText(text)}
-                                    >
-                                      {text}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                        </div>
-                      </div>
-                    </div>
-                    {/* Textbox user types into */}
-                    <div className="sf-flex sf-flex-col sf-pt-4">
-                      <AutoGrowingTextArea
-                        className={classNames(
-                          "sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border focus:sf-border-purple-300 focus:sf-ring-1 focus:sf-ring-purple-300 focus:sf-outline-0 placeholder:sf-text-gray-400",
-                          userText.length > 300
-                            ? "sf-overflow-auto-y"
-                            : "sf-overflow-hidden"
-                        )}
-                        placeholder={"Send a message"}
-                        value={userText}
-                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                          setUserText(e.target.value)
-                        }
-                        onKeyDown={(
-                          e: React.KeyboardEvent<HTMLTextAreaElement>
-                        ) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            if (userText.length > 3) {
-                              void callSuperflowsApi([
-                                ...devChatContents,
-                                { role: "user", content: userText },
-                              ]);
-                              setUserText("");
-                            }
-                          }
-                        }}
-                      />
-                      <div className="sf-flex sf-flex-shrink-0 sf-w-full sf-justify-between sf-px-1 sf-pb-4 sf-pt-2">
-                        {
-                          <button
-                            className={classNames(
-                              "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-text-gray-500 sf-shadow-sm sf-bg-gray-100 sf-border sf-border-gray-300",
-                              !loading
-                                ? "sf-bg-gray-200 sf-cursor-not-allowed"
-                                : "hover:sf-bg-gray-200 "
-                            )}
-                            onClick={() => {
-                              killSwitchClicked.current = true;
-                              alreadyRunning.current = false;
-                              setLoading(false);
-                            }}
-                          >
-                            Cancel
-                          </button>
-                        }
-                        <button
-                          ref={ref}
-                          type="submit"
-                          className={classNames(
-                            "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
-                            loading || userText.length <= 3
-                              ? "sf-bg-gray-500 sf-cursor-not-allowed"
-                              : `hover:sf-opacity-90 focus-visible:sf-outline focus-visible:sf-outline-2 focus-visible:sf-outline-offset-2 focus-visible:sf-outline-sky-500 sf-bg-purple-500`
-                          )}
-                          onClick={() => {
-                            if (!loading && userText.length > 3) {
-                              void callSuperflowsApi([
-                                ...devChatContents,
-                                { role: "user", content: userText },
-                              ]);
-                              setUserText("");
-                              killSwitchClicked.current = false;
-                            }
-                          }}
-                        >
-                          {loading && <LoadingSpinner classes="sf-h-4 sf-w-4" />}
-                          Submit
-                        </button>
-                      </div>
+                        <XMarkIcon
+                          className="sf-h-6 sf-w-6 sf-block md:sf-hidden"
+                          aria-hidden="true"
+                        />
+                      </button>
                     </div>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </div>
+                <div
+                  className="sf-relative sf-overflow-y-auto sf-h-full sf-flex sf-flex-col"
+                  id={"scrollable-chat-contents"}
+                >
+                  {/* Show clear chat button only when there is chat to clear */}
+                  {devChatContents.length > 0 && (
+                    <button
+                      className={
+                        "sf-absolute sf-top-2 sf-right-2 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-px-2 sf-py-1 sf-rounded-md sf-bg-white sf-border focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500 sf-transition sf-border-gray-300 hover:sf-border-gray-400 sf-text-gray-500 hover:sf-text-gray-600"
+                      }
+                      onClick={() => {
+                        setDevChatContents([]);
+                      }}
+                    >
+                      <ArrowPathIcon className="sf-h-4 sf-w-4" /> Clear chat
+                    </button>
+                  )}
+                  <div className="sf-mt-6 sf-flex-1 sf-px-1 sf-shrink-0 sf-flex sf-flex-col sf-justify-end sf-gap-y-2">
+                    {devChatContents.map((chatItem, idx) => {
+                      if (
+                        props.devMode ||
+                        ["error", "confirmation", "user"].includes(
+                          chatItem.role,
+                        )
+                      ) {
+                        return (
+                          <DevChatItem
+                            key={idx.toString() + chatItem.content}
+                            chatItem={chatItem}
+                            onConfirm={onConfirm}
+                          />
+                        );
+                      } else if (chatItem.role === "debug") return <></>;
+                      else if (chatItem.role === "function") {
+                        let contentString = "";
+                        const functionJsonResponse = JSON.parse(
+                          chatItem.content,
+                        ) as Json;
+                        if (
+                          // Empty array
+                          (Array.isArray(functionJsonResponse) &&
+                            functionJsonResponse.length === 0) ||
+                          // Empty object
+                          (functionJsonResponse &&
+                            typeof functionJsonResponse === "object" &&
+                            Object.entries(functionJsonResponse).length === 0)
+                        ) {
+                          if (
+                            devChatContents[idx - 1].role === "function" ||
+                            devChatContents[idx + 1].role === "function"
+                          ) {
+                            // If the function call is adjacent to other function calls we don't need to tell them it
+                            // was empty - otherwise we get a lot of empty messages clogging up the chat interface
+                            return (
+                              <div key={idx.toString() + chatItem.content} />
+                            );
+                          }
+                          contentString = "No data returned";
+                        } else if (
+                          functionJsonResponse &&
+                          typeof functionJsonResponse === "object"
+                        ) {
+                          contentString = convertToRenderable(
+                            functionJsonResponse,
+                            `${functionNameToDisplay(
+                              chatItem?.name ?? "",
+                            )} result`,
+                          );
+                        }
+                        return (
+                          <DevChatItem
+                            chatItem={{
+                              ...chatItem,
+                              content: contentString,
+                            }}
+                            key={idx.toString() + chatItem.content}
+                          />
+                        );
+                      }
+                      return (
+                        <UserChatItem
+                          chatItem={chatItem}
+                          key={idx.toString() + chatItem.content}
+                        />
+                      );
+                    })}
+                    {devChatContents.length === 0 &&
+                      props.suggestions &&
+                      props.suggestions.length > 0 && (
+                        <div className="sf-py-4 sf-px-1.5">
+                          <h2 className="sf-ml-2 sf-font-medium">
+                            Suggestions
+                          </h2>
+                          <div className="sf-mt-1 sf-flex sf-flex-col sf-gap-y-2 sf-place-items-baseline">
+                            {props.suggestions.map((text) => (
+                              <button
+                                key={text}
+                                className="sf-text-left sf-px-2 sf-py-1 sf-rounded-md sf-border sf-bg-white sf-text-little sf-text-gray-800 sf-shadow hover:sf-shadow-md"
+                                onClick={() => setUserText(text)}
+                              >
+                                {text}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                  </div>
+                </div>
+              </div>
+              {/* Textbox user types into */}
+              <div className="sf-flex sf-flex-col sf-pt-4">
+                <AutoGrowingTextArea
+                  className={classNames(
+                    "sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border focus:sf-border-purple-300 focus:sf-ring-1 focus:sf-ring-purple-300 focus:sf-outline-0 placeholder:sf-text-gray-400",
+                    userText.length > 300
+                      ? "sf-overflow-auto-y"
+                      : "sf-overflow-hidden",
+                  )}
+                  placeholder={"Send a message"}
+                  value={userText}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setUserText(e.target.value)
+                  }
+                  onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (userText.length > 3) {
+                        void callSuperflowsApi([
+                          ...devChatContents,
+                          { role: "user", content: userText },
+                        ]);
+                        setUserText("");
+                      }
+                    }
+                  }}
+                />
+                <div className="sf-flex sf-flex-shrink-0 sf-w-full sf-justify-between sf-px-1 sf-pb-4 sf-pt-2">
+                  <button
+                    className={classNames(
+                      "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-shadow-sm sf-border",
+                      loading
+                        ? "sf-text-gray-500 sf-bg-gray-100 hover:sf-bg-gray-200 sf-border-gray-300"
+                        : "sf-invisible",
+                    )}
+                    onClick={() => {
+                      killSwitchClicked.current = true;
+                      alreadyRunning.current = false;
+                      setLoading(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    ref={ref}
+                    type="submit"
+                    className={classNames(
+                      "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
+                      loading || userText.length <= 3
+                        ? "sf-bg-gray-500 sf-cursor-not-allowed"
+                        : `hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500`,
+                      !props.styling?.buttonColor &&
+                        !(loading || userText.length <= 3) &&
+                        "sf-bg-purple-500",
+                    )}
+                    onClick={() => {
+                      if (!loading && userText.length > 3) {
+                        void callSuperflowsApi([
+                          ...devChatContents,
+                          { role: "user", content: userText },
+                        ]);
+                        setUserText("");
+                        killSwitchClicked.current = false;
+                      }
+                    }}
+                    style={
+                      props.styling?.buttonColor &&
+                      !(loading || userText.length <= 3)
+                        ? { backgroundColor: props.styling?.buttonColor }
+                        : {}
+                    }
+                  >
+                    {loading && <LoadingSpinner classes="sf-h-4 sf-w-4" />}
+                    Submit
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+          </Dialog.Overlay>
+        </Transition>
+      </div>
+    </Dialog>
   );
 }
