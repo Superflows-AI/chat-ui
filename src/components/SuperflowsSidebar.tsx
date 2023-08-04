@@ -50,16 +50,9 @@ export default function SuperflowsSidebar(props: {
   // const [suggestions, setSuggestions] = useState<string[]>(props.suggestions ?? []);
 
   const [conversationId, setConversationId] = useState<number | null>(null);
-  const [devChatContents, setDevChatContents] = useState<StreamingStepInput[]>([
-    {
-      role: "assistant",
-      content: convertToRenderable([1, 2, 3, 4, 5, 6]),
-      // content: convertToRenderable([
-      //   { a: 1, b: 2, c: [1, 2, 3] },
-      //   { a: 4, b: 5, c: [4, 5, 6] },
-      // ]),
-    },
-  ]);
+  const [devChatContents, setDevChatContents] = useState<StreamingStepInput[]>(
+    [],
+  );
 
   useEffect(() => {
     const ele = document.getElementById("scrollable-chat-contents");
