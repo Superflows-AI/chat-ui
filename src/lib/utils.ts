@@ -1,3 +1,5 @@
+import tablemark from "tablemark";
+
 export function classNames(
   ...classes: (string | undefined | null | boolean)[]
 ): string {
@@ -5,64 +7,110 @@ export function classNames(
 }
 
 export function functionNameToDisplay(name: string): string {
-  let result = name
-    // Insert a space before all camelCased and PascalCased characters
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    // Replace underscores with a space
-    .replace(/_/g, " ")
-    // Convert all text to lower case
-    .toLowerCase()
-    // Capitalize the first letter of each word
-    .replace(/\b[a-z](?=[a-z]{1})/g, (letter) => letter.toUpperCase());
-
-  return result;
+  return (
+    name
+      // Insert a space before all camelCased and PascalCased characters
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      // Replace underscores with a space
+      .replace(/_/g, " ")
+      // Convert all text to lower case
+      .toLowerCase()
+      // Capitalize the first letter of each word
+      .replace(/\b[a-z](?=[a-z]{1})/g, (letter) => letter.toUpperCase())
+  );
 }
-export function parseTableTags(text: string): { key: string; value: string }[] {
-  const captionRegex = /<caption>(.*?)<\/caption>/;
-  const caption = {
-    key: "caption",
-    value: text.match(captionRegex)?.[1] ?? "",
-  };
-  text = text.replace(captionRegex, "");
 
-  const rows = text.split("<br/>").map((line) => {
-    const [key, ...value] = line.split(":");
-    return { key: key.trim(), value: value.join(":").trim() };
-  });
-  return [caption, ...rows];
-}
 export function convertToRenderable(
   functionOutput: Record<string, any> | any[],
-  caption?: string
+  caption?: string,
 ): string {
-  let output = "<table>";
+  /** Converts a function's output to a Markdown table
+   * In the future, it could also output graphs when applicable **/
+  let output = "";
   if (caption) {
-    output += `<caption>${caption}</caption>`;
+    output += `### ${caption}\n\n`;
   }
+  // Format: {data: {...interestingData}}
+  if (
+    !Array.isArray(functionOutput) &&
+    Object.keys(functionOutput).length === 1
+  ) {
+    if (!caption) {
+      // Make the first key the caption
+      output += `### ${functionNameToDisplay(
+        Object.keys(functionOutput)[0],
+      )}\n\n`;
+    }
+    functionOutput = functionOutput[Object.keys(functionOutput)[0]];
+  }
+
   if (Array.isArray(functionOutput)) {
-    if (
-      typeof functionOutput[0] === "object" &&
-      !Array.isArray(functionOutput[0])
-    ) {
-      // Format: [{a,b}, {a,b}]
-      functionOutput.forEach((item) => {
-        Object.entries(item).forEach(([key, value]) => {
-          output += `${functionNameToDisplay(key)}: ${
-            typeof value === "object" ? JSON.stringify(value) : value
-          }<br/>`;
+    // Assume all elements have the same type
+    if (typeof functionOutput[0] !== "object") {
+      if (functionOutput.length < 7) {
+        // And did those feet in ancient time,
+        return (
+          output +
+          ("|" +
+            functionOutput.map(() => "   ").join("|") +
+            "|\n|" +
+            functionOutput.map(() => "---").join("|") +
+            "|\n| " +
+            functionOutput.join(" | ") +
+            " |\n")
+        );
+      } else {
+        // Walk upon England's mountains green?
+        return (
+          output + "|   |\n|---|\n| " + functionOutput.join(" |\n| ") + " |\n"
+        );
+      }
+    }
+    // Otherwise, we have an array of arrays/objects
+    let columns: { name?: string; align: "center" }[];
+    if (Array.isArray(functionOutput[0])) {
+      functionOutput = functionOutput.map((item) => {
+        // Format: [[{a,b,c,d}, {a,b,c,d}], [{a,b,c,d}, {a,b,c,d}]]
+        return item.map((subItem: any) => {
+          // .slice() cuts out the starting and end [] or {}
+          if (typeof subItem === "object") return stringify(subItem);
+          else return subItem;
         });
       });
+      // @ts-ignore
+      columns = functionOutput[0].map(() => ({ align: "center" }));
     } else {
-      // Format: [x, y, z]
-      functionOutput.forEach((val) => {
-        output += `Value: ${functionNameToDisplay(val)}<br/>`;
+      // Array of objects
+      functionOutput = functionOutput.map((item) => {
+        // Format: [{a,b,c,d}, {a,b,c,d}, {a,b,c,d}, {a,b,c,d}]
+        Object.entries(item).forEach(([key, value]: any) => {
+          // Deal with nested objects: [{a,b:{c,d}}, {a,b:{c,d}}]
+          if (typeof value === "object" && !Array.isArray(value)) {
+            Object.entries(value).forEach(([subKey, subValue]: any) => {
+              if (typeof subValue === "object") {
+                item[`${key}: ${subKey}`] = stringify(subValue);
+              } else {
+                item[`${key}: ${functionNameToDisplay(subKey)}`] = subValue;
+              }
+            });
+            delete item[key];
+          } else if (Array.isArray(value)) {
+            item[key] = stringify(value);
+          } else if (typeof value === "string") {
+            item[key] = value.replaceAll("\n", "&#10;");
+          } else item[key] = value;
+        });
+        return item;
       });
+      // @ts-ignore
+      columns = Object.keys(functionOutput[0]).map((n) => ({
+        name: functionNameToDisplay(n),
+        align: "center",
+      }));
     }
+    // And was the holy Lamb of God,
+    return output + tablemark(functionOutput as any[], { columns });
   } else {
-    // Format: {data: {a, b}}
-    if ("data" in functionOutput) {
-      functionOutput = functionOutput.data;
-    }
     // Format: {a, b}
     Object.entries(functionOutput).forEach(([key, value]) => {
       output += `${functionNameToDisplay(key)}: ${
@@ -71,6 +119,16 @@ export function convertToRenderable(
     });
     output = output.slice(0, -5);
   }
-  output += "</table>";
+  // On England's pleasant pastures seen?
   return output;
+}
+
+function stringify(obj: Record<string, any> | any[]): string {
+  return (
+    JSON.stringify(obj)
+      // .slice() cuts out the starting and end [] or {}
+      .slice(1, -1)
+      // .replaceAll() replaces all " with nothing
+      .replaceAll('"', "")
+  );
 }

@@ -4,7 +4,6 @@ import {
   classNames,
   convertToRenderable,
   functionNameToDisplay,
-  parseTableTags,
 } from "../lib/utils";
 import {
   CheckCircleIcon,
@@ -15,11 +14,12 @@ import {
 } from "@heroicons/react/24/outline";
 import { parseOutput } from "../lib/parser";
 import { StreamingStepInput } from "../lib/types";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
-const fullRegex = /(<button>.*?<\/button>)|(<table>.*?<\/table>)|([\s\S]+?)/g;
+const fullRegex = /(<button>.*?<\/button>)|([\s\S]+?)/g;
 const feedbackRegex = /<button>Feedback<\/button>/;
 const buttonRegex = /<button>(?![^<]*<button>)(.*?)<\/button>/;
-const tableRegex = /<table>(.*?)<\/table>/;
 
 export function splitContentByParts(content: string): string[] {
   /** We split the message into different parts (based on whether they're a <table>, <button> or just text),
@@ -28,16 +28,15 @@ export function splitContentByParts(content: string): string[] {
   const matches: string[] = [];
   while ((match = fullRegex.exec(content)) !== null) {
     if (match[1]) matches.push(match[1]);
-    if (match[2]) matches.push(match[2]);
-    if (match[3]) {
+    if (match[2]) {
       // This is because the 3rd match group is lazy, so only captures 1 character at a time
       const prev = matches[matches.length - 1];
       if (
         matches.length === 0 ||
         (prev.startsWith("<") && prev.endsWith(">"))
       ) {
-        matches.push(match[3]);
-      } else matches[matches.length - 1] += match[3];
+        matches.push(match[2]);
+      } else matches[matches.length - 1] += match[2];
     }
   }
   return matches;
@@ -79,7 +78,7 @@ export function DevChatItem(props: {
       .map((action) => {
         return `${convertToRenderable(
           action.args,
-          functionNameToDisplay(action.name)
+          functionNameToDisplay(action.name),
         )}`;
       })
       .join("")}`;
@@ -88,7 +87,7 @@ export function DevChatItem(props: {
   const matches = splitContentByParts(content);
 
   return (
-     <div
+    <div
       className={classNames(
         "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col",
         props.chatItem.role === "user"
@@ -102,7 +101,7 @@ export function DevChatItem(props: {
           ? "sf-bg-green-200"
           : props.chatItem.role === "confirmation"
           ? "sf-bg-blue-100"
-          : ""
+          : "",
       )}
     >
       <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
@@ -147,7 +146,7 @@ export function DevChatItem(props: {
               <div
                 className={classNames(
                   "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
+                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
                 )}
               >
                 <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
@@ -180,18 +179,7 @@ export function DevChatItem(props: {
             </div>
           );
         }
-        const tableMatches = tableRegex.exec(text);
-        if (tableMatches && tableMatches.length > 0) {
-          return <Table chatKeyValueText={tableMatches[1]} key={idx} />;
-        }
-        return (
-          <p
-            key={idx}
-            className="sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-words"
-          >
-            {text}
-          </p>
-        );
+        return <StyledMarkdown key={idx}>{text}</StyledMarkdown>;
       })}
       {props.onConfirm &&
         props.chatItem.role === "confirmation" &&
@@ -221,7 +209,7 @@ export function DevChatItem(props: {
             <div
               className={classNames(
                 "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
+                saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
               )}
             >
               <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
@@ -239,37 +227,6 @@ export function DevChatItem(props: {
             Cancelled
           </div>
         ))}
-    </div>
-  );
-}
-
-export function Table(props: { chatKeyValueText: string }) {
-  const parsedValues = parseTableTags(props.chatKeyValueText);
-
-  return (
-    <div className="sf-inline-block sf-min-w-full sf-py-4 sf-align-middle sm:sf-px-6 lg:sf-px-8">
-      <div className="sf-min-w-full sf-border sf-border-gray-300">
-        <table className="sf-w-full sf-divide-y sf-divide-gray-300">
-          <caption className="sf-text-base sf-text-gray-900 sf-bg-gray-100 sf-py-2 sf-font-extrabold">
-            {parsedValues.find((keyValue) => keyValue.key === "caption")?.value}
-          </caption>
-          <tbody className="sf-bg-gray-300 sf-rounded-full">
-            {parsedValues.map(
-              (keyValue) =>
-                keyValue.key !== "caption" && (
-                  <tr key={keyValue.key} className="even:sf-bg-[#DADDE3]">
-                    <td className="sf-whitespace-nowrap sf-px-3 sf-py-2.5 sf-text-sm sf-font-medium sf-text-gray-900">
-                      {keyValue.key}
-                    </td>
-                    <td className="sf-whitespace-wrap sf-px-2 sf-py-2.5 sf-text-sm sf-text-gray-700">
-                      {keyValue.value}
-                    </td>
-                  </tr>
-                )
-            )}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }
@@ -322,7 +279,7 @@ export function UserChatItem(props: {
               <div
                 className={classNames(
                   "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
+                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
                 )}
               >
                 <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
@@ -355,16 +312,13 @@ export function UserChatItem(props: {
             </div>
           );
         }
-        const tableMatches = tableRegex.exec(text);
-        if (tableMatches && tableMatches.length > 0) {
-          return <Table chatKeyValueText={tableMatches[1]} key={idx} />;
-        }
         return (
           <div key={idx} className="sf-w-full">
             {outputObj.reasoning && (
               <div className="sf-bg-yellow-100 sf-rounded-md sf-px-4 sf-py-2 sf-border sf-border-yellow-300 sf-w-full">
                 <p className="sf-flex sf-flex-row sf-gap-x-1.5 sf-text-yellow-800">
-                  <LightBulbIcon className="sf-h-5 sf-w-5 sf-text-yellow-600" /> Thoughts
+                  <LightBulbIcon className="sf-h-5 sf-w-5 sf-text-yellow-600" />{" "}
+                  Thoughts
                 </p>
                 <p className="sf-mt-1 sf-text-little sf-whitespace-pre-line sf-text-gray-700">
                   {outputObj.reasoning}
@@ -372,16 +326,71 @@ export function UserChatItem(props: {
               </div>
             )}
             {outputObj.tellUser && (
-              <p
-                key={idx}
-                className="sf-px-2 sf-mt-3 sf-text-base sf-text-gray-900 sf-whitespace-pre-line sf-w-full"
-              >
-                {outputObj.tellUser}
-              </p>
+              <StyledMarkdown>{outputObj.tellUser}</StyledMarkdown>
             )}
           </div>
         );
       })}
     </div>
+  );
+}
+
+function StyledMarkdown(props: { children: string }) {
+  return (
+    <ReactMarkdown
+      className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full"
+      components={{
+        a: ({ node, ...props }) => (
+          <a className="sf-text-blue-500 hover:sf-underline" {...props} />
+        ),
+        li: ({ node, ...props }) => (
+          <li
+            className="marker:sf-text-gray-700 sf-ml-4 sf--my-2 sf-text-gray-900 sf-list-decimal"
+            {...props}
+          />
+        ),
+        p: ({ node, ...props }) => <p className="sf-my-0" {...props} />,
+        h3: ({ node, ...props }) => (
+          <h3
+            className="sf-text-little sm:sf-text-base lg:sf-text-lg sf-text-center sf-w-full sf-font-extrabold sf-text-gray-900 sf-py-2 sf--mb-6 sf-border sf-bg-gray-50 sf-border-gray-300"
+            {...props}
+          />
+        ),
+        table: ({ node, ...props }) => (
+          <table
+            className="sf-text-center sf-border-collapse sf-w-full sf-divide-y sf-divide-gray-300 sf-border sf-border-gray-300"
+            {...props}
+          />
+        ),
+        thead: ({ node, ...props }) => (
+          <thead
+            className="sf-bg-gray-100 sf-text-xs sm:sf-text-sm lg:sf-text-little sf-text-gray-900 sf-py-2"
+            {...props}
+          />
+        ),
+        th: ({ node, ...props }) => (
+          <th
+            className="sf-border sf-border-gray-300 sf-font-normal sf-px-2 sf-py-2"
+            {...props}
+          />
+        ),
+        tr: ({ node, ...props }) => (
+          <tr
+            className="even:sf-bg-gray-300 sf-border sf-border-gray-300"
+            {...props}
+          />
+        ),
+        td: ({ node, ...props }) => (
+          <td
+            className="sf-bg-gray-200 sf-border sf-border-gray-300 sf-whitespace-wrap sf-px-2 sf-py-2.5 sf-text-xs md:sf-text-sm sf-text-gray-700 sf-break-words sf-break"
+            style={{ ...props.style, wordBreak: "break-word" }}
+            {...props}
+          />
+        ),
+      }}
+      remarkPlugins={[remarkGfm]}
+    >
+      {props.children}
+    </ReactMarkdown>
   );
 }

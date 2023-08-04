@@ -11,11 +11,7 @@ import {
   parseFunctionCall,
   parseOutput,
 } from "./lib/parser";
-import {
-  convertToRenderable,
-  functionNameToDisplay,
-  parseTableTags,
-} from "./lib/utils";
+import { convertToRenderable, functionNameToDisplay } from "./lib/utils";
 import "./index.css";
 
 export {
@@ -24,7 +20,6 @@ export {
   DevChatItem,
   UserChatItem,
   functionNameToDisplay,
-  parseTableTags,
   convertToRenderable,
   parseFunctionCall,
   FunctionCall,

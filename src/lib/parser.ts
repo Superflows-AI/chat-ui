@@ -15,7 +15,7 @@ export interface ParsedOutput {
 function getSectionText(
   inputStr: string,
   sectionName: string,
-  nextSectionName: string
+  nextSectionName: string,
 ): string {
   const sectionIndex = inputStr.indexOf(sectionName + ":");
   const nextSectionIdx = inputStr.indexOf(nextSectionName + ":");
@@ -44,7 +44,7 @@ export function parseOutput(gptString: string): ParsedOutput {
     reasoning = getSectionText(
       gptString,
       "Reasoning",
-      planIn ? "Plan" : tellUserIn ? "Tell user" : "Commands"
+      planIn ? "Plan" : tellUserIn ? "Tell user" : "Commands",
     );
   } else if (reasoningIn) {
     // Response streaming in, reasoning present, but no other sections yet
@@ -78,7 +78,7 @@ export function parseOutput(gptString: string): ParsedOutput {
       .split("\n")
       // Filter out comments & empty lines
       .filter(
-        (line: string) => !line.startsWith("# ") && line.trim().length > 0
+        (line: string) => !line.startsWith("# ") && line.trim().length > 0,
       )
       .forEach((line: string) => {
         try {

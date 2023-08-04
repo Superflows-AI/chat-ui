@@ -1,0 +1,3 @@
+src/something/lib
+src/something/core
+where/src/something/else
