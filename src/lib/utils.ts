@@ -112,12 +112,14 @@ export function convertToRenderable(
     return output + tablemark(functionOutput as any[], { columns });
   } else {
     // Format: {a, b}
-    Object.entries(functionOutput).forEach(([key, value]) => {
-      output += `${functionNameToDisplay(key)}: ${
-        typeof value === "object" ? JSON.stringify(value) : value
-      }<br/>`;
-    });
-    output = output.slice(0, -5);
+    output += tablemark(
+      Object.entries(functionOutput).map(([key, value]) => {
+        return {
+          Name: key,
+          Value: typeof value === "object" ? stringify(value) : value,
+        };
+      }),
+    );
   }
   // On England's pleasant pastures seen?
   return output;

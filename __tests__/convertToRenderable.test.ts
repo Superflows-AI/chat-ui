@@ -151,4 +151,50 @@ describe("convertToRenderable", () => {
 |   5   |                                                            Have been great for when abroad.                                                            | 2023-08-02T14:02:18.945Z | Trustpilot  |                          {name:General}                          |
 `);
   });
+  it("should convert simple object to a markdown table", () => {
+    const input = {
+      if: "you can keep your head",
+      when: "all about you are losing theirs",
+      and: "blaming it on you",
+    };
+    const output = convertToRenderable(input);
+    expect(output).toEqual(
+      `| Name  | Value                           |
+| :---- | :------------------------------ |
+| if    | you can keep your head          |
+| when  | all about you are losing theirs |
+| and   | blaming it on you               |
+`,
+    );
+  });
+  it("should convert object with 1 array field to a markdown table", () => {
+    const input = {
+      if: ["you ", "can ", "trust", " yourself"],
+      when: "all men doubt you",
+      but: "keep allowance for their doubting too",
+    };
+    const output = convertToRenderable(input);
+    expect(output).toEqual(
+      `| Name  | Value                                 |
+| :---- | :------------------------------------ |
+| if    | you ,can ,trust, yourself             |
+| when  | all men doubt you                     |
+| but   | keep allowance for their doubting too |
+`,
+    );
+  });
+  it("should convert object with 1 object field to a markdown table", () => {
+    const input = {
+      if: ["you ", "can ", "wait"],
+      and: { not: "be", tired: "of", waiting: "." },
+    };
+    const output = convertToRenderable(input);
+    expect(output).toEqual(
+      `| Name  | Value                     |
+| :---- | :------------------------ |
+| if    | you ,can ,wait            |
+| and   | not:be,tired:of,waiting:. |
+`,
+    );
+  });
 });
