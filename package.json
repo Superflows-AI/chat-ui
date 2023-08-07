@@ -1,47 +1,48 @@
 {
-  "name": "@superflows/chat-ui-react",
-  "version": "1.1.1",
-  "main": "dist/index.js",
-  "devDependencies": {
-    "@heroicons/react": "^2.0.18",
-    "@jest/globals": "^29.6.2",
-    "@rollup/plugin-commonjs": "^25.0.3",
-    "@rollup/plugin-node-resolve": "^15.1.0",
-    "@types/jest": "^29.5.3",
-    "@types/react": "^18.2.0",
-    "husky": "^8.0.3",
-    "jest": "^29.6.2",
-    "jest-environment-jsdom": "^29.6.2",
-    "prettier": "^3.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "rollup": "^3.26.3",
-    "rollup-plugin-dts": "^5.3.1",
-    "rollup-plugin-postcss": "^4.0.2",
-    "rollup-plugin-tailwindcss": "file:../rollup-plugin-tailwindcss/rollup-plugin-tailwindcss-1.1.0.tgz",
-    "rollup-plugin-typescript2": "^0.35.0",
-    "ts-jest": "^29.1.1",
-    "typescript": "^5.1.6"
-  },
-  "peerDependencies": {
-    "react": "^16 || ^17 || ^18",
-    "react-dom": "^16 || ^17 || ^18"
-  },
-  "scripts": {
-    "build": "rollup -c",
-    "start": "rollup -c -w",
-    "dev": "next dev",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
-    "prepare": "husky install"
-  },
-  "files": [
-    "dist"
-  ],
-  "dependencies": {
-    "@headlessui/react": "1.4",
-    "@heroicons/react": "^2.0.18",
-    "react-markdown": "^8",
-    "remark-gfm": "^3.0.1",
-    "tablemark": "^3.0.0"
-  }
+	"name": "@superflows/chat-ui-react",
+	"version": "1.1.2-22",
+	"main": "dist/index.js",
+	"devDependencies": {
+		"@heroicons/react": "^2.0.18",
+		"@jest/globals": "^29.6.2",
+		"@rollup/plugin-commonjs": "^25.0.3",
+		"@rollup/plugin-node-resolve": "^15.1.0",
+		"@superflows/rollup-plugin-tailwindcss": "^1.1.0",
+		"@types/jest": "^29.5.3",
+		"@types/react": "^18.2.0",
+		"husky": "^8.0.3",
+		"jest": "^29.6.2",
+		"jest-environment-jsdom": "^29.6.2",
+		"prettier": "^3.0.0",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"rollup": "^3.26.3",
+		"rollup-plugin-dts": "^5.3.1",
+		"rollup-plugin-postcss": "^4.0.2",
+		"rollup-plugin-typescript2": "^0.35.0",
+		"ts-jest": "^29.1.1",
+		"typescript": "^5.1.6"
+	},
+	"peerDependencies": {
+		"react": "^16 || ^17 || ^18",
+		"react-dom": "^16 || ^17 || ^18"
+	},
+	"scripts": {
+		"build": "rollup -c",
+		"start": "rollup -c -w",
+		"dev": "next dev",
+		"test": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+		"prepare": "husky install"
+	},
+	"files": [
+		"dist"
+	],
+	"dependencies": {
+		"@headlessui/react": "1.4",
+		"@heroicons/react": "^2.0.18",
+		"react-markdown": "^8",
+		"recharts": "^2.7.2",
+		"remark-gfm": "^3.0.1",
+		"tablemark": "^3.0.0"
+	}
 }

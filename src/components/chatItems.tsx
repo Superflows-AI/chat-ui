@@ -1,10 +1,3 @@
-import * as React from "react";
-import { useEffect, useState } from "react";
-import {
-  classNames,
-  convertToRenderable,
-  functionNameToDisplay,
-} from "../lib/utils";
 import {
   CheckCircleIcon,
   HandThumbDownIcon,
@@ -12,10 +5,18 @@ import {
   LightBulbIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import { parseOutput } from "../lib/parser";
-import { StreamingStepInput } from "../lib/types";
+import * as React from "react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { parseOutput } from "../lib/parser";
+import { StreamingStepInput } from "../lib/types";
+import {
+  classNames,
+  convertToRenderable,
+  functionNameToDisplay,
+} from "../lib/utils";
+import { Graph, extractGraphData } from "./graph";
 
 const fullRegex = /(<button>.*?<\/button>)|([\s\S]+?)/g;
 const feedbackRegex = /<button>Feedback<\/button>/;
@@ -67,6 +68,10 @@ export function DevChatItem(props: {
       }, 3000);
     }
   }, [saveSuccessfulFeedback]);
+  const graphedData =
+    props.chatItem.role === "function"
+      ? extractGraphData(props.chatItem.content)
+      : null;
 
   let content = props.chatItem.content;
   if (!content) return <></>;
@@ -78,7 +83,7 @@ export function DevChatItem(props: {
       .map((action) => {
         return `${convertToRenderable(
           action.args,
-          functionNameToDisplay(action.name),
+          functionNameToDisplay(action.name)
         )}`;
       })
       .join("")}`;
@@ -101,7 +106,7 @@ export function DevChatItem(props: {
           ? "sf-bg-green-200"
           : props.chatItem.role === "confirmation"
           ? "sf-bg-blue-100"
-          : "",
+          : ""
       )}
     >
       <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
@@ -146,7 +151,7 @@ export function DevChatItem(props: {
               <div
                 className={classNames(
                   "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
+                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
                 )}
               >
                 <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
@@ -179,7 +184,11 @@ export function DevChatItem(props: {
             </div>
           );
         }
-        return <StyledMarkdown key={idx}>{text}</StyledMarkdown>;
+
+        const graphTabSelected = true;
+
+        if (graphTabSelected && graphedData) return <Graph {...graphedData} />;
+        else return <StyledMarkdown key={idx}>{text}</StyledMarkdown>;
       })}
       {props.onConfirm &&
         props.chatItem.role === "confirmation" &&
@@ -209,7 +218,7 @@ export function DevChatItem(props: {
             <div
               className={classNames(
                 "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
+                saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
               )}
             >
               <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
@@ -279,7 +288,7 @@ export function UserChatItem(props: {
               <div
                 className={classNames(
                   "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
+                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
                 )}
               >
                 <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
@@ -326,7 +335,9 @@ export function UserChatItem(props: {
               </div>
             )}
             {outputObj.tellUser && (
-              <StyledMarkdown>{outputObj.tellUser}</StyledMarkdown>
+              <>
+                <StyledMarkdown>{outputObj.tellUser}</StyledMarkdown>
+              </>
             )}
           </div>
         );
