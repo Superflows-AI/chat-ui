@@ -155,7 +155,6 @@ export default function SuperflowsSidebar(props: {
           console.error(e);
         }
       }
-      // TODO: Add a confirmation step when taking non-GET actions
       setLoading(false);
       alreadyRunning.current = false;
       killSwitchClicked.current = false;
@@ -363,7 +362,7 @@ export default function SuperflowsSidebar(props: {
                         ) {
                           if (
                             devChatContents[idx - 1].role === "function" ||
-                            devChatContents[idx + 1].role === "function"
+                            devChatContents[idx + 1]?.role === "function"
                           ) {
                             // If the function call is adjacent to other function calls we don't need to tell them it
                             // was empty - otherwise we get a lot of empty messages clogging up the chat interface
@@ -427,10 +426,13 @@ export default function SuperflowsSidebar(props: {
               <div className="sf-flex sf-flex-col sf-pt-4">
                 <AutoGrowingTextArea
                   className={classNames(
-                    "sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border focus:sf-border-purple-300 focus:sf-ring-1 focus:sf-ring-purple-300 focus:sf-outline-0 placeholder:sf-text-gray-400",
+                    "sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400",
                     userText.length > 300
                       ? "sf-overflow-auto-y"
                       : "sf-overflow-hidden",
+                    props.styling?.buttonColor
+                      ? `focus:sf-border-gray-500 focus:sf-ring-gray-500`
+                      : "focus:sf-border-purple-300 focus:sf-ring-purple-300",
                   )}
                   placeholder={"Send a message"}
                   value={userText}
