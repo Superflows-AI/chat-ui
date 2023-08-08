@@ -1,12 +1,14 @@
 import * as React from "react";
 import {
   ComposedChart,
+  LineChart,
   Label,
   Line,
   ResponsiveContainer,
   XAxis,
   YAxis,
 } from "recharts";
+import { classNames } from "../lib/utils";
 
 export interface GraphData {
   data: { x: number | string; y: number }[];
@@ -15,32 +17,22 @@ export interface GraphData {
 }
 
 export function Graph(props: GraphData) {
-  console.log("graph data", props.data);
   return (
-    <>
-      <ResponsiveContainer width="99%" aspect={2}>
-        <ComposedChart
-          data={props.data}
-          margin={{
-            top: 20,
-            right: 30,
-            left: 20,
-            bottom: 0,
-          }}
-        >
-          <XAxis dataKey="x" />
-          <YAxis allowDecimals={false}>
-            <Label
-              value={"lovely label"}
-              angle={-90}
-              position="insideLeft"
-              offset={-5}
-            />
-          </YAxis>
-          <Line dataKey="y" />
-        </ComposedChart>
-      </ResponsiveContainer>
-    </>
+    <ResponsiveContainer width="80%" aspect={2} className="sf-mx-auto sf-mt-2">
+      <LineChart data={props.data}>
+        <XAxis dataKey="x" />
+        <YAxis allowDecimals={false}>
+          <Label
+            value={"lovely label"}
+            angle={-90}
+            style={{ textAnchor: "middle" }}
+            position="insideLeft"
+            // offset={-5}
+          />
+        </YAxis>
+        <Line dataKey="y" />
+      </LineChart>
+    </ResponsiveContainer>
   );
 }
 
@@ -97,6 +89,7 @@ export function extractGraphData(data: string): GraphData | null {
   try {
     data = JSON.parse(data);
   } catch {
+    console.log("this be null");
     return null;
   }
 
@@ -151,7 +144,7 @@ export function extractGraphData(data: string): GraphData | null {
   return null;
 }
 
-function findFirstArray(json: any): any[] | null {
+export function findFirstArray(json: any): any[] | null {
   /**
    * Recursively search through the object's properties for an array.
    * Return first array found (which will be at the highest level) of nesting
@@ -178,7 +171,7 @@ function findFirstArray(json: any): any[] | null {
 }
 export function checkStringMatch(
   fieldName: string,
-  possibleLabels: string[]
+  possibleLabels: string[],
 ): boolean {
   // Match insensitive to punctuation, spaces, case and trailing s
   const processStr = (str: string) => {
