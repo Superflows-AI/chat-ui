@@ -19,6 +19,9 @@ import {
 } from "../lib/utils";
 import { Graph, GraphData, extractGraphData } from "./graph";
 
+const feedbackRegex = /<button>Feedback<\/button>/;
+const buttonRegex = /<button>(?![^<]*<button>)(.*?)<\/button>/;
+
 export interface FunctionCall {
   name: string;
   args: { [key: string]: any };
@@ -27,9 +30,6 @@ export interface FunctionCall {
 export interface ToConfirm extends FunctionCall {
   actionId: number;
 }
-
-const feedbackRegex = /<button>Feedback<\/button>/;
-const buttonRegex = /<button>(?![^<]*<button>)(.*?)<\/button>/;
 
 export function DevChatItem(props: {
   chatItem: StreamingStepInput;
@@ -84,134 +84,65 @@ export function DevChatItem(props: {
   const matches = splitContentByParts(content);
 
   return (
-    <>
-      <div
-        className={classNames(
-          "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col  sf-w-full",
-          props.chatItem.role === "user"
-            ? "sf-bg-gray-100 sf-text-right sf-place-items-end"
-            : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
-          props.chatItem.role === "error"
-            ? "sf-bg-red-200"
-            : props.chatItem.role === "debug"
-            ? "sf-bg-green-100"
-            : props.chatItem.role === "function"
-            ? "sf-bg-green-200"
-            : props.chatItem.role === "confirmation"
-            ? "sf-bg-blue-100"
-            : ""
-        )}
-      >
-        {graphedData && (
-          <div className="-sf-py-4">
-            <Tabs setTabOpen={setTabOpen} />{" "}
-          </div>
-        )}
-        <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
-          {props.chatItem.role === "assistant"
-            ? (props.AIname ?? "Assistant") + " AI"
-            : props.chatItem.role === "function" && tabOpen === "table"
-            ? "Function called"
-            : props.chatItem.role === "confirmation"
-            ? "Confirmation required"
-            : props.chatItem.role === "user"
-            ? "You"
-            : props.chatItem.role === "debug"
-            ? "Debug"
-            : props.chatItem.role === "error"
-            ? "Error"
-            : ""}
-        </p>
-        {matches.map((text, idx) => {
-          if (
-            feedbackRegex.exec(text) &&
-            feedbackRegex.exec(text)!.length > 0
-          ) {
-            return (
-              <div
-                key={idx}
-                className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2"
-              >
-                Did this response answer your question?
-                <div className="sf-flex sf-flex-row sf-gap-x-4">
-                  <button
-                    onClick={() => setSaveSuccessfulFeedback(true)}
-                    className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-red-500 sf-ring-red-500 hover:sf-bg-red-600`}
-                  >
-                    <HandThumbDownIcon className="sf-h-5 sf-w-5" />
-                    No
-                  </button>
-                  <button
-                    onClick={() => setSaveSuccessfulFeedback(true)}
-                    className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-green-500 sf-ring-green-500 hover:sf-bg-green-600`}
-                  >
-                    <HandThumbUpIcon className="sf-h-5 sf-w-5" />
-                    Yes
-                  </button>
-                </div>
-                <div
-                  className={classNames(
-                    "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                    saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
-                  )}
-                >
-                  <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
-                  <div className="sf-text-sm">Thanks for your feedback!</div>
-                </div>
-              </div>
-            );
-          }
-          const buttonMatches = buttonRegex.exec(text);
-          if (buttonMatches && buttonMatches.length > 0) {
-            return (
-              <div
-                key={idx}
-                className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2"
-              >
+    <div
+      className={classNames(
+        "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col  sf-w-full",
+        props.chatItem.role === "user"
+          ? "sf-bg-gray-100 sf-text-right sf-place-items-end"
+          : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
+        props.chatItem.role === "error"
+          ? "sf-bg-red-200"
+          : props.chatItem.role === "debug"
+          ? "sf-bg-green-100"
+          : props.chatItem.role === "function"
+          ? "sf-bg-green-200"
+          : props.chatItem.role === "confirmation"
+          ? "sf-bg-blue-100"
+          : ""
+      )}
+    >
+      {graphedData && (
+        <div className="-sf-py-4">
+          <Tabs setTabOpen={setTabOpen} />{" "}
+        </div>
+      )}
+      <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
+        {props.chatItem.role === "assistant"
+          ? (props.AIname ?? "Assistant") + " AI"
+          : props.chatItem.role === "function" && tabOpen === "table"
+          ? "Function called"
+          : props.chatItem.role === "confirmation"
+          ? "Confirmation required"
+          : props.chatItem.role === "user"
+          ? "You"
+          : props.chatItem.role === "debug"
+          ? "Debug"
+          : props.chatItem.role === "error"
+          ? "Error"
+          : ""}
+      </p>
+      {matches.map((text, idx) => {
+        if (feedbackRegex.exec(text) && feedbackRegex.exec(text)!.length > 0) {
+          return (
+            <div
+              key={idx}
+              className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2"
+            >
+              Did this response answer your question?
+              <div className="sf-flex sf-flex-row sf-gap-x-4">
                 <button
                   onClick={() => setSaveSuccessfulFeedback(true)}
-                  className={`sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-ring-purple-600 sf-bg-purple-600 sf-text-white`}
+                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-red-500 sf-ring-red-500 hover:sf-bg-red-600`}
                 >
-                  {buttonMatches[1].trim()}
-                </button>
-                <div className="sf-flex sf-flex-row sf-place-items-center sf-gap-x-1">
-                  {saveSuccessfulFeedback && (
-                    <>
-                      <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
-                      <div className="sf-text-sm">Successful!</div>
-                    </>
-                  )}
-                </div>
-              </div>
-            );
-          }
-
-          if (tabOpen === "graph") return <Graph {...graphedData} />;
-          else return <StyledMarkdown key={idx}>{text}</StyledMarkdown>;
-        })}
-        {props.onConfirm &&
-          props.chatItem.role === "confirmation" &&
-          (confirmed === null ? (
-            <div className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2">
-              Are you sure you want to continue?
-              <div className="sf-flex sf-flex-row sf-gap-x-8">
-                <button
-                  onClick={() => {
-                    setConfirmed(false);
-                    void props.onConfirm!(false);
-                  }}
-                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-700 sf-px-4 sf-border sf-border-gray-400 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-gray-100 sf-ring-gray-500 hover:sf-bg-gray-200`}
-                >
-                  Cancel
+                  <HandThumbDownIcon className="sf-h-5 sf-w-5" />
+                  No
                 </button>
                 <button
-                  onClick={() => {
-                    setConfirmed(true);
-                    void props.onConfirm!(true);
-                  }}
-                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-blue-500 sf-ring-blue-500 hover:sf-bg-blue-600`}
+                  onClick={() => setSaveSuccessfulFeedback(true)}
+                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-green-500 sf-ring-green-500 hover:sf-bg-green-600`}
                 >
-                  Confirm
+                  <HandThumbUpIcon className="sf-h-5 sf-w-5" />
+                  Yes
                 </button>
               </div>
               <div
@@ -224,19 +155,83 @@ export function DevChatItem(props: {
                 <div className="sf-text-sm">Thanks for your feedback!</div>
               </div>
             </div>
-          ) : confirmed ? (
-            <div className="sf-my-5 sf-w-full sf-font-semibold sf-flex sf-flex-row sf-justify-center sf-gap-x-1 sf-place-items-center">
+          );
+        }
+        const buttonMatches = buttonRegex.exec(text);
+        if (buttonMatches && buttonMatches.length > 0) {
+          return (
+            <div
+              key={idx}
+              className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2"
+            >
+              <button
+                onClick={() => setSaveSuccessfulFeedback(true)}
+                className={`sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-ring-purple-600 sf-bg-purple-600 sf-text-white`}
+              >
+                {buttonMatches[1].trim()}
+              </button>
+              <div className="sf-flex sf-flex-row sf-place-items-center sf-gap-x-1">
+                {saveSuccessfulFeedback && (
+                  <>
+                    <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
+                    <div className="sf-text-sm">Successful!</div>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        }
+
+        if (tabOpen === "graph") return <Graph {...graphedData} />;
+        else return <StyledMarkdown key={idx}>{text}</StyledMarkdown>;
+      })}
+      {props.onConfirm &&
+        props.chatItem.role === "confirmation" &&
+        (confirmed === null ? (
+          <div className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2">
+            Are you sure you want to continue?
+            <div className="sf-flex sf-flex-row sf-gap-x-8">
+              <button
+                onClick={() => {
+                  setConfirmed(false);
+                  void props.onConfirm!(false);
+                }}
+                className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-700 sf-px-4 sf-border sf-border-gray-400 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-gray-100 sf-ring-gray-500 hover:sf-bg-gray-200`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setConfirmed(true);
+                  void props.onConfirm!(true);
+                }}
+                className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-blue-500 sf-ring-blue-500 hover:sf-bg-blue-600`}
+              >
+                Confirm
+              </button>
+            </div>
+            <div
+              className={classNames(
+                "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
+                saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
+              )}
+            >
               <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
-              Confirmed
+              <div className="sf-text-sm">Thanks for your feedback!</div>
             </div>
-          ) : (
-            <div className="sf-my-5 sf-w-full sf-flex sf-flex-row sf-font-semibold sf-justify-center sf-gap-x-2 sf-place-items-center">
-              <XCircleIcon className="sf-h-5 sf-w-5 sf-text-red-500" />
-              Cancelled
-            </div>
-          ))}
-      </div>
-    </>
+          </div>
+        ) : confirmed ? (
+          <div className="sf-my-5 sf-w-full sf-font-semibold sf-flex sf-flex-row sf-justify-center sf-gap-x-1 sf-place-items-center">
+            <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
+            Confirmed
+          </div>
+        ) : (
+          <div className="sf-my-5 sf-w-full sf-flex sf-flex-row sf-font-semibold sf-justify-center sf-gap-x-2 sf-place-items-center">
+            <XCircleIcon className="sf-h-5 sf-w-5 sf-text-red-500" />
+            Cancelled
+          </div>
+        ))}
+    </div>
   );
 }
 
