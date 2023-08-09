@@ -22,7 +22,7 @@ export function functionNameToDisplay(name: string): string {
 
 export function convertToRenderable(
   functionOutput: Record<string, any> | any[],
-  caption?: string,
+  caption?: string
 ): string {
   /** Converts a function's output to a Markdown table
    * In the future, it could also output graphs when applicable **/
@@ -38,7 +38,7 @@ export function convertToRenderable(
     if (!caption) {
       // Make the first key the caption
       output += `### ${functionNameToDisplay(
-        Object.keys(functionOutput)[0],
+        Object.keys(functionOutput)[0]
       )}\n\n`;
     }
     functionOutput = functionOutput[Object.keys(functionOutput)[0]];
@@ -118,7 +118,7 @@ export function convertToRenderable(
           Name: key,
           Value: typeof value === "object" ? stringify(value) : value,
         };
-      }),
+      })
     );
   }
   // On England's pleasant pastures seen?
@@ -133,4 +133,28 @@ function stringify(obj: Record<string, any> | any[]): string {
       // .replaceAll() replaces all " with nothing
       .replaceAll('"', "")
   );
+}
+
+export function splitContentByParts(content: string): string[] {
+  /** We split the message into different parts (based on whether they're a <table>, <button> or just text),
+   * and then render parts one-by-one **/
+
+  const fullRegex = /(<button>.*?<\/button>)|([\s\S]+?)/g;
+
+  let match;
+  const matches: string[] = [];
+  while ((match = fullRegex.exec(content)) !== null) {
+    if (match[1]) matches.push(match[1]);
+    if (match[2]) {
+      // This is because the 3rd match group is lazy, so only captures 1 character at a time
+      const prev = matches[matches.length - 1];
+      if (
+        matches.length === 0 ||
+        (prev.startsWith("<") && prev.endsWith(">"))
+      ) {
+        matches.push(match[2]);
+      } else matches[matches.length - 1] += match[2];
+    }
+  }
+  return matches;
 }

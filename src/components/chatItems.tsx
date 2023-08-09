@@ -10,38 +10,14 @@ import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { parseOutput } from "../lib/parser";
-import { StreamingStepInput } from "../lib/types";
+import { Json, StreamingStepInput } from "../lib/types";
 import {
   classNames,
   convertToRenderable,
   functionNameToDisplay,
+  splitContentByParts,
 } from "../lib/utils";
-import { Graph, extractGraphData } from "./graph";
-
-const fullRegex = /(<button>.*?<\/button>)|([\s\S]+?)/g;
-const feedbackRegex = /<button>Feedback<\/button>/;
-const buttonRegex = /<button>(?![^<]*<button>)(.*?)<\/button>/;
-
-export function splitContentByParts(content: string): string[] {
-  /** We split the message into different parts (based on whether they're a <table>, <button> or just text),
-   * and then render parts one-by-one **/
-  let match;
-  const matches: string[] = [];
-  while ((match = fullRegex.exec(content)) !== null) {
-    if (match[1]) matches.push(match[1]);
-    if (match[2]) {
-      // This is because the 3rd match group is lazy, so only captures 1 character at a time
-      const prev = matches[matches.length - 1];
-      if (
-        matches.length === 0 ||
-        (prev.startsWith("<") && prev.endsWith(">"))
-      ) {
-        matches.push(match[2]);
-      } else matches[matches.length - 1] += match[2];
-    }
-  }
-  return matches;
-}
+import { Graph, GraphData, extractGraphData } from "./graph";
 
 export interface FunctionCall {
   name: string;
@@ -52,11 +28,45 @@ export interface ToConfirm extends FunctionCall {
   actionId: number;
 }
 
+const feedbackRegex = /<button>Feedback<\/button>/;
+const buttonRegex = /<button>(?![^<]*<button>)(.*?)<\/button>/;
+
 export function DevChatItem(props: {
   chatItem: StreamingStepInput;
   AIname?: string;
   onConfirm?: (confirm: boolean) => Promise<void>;
 }) {
+  let graphedData: GraphData | null = null;
+  let content = props.chatItem.content;
+  if (!content) return <></>;
+
+  if (props.chatItem.role === "confirmation") {
+    const toConfirm = JSON.parse(props.chatItem.content) as ToConfirm[];
+    content = `The following action${
+      toConfirm.length > 1 ? "s require" : " requires"
+    } confirmation:\n\n${toConfirm
+      .map((action) => {
+        return `${convertToRenderable(
+          action.args,
+          functionNameToDisplay(action.name)
+        )}`;
+      })
+      .join("")}`;
+  }
+
+  if (props.chatItem.role === "function") {
+    graphedData = extractGraphData(props.chatItem.content);
+    try {
+      const functionJsonResponse = JSON.parse(props.chatItem.content) as Json;
+      if (functionJsonResponse && typeof functionJsonResponse === "object") {
+        content = convertToRenderable(
+          functionJsonResponse,
+          `${functionNameToDisplay(props.chatItem?.name ?? "")} result`
+        );
+      }
+    } catch {}
+  }
+
   const [saveSuccessfulFeedback, setSaveSuccessfulFeedback] =
     useState<boolean>(false);
   // Confirmed is null if the user hasn't confirmed yet, true if the user has confirmed, and false if the user has cancelled
@@ -70,27 +80,6 @@ export function DevChatItem(props: {
   }, [saveSuccessfulFeedback]);
 
   const [tabOpen, setTabOpen] = useState<"table" | "graph">("table");
-
-  const graphedData =
-    props.chatItem.role === "function"
-      ? extractGraphData(props.chatItem.content)
-      : null;
-
-  let content = props.chatItem.content;
-  if (!content) return <></>;
-  if (props.chatItem.role === "confirmation") {
-    const toConfirm = JSON.parse(props.chatItem.content) as ToConfirm[];
-    content = `The following action${
-      toConfirm.length > 1 ? "s require" : " requires"
-    } confirmation:\n\n${toConfirm
-      .map((action) => {
-        return `${convertToRenderable(
-          action.args,
-          functionNameToDisplay(action.name),
-        )}`;
-      })
-      .join("")}`;
-  }
 
   const matches = splitContentByParts(content);
 
@@ -110,7 +99,7 @@ export function DevChatItem(props: {
             ? "sf-bg-green-200"
             : props.chatItem.role === "confirmation"
             ? "sf-bg-blue-100"
-            : "",
+            : ""
         )}
       >
         {graphedData && (
@@ -163,7 +152,7 @@ export function DevChatItem(props: {
                 <div
                   className={classNames(
                     "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                    saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
+                    saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
                   )}
                 >
                   <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
@@ -228,7 +217,7 @@ export function DevChatItem(props: {
               <div
                 className={classNames(
                   "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
+                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
                 )}
               >
                 <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
@@ -299,7 +288,7 @@ export function UserChatItem(props: {
               <div
                 className={classNames(
                   "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
+                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
                 )}
               >
                 <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
@@ -423,7 +412,7 @@ const tabs = [
 export function Tabs(props: { setTabOpen: (tab: "table" | "graph") => void }) {
   return (
     <nav
-      className="isolate sf-flex sf-divide-x sf-divide-gray-200 sf-rounded-lg sf-shadow"
+      className="isolate sf-flex sf-divide-x sf-divide-gray-200 sf-rounded-lg sf-shadow sf-mb-4"
       aria-label="Tabs"
     >
       {tabs.map((tab, tabIdx) => (
@@ -435,7 +424,7 @@ export function Tabs(props: { setTabOpen: (tab: "table" | "graph") => void }) {
               : "sf-text-gray-500 hover:sf-text-gray-700",
             tabIdx === 0 ? "sf-rounded-l-lg" : "",
             tabIdx === tabs.length - 1 ? "sf-rounded-r-lg" : "",
-            "group sf-relative sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-4 sf-px-4 sf-text-center sf-text-sm sf-font-medium hover:sf-bg-gray-50 focus:sf-z-10",
+            "group sf-relative cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-2 sf-px-2 sf-text-center sf-text-sm sf-font-sm hover:sf-bg-gray-50 focus:sf-z-10"
           )}
           aria-current={tab.current ? "page" : undefined}
           onClick={() => {
@@ -449,7 +438,7 @@ export function Tabs(props: { setTabOpen: (tab: "table" | "graph") => void }) {
             aria-hidden="true"
             className={classNames(
               tab.current ? "sf-bg-indigo-500" : "sf-bg-transparent",
-              "sf-absolute sf-inset-x-0 sf-bottom-0 sf-h-0.5",
+              "sf-absolute sf-inset-x-0 sf-bottom-0 sf-h-0.5"
             )}
           />
         </a>

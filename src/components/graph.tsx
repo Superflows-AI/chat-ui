@@ -1,6 +1,5 @@
 import * as React from "react";
 import {
-  ComposedChart,
   LineChart,
   Label,
   Line,
@@ -8,7 +7,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { classNames } from "../lib/utils";
 
 export interface GraphData {
   data: { x: number | string; y: number }[];
@@ -20,14 +18,19 @@ export function Graph(props: GraphData) {
   return (
     <ResponsiveContainer width="80%" aspect={2} className="sf-mx-auto sf-mt-2">
       <LineChart data={props.data}>
-        <XAxis dataKey="x" />
+        <XAxis dataKey="x">
+          <Label
+            value={props.xLabel || ""}
+            offset={-5}
+            position="insideBottom"
+          />
+        </XAxis>
         <YAxis allowDecimals={false}>
           <Label
-            value={"lovely label"}
+            value={props.yLabel || ""}
             angle={-90}
             style={{ textAnchor: "middle" }}
             position="insideLeft"
-            // offset={-5}
           />
         </YAxis>
         <Line dataKey="y" />

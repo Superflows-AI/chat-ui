@@ -1,9 +1,5 @@
 import SuperflowsSidebar from "./components/SuperflowsSidebar";
-import {
-  DevChatItem,
-  UserChatItem,
-  splitContentByParts,
-} from "./components/chatItems";
+import { DevChatItem, UserChatItem } from "./components/chatItems";
 import SuperflowsButton from "./components/superflowsButton";
 import {
   FunctionCall,
@@ -11,7 +7,11 @@ import {
   parseFunctionCall,
   parseOutput,
 } from "./lib/parser";
-import { convertToRenderable, functionNameToDisplay } from "./lib/utils";
+import {
+  convertToRenderable,
+  functionNameToDisplay,
+  splitContentByParts,
+} from "./lib/utils";
 import "./index.css";
 
 export {
