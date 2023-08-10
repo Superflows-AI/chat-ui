@@ -103,7 +103,7 @@ export function DevChatItem(props: {
     >
       {graphedData && (
         <div className="-sf-py-4">
-          <Tabs setTabOpen={setTabOpen} />{" "}
+          <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />{" "}
         </div>
       )}
       <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
@@ -399,40 +399,36 @@ function StyledMarkdown(props: { children: string }) {
   );
 }
 
-const tabs = [
-  { name: "Table", current: true },
-  { name: "Graph", current: false },
-];
-
-export function Tabs(props: { setTabOpen: (tab: "table" | "graph") => void }) {
+export function Tabs(props: {
+  tabOpen: "table" | "graph";
+  setTabOpen: (tab: "table" | "graph") => void;
+}) {
   return (
     <nav
       className="isolate sf-flex sf-divide-x sf-divide-gray-200 sf-rounded-lg sf-shadow sf-mb-4"
       aria-label="Tabs"
     >
-      {tabs.map((tab, tabIdx) => (
+      {["table", "graph"].map((tab, tabIdx) => (
         <a
-          key={tab.name}
+          key={tab}
           className={classNames(
-            tab.current
+            props.tabOpen === tab
               ? "sf-text-gray-900"
               : "sf-text-gray-500 hover:sf-text-gray-700",
             tabIdx === 0 ? "sf-rounded-l-lg" : "",
-            tabIdx === tabs.length - 1 ? "sf-rounded-r-lg" : "",
+            tabIdx === 1 ? "sf-rounded-r-lg" : "",
             "group sf-relative cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-2 sf-px-2 sf-text-center sf-text-sm sf-font-sm hover:sf-bg-gray-50 focus:sf-z-10"
           )}
-          aria-current={tab.current ? "page" : undefined}
+          aria-current={props.tabOpen === tab ? "page" : undefined}
           onClick={() => {
-            tabs[tabIdx].current = true;
-            tabs[Number(!tabIdx)].current = false;
             props.setTabOpen(tabIdx === 0 ? "table" : "graph");
           }}
         >
-          <span>{tab.name}</span>
+          <span>{tab}</span>
           <span
             aria-hidden="true"
             className={classNames(
-              tab.current ? "sf-bg-indigo-500" : "sf-bg-transparent",
+              props.tabOpen === tab ? "sf-bg-indigo-500" : "sf-bg-transparent",
               "sf-absolute sf-inset-x-0 sf-bottom-0 sf-h-0.5"
             )}
           />
