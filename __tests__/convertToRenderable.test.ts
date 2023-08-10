@@ -9,7 +9,7 @@ describe("convertToRenderable", () => {
       `|   |   |   |   |   |   |
 |---|---|---|---|---|---|
 | 1 | 2 | 3 | 4 | 5 | 6 |
-`
+`,
     );
   });
   it("should convert long array of numbers to a markdown table", () => {
@@ -25,7 +25,7 @@ describe("convertToRenderable", () => {
 | 5 |
 | 6 |
 | 7 |
-`
+`,
     );
   });
   it("should convert object with 1 key and value of long array of numbers to a markdown table", () => {
@@ -43,7 +43,7 @@ describe("convertToRenderable", () => {
 | 5 |
 | 6 |
 | 7 |
-`
+`,
     );
   });
   it("should convert array of arrays to a markdown table", () => {
@@ -59,7 +59,7 @@ describe("convertToRenderable", () => {
 |   1   |   2   |   3   |
 |   4   |   5   |   6   |
 |   7   |   8   |   9   |
-`
+`,
     );
   });
   it("should convert an array of objects to a markdown table", () => {
@@ -73,7 +73,7 @@ describe("convertToRenderable", () => {
 | :---: | :---: | :---: |
 |   1   |   2   |   3   |
 |   4   |   5   |   6   |
-`
+`,
     );
   });
   it("should convert an array of objects with nested arrays to a markdown table", () => {
@@ -87,7 +87,7 @@ describe("convertToRenderable", () => {
 | :---: | :---: | :---: |
 |   1   |   2   | 1,2,3 |
 |   4   |   5   | 4,5,6 |
-`
+`,
     );
   });
   it("should convert an array of objects with nested objects to a markdown table", () => {
@@ -101,7 +101,7 @@ describe("convertToRenderable", () => {
 | :---: | :---: | :-----: | :-----: | :-----: | :-----------: |
 |   1   |   2   |    1    |    2    |    3    |       4       |
 |   4   |   5   |    1    |    2    |    3    |       4       |
-`
+`,
     );
   });
   it("should convert object with long array of objects into a markdown table", () => {
@@ -164,7 +164,7 @@ describe("convertToRenderable", () => {
 | if    | you can keep your head          |
 | when  | all about you are losing theirs |
 | and   | blaming it on you               |
-`
+`,
     );
   });
   it("should convert object with 1 array field to a markdown table", () => {
@@ -180,7 +180,7 @@ describe("convertToRenderable", () => {
 | if    | you ,can ,trust, yourself             |
 | when  | all men doubt you                     |
 | but   | keep allowance for their doubting too |
-`
+`,
     );
   });
   it("should convert object with 1 object field to a markdown table", () => {
@@ -194,7 +194,7 @@ describe("convertToRenderable", () => {
 | :---- | :------------------------ |
 | if    | you ,can ,wait            |
 | and   | not:be,tired:of,waiting:. |
-`
+`,
     );
   });
 });

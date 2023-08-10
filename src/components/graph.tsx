@@ -96,7 +96,7 @@ export function extractGraphData(data: string): GraphData | null {
   try {
     data = JSON.parse(data);
   } catch {
-    console.log("Could not parse data: ${data} as json");
+    console.log(`Could not parse data: ${data} as json`);
     return null;
   }
 
@@ -132,9 +132,6 @@ export function extractGraphData(data: string): GraphData | null {
     const yMatches = Object.keys(array[0])
       .filter((key) => checkStringMatch(key, possibleYlabels))
       .filter((key) => array.every((obj) => key in obj));
-
-    console.log("xmatchy", xMatches);
-    console.log("ymatchy", yMatches);
 
     if (xMatches.length === 0 && yMatches.length === 0) {
       console.log(

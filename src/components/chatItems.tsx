@@ -48,7 +48,7 @@ export function DevChatItem(props: {
       .map((action) => {
         return `${convertToRenderable(
           action.args,
-          functionNameToDisplay(action.name)
+          functionNameToDisplay(action.name),
         )}`;
       })
       .join("")}`;
@@ -61,7 +61,7 @@ export function DevChatItem(props: {
       if (functionJsonResponse && typeof functionJsonResponse === "object") {
         content = convertToRenderable(
           functionJsonResponse,
-          `${functionNameToDisplay(props.chatItem?.name ?? "")} result`
+          `${functionNameToDisplay(props.chatItem?.name ?? "")} result`,
         );
       }
     } catch {}
@@ -98,7 +98,7 @@ export function DevChatItem(props: {
           ? "sf-bg-green-200"
           : props.chatItem.role === "confirmation"
           ? "sf-bg-blue-100"
-          : ""
+          : "",
       )}
     >
       {graphedData && (
@@ -148,7 +148,7 @@ export function DevChatItem(props: {
               <div
                 className={classNames(
                   "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
+                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
                 )}
               >
                 <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
@@ -213,7 +213,7 @@ export function DevChatItem(props: {
             <div
               className={classNames(
                 "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
+                saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
               )}
             >
               <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
@@ -283,7 +283,7 @@ export function UserChatItem(props: {
               <div
                 className={classNames(
                   "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible"
+                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
                 )}
               >
                 <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
@@ -417,7 +417,7 @@ export function Tabs(props: {
               : "sf-text-gray-500 hover:sf-text-gray-700",
             tabIdx === 0 ? "sf-rounded-l-lg" : "",
             tabIdx === 1 ? "sf-rounded-r-lg" : "",
-            "group sf-relative cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-2 sf-px-2 sf-text-center sf-text-sm sf-font-sm hover:sf-bg-gray-50 focus:sf-z-10"
+            "group sf-relative cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-2 sf-px-2 sf-text-center sf-text-sm sf-font-sm hover:sf-bg-gray-50 focus:sf-z-10",
           )}
           aria-current={props.tabOpen === tab ? "page" : undefined}
           onClick={() => {
@@ -429,7 +429,7 @@ export function Tabs(props: {
             aria-hidden="true"
             className={classNames(
               props.tabOpen === tab ? "sf-bg-indigo-500" : "sf-bg-transparent",
-              "sf-absolute sf-inset-x-0 sf-bottom-0 sf-h-0.5"
+              "sf-absolute sf-inset-x-0 sf-bottom-0 sf-h-0.5",
             )}
           />
         </a>
