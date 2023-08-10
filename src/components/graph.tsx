@@ -103,7 +103,8 @@ export function extractGraphData(data: string): GraphData | null {
 
   if (
     typeof array[0] === "string" &&
-    array.every((val) => /^[0-9]+$/.test(val))
+    // We can graph if every value in the array is a stringified number
+    array.every((val) => !isNaN(Number(val)))
   )
     return {
       data: array.map((value, index) => ({ x: index, y: Number(value) })),
