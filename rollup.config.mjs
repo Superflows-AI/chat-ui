@@ -1,4 +1,4 @@
-import tailwind from "rollup-plugin-tailwindcss";
+import tailwind from "@superflows/rollup-plugin-tailwindcss";
 import typescript from "rollup-plugin-typescript2";
 import postcss from "rollup-plugin-postcss";
 import resolve from "@rollup/plugin-node-resolve";

@@ -375,12 +375,7 @@ export default function SuperflowsSidebar(props: {
                           functionJsonResponse &&
                           typeof functionJsonResponse === "object"
                         ) {
-                          contentString = convertToRenderable(
-                            functionJsonResponse,
-                            `${functionNameToDisplay(
-                              chatItem?.name ?? "",
-                            )} result`,
-                          );
+                          contentString = chatItem.content;
                         }
                         return (
                           <DevChatItem

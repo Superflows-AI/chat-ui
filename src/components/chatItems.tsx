@@ -1,10 +1,3 @@
-import * as React from "react";
-import { useEffect, useState } from "react";
-import {
-  classNames,
-  convertToRenderable,
-  functionNameToDisplay,
-} from "../lib/utils";
 import {
   CheckCircleIcon,
   HandThumbDownIcon,
@@ -12,35 +5,22 @@ import {
   LightBulbIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import { parseOutput } from "../lib/parser";
-import { StreamingStepInput } from "../lib/types";
+import * as React from "react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { parseOutput } from "../lib/parser";
+import { Json, StreamingStepInput } from "../lib/types";
+import {
+  classNames,
+  convertToRenderable,
+  functionNameToDisplay,
+  splitContentByParts,
+} from "../lib/utils";
+import { Graph, GraphData, extractGraphData } from "./graph";
 
-const fullRegex = /(<button>.*?<\/button>)|([\s\S]+?)/g;
 const feedbackRegex = /<button>Feedback<\/button>/;
 const buttonRegex = /<button>(?![^<]*<button>)(.*?)<\/button>/;
-
-export function splitContentByParts(content: string): string[] {
-  /** We split the message into different parts (based on whether they're a <table>, <button> or just text),
-   * and then render parts one-by-one **/
-  let match;
-  const matches: string[] = [];
-  while ((match = fullRegex.exec(content)) !== null) {
-    if (match[1]) matches.push(match[1]);
-    if (match[2]) {
-      // This is because the 3rd match group is lazy, so only captures 1 character at a time
-      const prev = matches[matches.length - 1];
-      if (
-        matches.length === 0 ||
-        (prev.startsWith("<") && prev.endsWith(">"))
-      ) {
-        matches.push(match[2]);
-      } else matches[matches.length - 1] += match[2];
-    }
-  }
-  return matches;
-}
 
 export interface FunctionCall {
   name: string;
@@ -56,20 +36,10 @@ export function DevChatItem(props: {
   AIname?: string;
   onConfirm?: (confirm: boolean) => Promise<void>;
 }) {
-  const [saveSuccessfulFeedback, setSaveSuccessfulFeedback] =
-    useState<boolean>(false);
-  // Confirmed is null if the user hasn't confirmed yet, true if the user has confirmed, and false if the user has cancelled
-  const [confirmed, setConfirmed] = useState<boolean | null>(null);
-  useEffect(() => {
-    if (saveSuccessfulFeedback) {
-      setTimeout(() => {
-        setSaveSuccessfulFeedback(false);
-      }, 3000);
-    }
-  }, [saveSuccessfulFeedback]);
-
+  let graphedData: GraphData | null = null;
   let content = props.chatItem.content;
   if (!content) return <></>;
+
   if (props.chatItem.role === "confirmation") {
     const toConfirm = JSON.parse(props.chatItem.content) as ToConfirm[];
     content = `The following action${
@@ -84,12 +54,39 @@ export function DevChatItem(props: {
       .join("")}`;
   }
 
+  if (props.chatItem.role === "function") {
+    graphedData = extractGraphData(props.chatItem.content);
+    try {
+      const functionJsonResponse = JSON.parse(props.chatItem.content) as Json;
+      if (functionJsonResponse && typeof functionJsonResponse === "object") {
+        content = convertToRenderable(
+          functionJsonResponse,
+          `${functionNameToDisplay(props.chatItem?.name ?? "")} result`,
+        );
+      }
+    } catch {}
+  }
+
+  const [saveSuccessfulFeedback, setSaveSuccessfulFeedback] =
+    useState<boolean>(false);
+  // Confirmed is null if the user hasn't confirmed yet, true if the user has confirmed, and false if the user has cancelled
+  const [confirmed, setConfirmed] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (saveSuccessfulFeedback) {
+      setTimeout(() => {
+        setSaveSuccessfulFeedback(false);
+      }, 3000);
+    }
+  }, [saveSuccessfulFeedback]);
+
+  const [tabOpen, setTabOpen] = useState<"table" | "graph">("table");
+
   const matches = splitContentByParts(content);
 
   return (
     <div
       className={classNames(
-        "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col",
+        "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col  sf-w-full",
         props.chatItem.role === "user"
           ? "sf-bg-gray-100 sf-text-right sf-place-items-end"
           : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
@@ -104,10 +101,15 @@ export function DevChatItem(props: {
           : "",
       )}
     >
+      {graphedData && (
+        <div className="-sf-py-4">
+          <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />{" "}
+        </div>
+      )}
       <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
         {props.chatItem.role === "assistant"
           ? (props.AIname ?? "Assistant") + " AI"
-          : props.chatItem.role === "function"
+          : props.chatItem.role === "function" && tabOpen === "table"
           ? "Function called"
           : props.chatItem.role === "confirmation"
           ? "Confirmation required"
@@ -117,7 +119,7 @@ export function DevChatItem(props: {
           ? "Debug"
           : props.chatItem.role === "error"
           ? "Error"
-          : "Unknown"}
+          : ""}
       </p>
       {matches.map((text, idx) => {
         if (feedbackRegex.exec(text) && feedbackRegex.exec(text)!.length > 0) {
@@ -179,7 +181,9 @@ export function DevChatItem(props: {
             </div>
           );
         }
-        return <StyledMarkdown key={idx}>{text}</StyledMarkdown>;
+
+        if (tabOpen === "graph") return <Graph {...graphedData} />;
+        else return <StyledMarkdown key={idx}>{text}</StyledMarkdown>;
       })}
       {props.onConfirm &&
         props.chatItem.role === "confirmation" &&
@@ -392,5 +396,44 @@ function StyledMarkdown(props: { children: string }) {
     >
       {props.children}
     </ReactMarkdown>
+  );
+}
+
+export function Tabs(props: {
+  tabOpen: "table" | "graph";
+  setTabOpen: (tab: "table" | "graph") => void;
+}) {
+  return (
+    <nav
+      className="isolate sf-flex sf-divide-x sf-divide-gray-200 sf-rounded-lg sf-shadow sf-mb-4"
+      aria-label="Tabs"
+    >
+      {["table", "graph"].map((tab, tabIdx) => (
+        <a
+          key={tab}
+          className={classNames(
+            props.tabOpen === tab
+              ? "sf-text-gray-900"
+              : "sf-text-gray-500 hover:sf-text-gray-700",
+            tabIdx === 0 ? "sf-rounded-l-lg" : "",
+            tabIdx === 1 ? "sf-rounded-r-lg" : "",
+            "group sf-relative cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-2 sf-px-2 sf-text-center sf-text-sm sf-font-sm hover:sf-bg-gray-50 focus:sf-z-10",
+          )}
+          aria-current={props.tabOpen === tab ? "page" : undefined}
+          onClick={() => {
+            props.setTabOpen(tabIdx === 0 ? "table" : "graph");
+          }}
+        >
+          <span>{tab}</span>
+          <span
+            aria-hidden="true"
+            className={classNames(
+              props.tabOpen === tab ? "sf-bg-indigo-500" : "sf-bg-transparent",
+              "sf-absolute sf-inset-x-0 sf-bottom-0 sf-h-0.5",
+            )}
+          />
+        </a>
+      ))}
+    </nav>
   );
 }
