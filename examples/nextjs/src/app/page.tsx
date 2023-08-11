@@ -56,11 +56,16 @@ export default function Home() {
               // headerTextColor: "#146ef5",
               // buttonColor: "#146ef5",
             }}
-            mockApiResponses={true}
+            // mockApiResponses={true}
+            userDescription={
+              // "The user works at Chatterbank.\nProject key: demo_superflows_teams\nProject id: 11090\nMost recent version: 7.27\nData type keys: [comment,competitor_review,csat,nps,review,survey]"
+              process.env.NEXT_PUBLIC_USER_DESCRIPTION
+            }
+            userApiKey={process.env.NEXT_PUBLIC_USER_API_KEY}
             suggestions={[
-              "When am I meeting Alex from Alphabet Inc?",
-              "Who was the top-performing sales rep last quarter?",
-              "What's the most valuable open opportunity?",
+              "How do Monzo's reviews compare with ours?",
+              "What are the biggest issues Trustpilot reviewers have?",
+              "How have Google play reviews changed over time since our last release?",
             ]}
           />
           {[1, 2, 3].map((n) => (
