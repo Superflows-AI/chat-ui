@@ -42,11 +42,6 @@ export default function Home() {
             "z-0 pl-60 flex flex-row justify-end fixed top-0 inset-x-0 h-8 bg-gray-400 pr-20 gap-x-3"
           }
         >
-          {/*          Henry is a data scientist at Chatterbank.*/}
-
-          {/*Project id is 11090 with key demo_superflows_teams.*/}
-
-          {/*The most recent Chatterbank version is 7.27*/}
           <SuperflowsButton
             superflowsApiKey={process.env.NEXT_PUBLIC_SUPERFLOWS_API_KEY}
             // superflowsUrl={process.env.NEXT_PUBLIC_SUPERFLOWS_API_URL}
