@@ -31,6 +31,7 @@ export default function SuperflowsSidebar(props: {
   devMode?: boolean;
   mockApiResponses?: boolean;
   styling?: SidebarStyle;
+  initialMessage?: string;
 }) {
   const ref = useRef(null);
   const [userText, setUserText] = useState<string>("");
@@ -61,6 +62,15 @@ export default function SuperflowsSidebar(props: {
   const killSwitchClicked = useRef(false);
 
   const hostname = props.superflowsUrl ?? "https://dashboard.superflows.ai";
+
+  useEffect(() => {
+    if (props.initialMessage) {
+      callSuperflowsApi([
+        ...devChatContents,
+        { role: "user", content: props.initialMessage },
+      ]);
+    }
+  }, []);
 
   const callSuperflowsApi = useCallback(
     async (chat: StreamingStepInput[]) => {
@@ -354,15 +364,10 @@ export default function SuperflowsSidebar(props: {
                         // Hide debug messages if not in dev mode
                       } else if (chatItem.role === "debug") return <></>;
                       else if (chatItem.role === "function") {
-                        let contentString = chatItem.content;
-                        let functionJsonResponse: Json;
-                        try {
-                          functionJsonResponse = JSON.parse(
-                            chatItem.content,
-                          ) as Json;
-                        } catch (e) {
-                          functionJsonResponse = chatItem.content;
-                        }
+                        let contentString = "";
+                        const functionJsonResponse = JSON.parse(
+                          chatItem.content
+                        ) as Json;
                         if (
                           // Empty array
                           (Array.isArray(functionJsonResponse) &&
