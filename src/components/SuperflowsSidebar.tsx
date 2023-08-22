@@ -31,6 +31,7 @@ export default function SuperflowsSidebar(props: {
   devMode?: boolean;
   mockApiResponses?: boolean;
   styling?: SidebarStyle;
+  initialMessage?: string;
 }) {
   const ref = useRef(null);
   const [userText, setUserText] = useState<string>("");
@@ -47,7 +48,7 @@ export default function SuperflowsSidebar(props: {
 
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [devChatContents, setDevChatContents] = useState<StreamingStepInput[]>(
-    [],
+    []
   );
 
   useEffect(() => {
@@ -61,6 +62,15 @@ export default function SuperflowsSidebar(props: {
   const killSwitchClicked = useRef(false);
 
   const hostname = props.superflowsUrl ?? "https://dashboard.superflows.ai";
+
+  useEffect(() => {
+    if (props.initialMessage) {
+      callSuperflowsApi([
+        ...devChatContents,
+        { role: "user", content: props.initialMessage },
+      ]);
+    }
+  }, []);
 
   const callSuperflowsApi = useCallback(
     async (chat: StreamingStepInput[]) => {
@@ -167,7 +177,7 @@ export default function SuperflowsSidebar(props: {
       setDevChatContents,
       killSwitchClicked.current,
       alreadyRunning.current,
-    ],
+    ]
   );
   const onConfirm = useCallback(
     async (confirm: boolean): Promise<void> => {
@@ -221,7 +231,7 @@ export default function SuperflowsSidebar(props: {
       setLoading,
       props.userApiKey,
       props.mockApiResponses,
-    ],
+    ]
   );
 
   return (
@@ -237,7 +247,7 @@ export default function SuperflowsSidebar(props: {
       <div
         className={classNames(
           "sf-pointer-events-none sf-fixed sf-inset-y-0 sf-flex sf-max-w-full",
-          props.styling?.slideoverSide === "left" ? "sf-left-0" : "sf-right-0",
+          props.styling?.slideoverSide === "left" ? "sf-left-0" : "sf-right-0"
         )}
       >
         <Transition
@@ -263,7 +273,7 @@ export default function SuperflowsSidebar(props: {
               <div className="sf-flex sf-min-h-0 sf-flex-1 sf-flex-col sf-pb-1">
                 <div
                   className={classNames(
-                    `sf-py-4 sf-px-3 sf-min-h-[3.75rem] sf-text-gray-900 sf-border-b sf-border-gray-200`,
+                    `sf-py-4 sf-px-3 sf-min-h-[3.75rem] sf-text-gray-900 sf-border-b sf-border-gray-200`
                   )}
                   style={{
                     backgroundColor: props.styling?.headerBackgroundColor,
@@ -273,7 +283,7 @@ export default function SuperflowsSidebar(props: {
                   <div className="sf-relative sf-flex sf-flex-row sf-place-items-center sf-justify-center">
                     <Dialog.Title
                       className={classNames(
-                        "sf-block sf-text-xl sf-font-semibold sf-leading-6",
+                        "sf-block sf-text-xl sf-font-semibold sf-leading-6"
                       )}
                     >
                       {props.AIname ?? "Chatbot"}
@@ -284,7 +294,7 @@ export default function SuperflowsSidebar(props: {
                         // Only set on the left if screen is large and sidebar on the left
                         props.styling?.slideoverSide === "left"
                           ? ""
-                          : "md:sf-left-0",
+                          : "md:sf-left-0"
                       )}
                     >
                       <button
@@ -334,7 +344,7 @@ export default function SuperflowsSidebar(props: {
                       if (
                         props.devMode ||
                         ["error", "confirmation", "user"].includes(
-                          chatItem.role,
+                          chatItem.role
                         )
                       ) {
                         return (
@@ -348,7 +358,7 @@ export default function SuperflowsSidebar(props: {
                       else if (chatItem.role === "function") {
                         let contentString = "";
                         const functionJsonResponse = JSON.parse(
-                          chatItem.content,
+                          chatItem.content
                         ) as Json;
                         if (
                           // Empty array
@@ -426,7 +436,7 @@ export default function SuperflowsSidebar(props: {
                       : "sf-overflow-hidden",
                     props.styling?.buttonColor
                       ? `focus:sf-border-gray-500 focus:sf-ring-gray-500`
-                      : "focus:sf-border-purple-300 focus:sf-ring-purple-300",
+                      : "focus:sf-border-purple-300 focus:sf-ring-purple-300"
                   )}
                   placeholder={"Send a message"}
                   value={userText}
@@ -452,7 +462,7 @@ export default function SuperflowsSidebar(props: {
                       "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-shadow-sm sf-border",
                       loading
                         ? "sf-text-gray-500 sf-bg-gray-100 hover:sf-bg-gray-200 sf-border-gray-300"
-                        : "sf-invisible",
+                        : "sf-invisible"
                     )}
                     onClick={() => {
                       killSwitchClicked.current = true;
@@ -472,7 +482,7 @@ export default function SuperflowsSidebar(props: {
                         : `hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500`,
                       !props.styling?.buttonColor &&
                         !(loading || userText.length <= 3) &&
-                        "sf-bg-purple-500",
+                        "sf-bg-purple-500"
                     )}
                     onClick={() => {
                       if (!loading && userText.length > 3) {
