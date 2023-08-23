@@ -56,6 +56,7 @@ describe("findFirstArray", () => {
         { x: 2, y: 3 },
         { x: 3, y: 4 },
       ],
+      xisDate: false,
     };
 
     const { result, arrayKey } = findFirstArray(data);
@@ -79,6 +80,7 @@ describe("findFirstArray", () => {
           { x: 3, y: 4 },
         ],
       },
+      xisDate: false,
     };
     const { result, arrayKey } = findFirstArray(data);
     expect(result).toEqual([200, 300, 400]);
@@ -111,17 +113,30 @@ describe("extractGraphData", () => {
     expect(extractGraphData(data)).toEqual(expected);
   });
   it("match array of objects", () => {
-    const data = `{ "numberOfCustomers": [{"date": 1, "value": 2}, {"date": 2, "value": 3}]}`;
+    const data = `{ "numberOfCustomers": [{"category": 1, "value": 2}, {"category": 2, "value": 3}]}`;
     const expected: GraphData = {
       data: [
         { x: 1, y: 2 },
         { x: 2, y: 3 },
       ],
-      xLabel: "date",
+      xLabel: "category",
       yLabel: "value",
       graphTitle: "numberOfCustomers",
+      xIsdate: false,
     };
     expect(extractGraphData(data)).toEqual(expected);
+  });
+  it("match array of objects date", () => {
+    const data = `{ "numberOfCustomers": [{"date": "2023-08-22", "value": 2}, {"date": "2023-08-23", "value": 3}]}`;
+    expect(extractGraphData(data)?.xIsdate).toEqual(true);
+    expect(extractGraphData(data)?.data[0].y).toEqual(2);
+    expect(extractGraphData(data)?.data[1].y).toEqual(3);
+
+    expect(extractGraphData(data)?.data[0].x).toBeGreaterThan(19590);
+    expect(extractGraphData(data)?.data[0].x).toBeLessThan(19590 + 365 * 100); // test will fail in 100 years time
+    expect(extractGraphData(data)?.data[1].x).toBeGreaterThan(
+      extractGraphData(data)?.data[0].x as number,
+    );
   });
   it("no arrays", () => {
     const data = `{ "numberOfCustomers": 100}`;
@@ -156,6 +171,7 @@ describe("extractGraphData", () => {
       yLabel: "score",
       xLabel: "date",
       graphTitle: "numberOfCustomers",
+      xIsdate: false,
     };
 
     expect(extractGraphData(data)).toEqual(expected);
