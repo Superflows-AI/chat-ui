@@ -126,7 +126,7 @@ export function Graph(props: GraphData) {
                       ? "hh:mm"
                       : xRange < 60 * 60 * 24 * 365
                       ? "MM-dd"
-                      : "yyyy-MM-dd"
+                      : "yyyy-MM-dd",
                   )
               : undefined
           }
@@ -239,7 +239,7 @@ export function extractGraphData(data: string): GraphData | null {
       .filter(
         (key) =>
           checkStringMatch(key, possibleXlabels) ||
-          attemptDatetimeConversion(array.map((obj) => obj[key])) !== null
+          attemptDatetimeConversion(array.map((obj) => obj[key])) !== null,
       )
       .filter((key) => array.every((obj) => key in obj));
 
@@ -249,7 +249,7 @@ export function extractGraphData(data: string): GraphData | null {
 
     if (xMatches.length === 0 && yMatches.length === 0) {
       console.log(
-        `no x or y matches found in array keys ${Object.keys(array[0])}`
+        `no x or y matches found in array keys ${Object.keys(array[0])}`,
       );
       return null;
     }
@@ -269,7 +269,7 @@ export function extractGraphData(data: string): GraphData | null {
       const yLabel = yMatches[0];
 
       const dateParseRes = attemptDatetimeConversion(
-        array.map((obj) => obj[xLabel])
+        array.map((obj) => obj[xLabel]),
       );
 
       const x = dateParseRes ? dateParseRes : array.map((obj) => obj[xLabel]);
@@ -293,7 +293,7 @@ export function extractGraphData(data: string): GraphData | null {
 
 export function findFirstArray(
   json: any,
-  key: string | number | null = null
+  key: string | number | null = null,
 ): { result: any[] | null; arrayKey: string | number | null } {
   /**
    * Recursively search through the object's properties for an array.
@@ -321,7 +321,7 @@ export function findFirstArray(
 }
 export function checkStringMatch(
   fieldName: string,
-  possibleLabels: string[]
+  possibleLabels: string[],
 ): boolean {
   // Match insensitive to punctuation, spaces, case and trailing s
   const processStr = (str: string) => {
