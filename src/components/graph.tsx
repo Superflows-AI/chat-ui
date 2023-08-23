@@ -85,12 +85,17 @@ export function Graph(props: GraphData) {
   // Title currently does nothing in recharts, though there's an open
   // ticket for it
 
-  const xRange =
-    Math.max(...props.data.map((obj) => obj.x as number)) -
-    Math.min(...props.data.map((obj) => obj.x as number));
+  const xIsNumber = typeof props.data[0].x === "number";
 
-  // This doesn't seem to be working for some reason
-  const offset = Math.ceil(xRange * 0.1);
+  let xRange: number;
+  let offset: number;
+
+  if (xIsNumber) {
+    xRange =
+      Math.max(...props.data.map((obj) => obj.x as number)) -
+      Math.min(...props.data.map((obj) => obj.x as number));
+    offset = Math.ceil(xRange * 0.1);
+  }
 
   return (
     <ResponsiveContainer width="80%" aspect={2} className="sf-mx-auto sf-mt-2">
@@ -98,8 +103,13 @@ export function Graph(props: GraphData) {
         <XAxis
           dataKey="x"
           tick={{ fontSize: 12 }}
+          type={xIsNumber ? "number" : "category"}
           angle={0}
-          domain={[`dataMin - ${offset}`, `dataMax + ${offset}`]}
+          domain={
+            xIsNumber
+              ? [`dataMin - ${offset}`, `dataMax + ${offset}`]
+              : undefined
+          }
           tickFormatter={
             props.xIsdate
               ? (x) =>
@@ -115,7 +125,7 @@ export function Graph(props: GraphData) {
         >
           <Label
             value={props.xLabel || ""}
-            offset={-5}
+            offset={-2}
             position="insideBottom"
           />
         </XAxis>
@@ -216,8 +226,13 @@ export function extractGraphData(data: string): GraphData | null {
   // TODO: Currently don't support arrays of arrays
   if (typeof array[0] === "object" && !(array[0] instanceof Array)) {
     // Fields that match the possible x labels and are in every object in the array
+    // x matches are either in the possible x labels or can be converted to a date
     const xMatches = Object.keys(array[0])
-      .filter((key) => checkStringMatch(key, possibleXlabels))
+      .filter(
+        (key) =>
+          checkStringMatch(key, possibleXlabels) ||
+          attemptDatetimeConversion(array.map((obj) => obj[key])) !== null
+      )
       .filter((key) => array.every((obj) => key in obj));
 
     const yMatches = Object.keys(array[0])
@@ -226,7 +241,7 @@ export function extractGraphData(data: string): GraphData | null {
 
     if (xMatches.length === 0 && yMatches.length === 0) {
       console.log(
-        `no x or y matches found in array keys ${Object.keys(array[0])}`,
+        `no x or y matches found in array keys ${Object.keys(array[0])}`
       );
       return null;
     }
@@ -270,7 +285,7 @@ export function extractGraphData(data: string): GraphData | null {
 
 export function findFirstArray(
   json: any,
-  key: string | number | null = null,
+  key: string | number | null = null
 ): { result: any[] | null; arrayKey: string | number | null } {
   /**
    * Recursively search through the object's properties for an array.
@@ -298,7 +313,7 @@ export function findFirstArray(
 }
 export function checkStringMatch(
   fieldName: string,
-  possibleLabels: string[],
+  possibleLabels: string[]
 ): boolean {
   // Match insensitive to punctuation, spaces, case and trailing s
   const processStr = (str: string) => {
