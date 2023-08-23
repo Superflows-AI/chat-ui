@@ -107,7 +107,7 @@ export function Graph(props: GraphData) {
     xRange =
       Math.max(...props.data.map((obj) => obj.x as number)) -
       Math.min(...props.data.map((obj) => obj.x as number));
-    offset = Math.ceil(xRange * 0.1);
+    offset = Math.floor(xRange * 0.1);
   }
 
   return (
@@ -126,8 +126,12 @@ export function Graph(props: GraphData) {
           tickFormatter={
             props.xIsdate
               ? (x) =>
-                  DateTime.fromSeconds(x * secondsToDay).toFormat(
-                    xRange < 1 ? "hh:mm" : xRange < 365 ? "MM-dd" : "yyyy-MM-dd"
+                  DateTime.fromSeconds(x * secondsToDay).toLocaleString(
+                    xRange < 1 / 24
+                      ? DateTime.TIME_24_WITH_SECONDS
+                      : xRange < 1
+                      ? DateTime.TIME_24_SIMPLE
+                      : DateTime.DATE_SHORT
                   )
               : undefined
           }
@@ -277,7 +281,7 @@ export function extractGraphData(data: string): GraphData | null {
       const data = [];
       for (let i = 0; i < x.length; i++) {
         data.push({
-          x: x[i] / (dateParseRes ? secondsToDay : 1),
+          x: dateParseRes ? x[i] / secondsToDay : x[i],
           y: array[i][yLabel],
         });
       }

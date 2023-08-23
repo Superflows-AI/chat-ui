@@ -135,7 +135,7 @@ describe("extractGraphData", () => {
     expect(extractGraphData(data)?.data[0].x).toBeGreaterThan(19590);
     expect(extractGraphData(data)?.data[0].x).toBeLessThan(19590 + 365 * 100); // test will fail in 100 years time
     expect(extractGraphData(data)?.data[1].x).toBeGreaterThan(
-      extractGraphData(data)?.data[0].x as number
+      extractGraphData(data)?.data[0].x as number,
     );
   });
   it("no arrays", () => {
