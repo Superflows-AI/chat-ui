@@ -127,14 +127,15 @@ describe("extractGraphData", () => {
     expect(extractGraphData(data)).toEqual(expected);
   });
   it("match array of objects date", () => {
-    const data = `{ "numberOfCustomers": [{"date": "2023-01-02", "value": 2}, {"date": "2023-01-04", "value": 3}]}`;
+    const data = `{ "numberOfCustomers": [{"date": "2023-08-22", "value": 2}, {"date": "2023-08-23", "value": 3}]}`;
     expect(extractGraphData(data)?.xIsdate).toEqual(true);
     expect(extractGraphData(data)?.data[0].y).toEqual(2);
     expect(extractGraphData(data)?.data[1].y).toEqual(3);
 
-    expect(extractGraphData(data)?.data[0].x).toBeGreaterThan(1672444800);
+    expect(extractGraphData(data)?.data[0].x).toBeGreaterThan(19590);
+    expect(extractGraphData(data)?.data[0].x).toBeLessThan(19590 + 365 * 100); // test will fail in 100 years time
     expect(extractGraphData(data)?.data[1].x).toBeGreaterThan(
-      extractGraphData(data)?.data[0].x as number,
+      extractGraphData(data)?.data[0].x as number
     );
   });
   it("no arrays", () => {

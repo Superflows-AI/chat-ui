@@ -276,7 +276,10 @@ export function extractGraphData(data: string): GraphData | null {
       const x = dateParseRes ? dateParseRes : array.map((obj) => obj[xLabel]);
       const data = [];
       for (let i = 0; i < x.length; i++) {
-        data.push({ x: x[i] / secondsToDay, y: array[i][yLabel] });
+        data.push({
+          x: x[i] / (dateParseRes ? secondsToDay : 1),
+          y: array[i][yLabel],
+        });
       }
 
       return {
