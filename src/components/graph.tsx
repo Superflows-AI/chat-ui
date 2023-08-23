@@ -58,12 +58,20 @@ function attemptDatetimeConversion(array: any[]): number[] | null {
     }
   }
 
+  if (DateTime.fromISO(array[0]).isValid) {
+    matchingFormat = "ISO";
+  }
+
   if (!matchingFormat) return null;
 
   const convertedArray = [];
 
   for (const str of array) {
-    let dt = DateTime.fromFormat(str, matchingFormat);
+    const dt =
+      matchingFormat === "ISO"
+        ? DateTime.fromISO(str)
+        : DateTime.fromFormat(str, matchingFormat);
+
     if (!dt.isValid) {
       return null;
     }

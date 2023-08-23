@@ -134,7 +134,7 @@ describe("extractGraphData", () => {
 
     expect(extractGraphData(data)?.data[0].x).toBeGreaterThan(1672444800);
     expect(extractGraphData(data)?.data[1].x).toBeGreaterThan(
-      extractGraphData(data)?.data[0].x as number
+      extractGraphData(data)?.data[0].x as number,
     );
   });
   it("no arrays", () => {
