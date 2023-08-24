@@ -22,7 +22,7 @@ export function functionNameToDisplay(name: string): string {
 
 export function convertToRenderable(
   functionOutput: Record<string, any> | any[],
-  caption?: string,
+  caption?: string
 ): string {
   /** Converts a function's output to a Markdown table
    * In the future, it could also output graphs when applicable **/
@@ -33,12 +33,13 @@ export function convertToRenderable(
   // Format: {data: {...interestingData}}
   if (
     !Array.isArray(functionOutput) &&
-    Object.keys(functionOutput).length === 1
+    Object.keys(functionOutput).length === 1 &&
+    typeof functionOutput[Object.keys(functionOutput)[0]] === "object"
   ) {
     if (!caption) {
       // Make the first key the caption
       output += `### ${functionNameToDisplay(
-        Object.keys(functionOutput)[0],
+        Object.keys(functionOutput)[0]
       )}\n\n`;
     }
     functionOutput = functionOutput[Object.keys(functionOutput)[0]];
@@ -118,7 +119,7 @@ export function convertToRenderable(
           Name: key,
           Value: typeof value === "object" ? stringify(value) : value,
         };
-      }),
+      })
     );
   }
   // On England's pleasant pastures seen?
