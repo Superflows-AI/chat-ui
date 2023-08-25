@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import {
   ArrowPathIcon,
   ChevronLeftIcon,
@@ -33,7 +34,7 @@ export default function SuperflowsSidebar(props: {
   styling?: SidebarStyle;
   initialMessage?: string;
 }) {
-  const ref = useRef(null);
+  const ref = useRef();
   const [userText, setUserText] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -234,6 +235,7 @@ export default function SuperflowsSidebar(props: {
     ]
   );
 
+  console.log("openhere", props.open);
   return (
     //    eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //    @ts-ignore
@@ -243,7 +245,9 @@ export default function SuperflowsSidebar(props: {
       className="sf-relative sf-z-50"
       onClose={props.setOpen}
       initialFocus={ref}
+      unmount={false}
     >
+      <button type="button" className="opacity-0" />
       <div
         className={classNames(
           "sf-pointer-events-none sf-fixed sf-inset-y-0 sf-flex sf-max-w-full",
@@ -429,6 +433,7 @@ export default function SuperflowsSidebar(props: {
               {/* Textbox user types into */}
               <div className="sf-flex sf-flex-col sf-pt-4">
                 <AutoGrowingTextArea
+                  id="sf-chatbot-textarea"
                   className={classNames(
                     "sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400",
                     userText.length > 300

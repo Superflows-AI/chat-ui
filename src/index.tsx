@@ -1,5 +1,6 @@
 import SuperflowsSidebar from "./components/SuperflowsSidebar";
 import { DevChatItem, UserChatItem } from "./components/chatItems";
+import { addTextToTextbox } from "./components/autoGrowingTextarea";
 import SuperflowsButton from "./components/superflowsButton";
 import {
   FunctionCall,
@@ -26,4 +27,5 @@ export {
   getLastSectionName,
   parseOutput,
   SuperflowsSidebar,
+  addTextToTextbox,
 }; // Add more exports here

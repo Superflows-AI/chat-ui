@@ -1,6 +1,6 @@
 {
   "name": "@superflows/chat-ui-react",
-  "version": "1.1.4",
+  "version": "1.1.5-22",
   "main": "dist/index.js",
   "devDependencies": {
     "@heroicons/react": "^2.0.18",
@@ -38,7 +38,7 @@
     "dist"
   ],
   "dependencies": {
-    "@headlessui/react": "1.4",
+    "@headlessui/react": "^0.0.0-insiders.6444e01",
     "@heroicons/react": "^2.0.18",
     "@tailwindcss/forms": "^0.5.4",
     "react-markdown": "^8",

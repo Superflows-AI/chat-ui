@@ -135,7 +135,7 @@ export function extractGraphData(data: string): GraphData | null {
 
     if (xMatches.length === 0 && yMatches.length === 0) {
       console.log(
-        `no x or y matches found in array keys ${Object.keys(array[0])}`,
+        `no x or y matches found in array keys ${Object.keys(array[0])}`
       );
       return null;
     }
@@ -170,7 +170,7 @@ export function extractGraphData(data: string): GraphData | null {
 
 export function findFirstArray(
   json: any,
-  key: string | number | null = null,
+  key: string | number | null = null
 ): { result: any[] | null; arrayKey: string | number | null } {
   /**
    * Recursively search through the object's properties for an array.
@@ -198,7 +198,7 @@ export function findFirstArray(
 }
 export function checkStringMatch(
   fieldName: string,
-  possibleLabels: string[],
+  possibleLabels: string[]
 ): boolean {
   // Match insensitive to punctuation, spaces, case and trailing s
   const processStr = (str: string) => {

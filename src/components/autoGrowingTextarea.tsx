@@ -1,7 +1,7 @@
-import * as React from "react";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 export function AutoGrowingTextArea(props: {
+  id: string;
   className: string;
   placeholder: string;
   value: string;
@@ -15,21 +15,19 @@ export function AutoGrowingTextArea(props: {
 
   useEffect(() => {
     if (ref.current === null) return;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ref.current.style.height = "5px";
 
     const maxH = props.maxHeight ?? 500;
     const minH = props.minHeight ?? 0;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ref.current.style.height =
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
       Math.max(Math.min(ref.current.scrollHeight, maxH), minH).toString() +
       "px";
   }, [ref.current, props.value]);
 
   return (
     <textarea
+      id={props.id}
       ref={ref}
       className={props.className}
       placeholder={props.placeholder}
@@ -39,4 +37,24 @@ export function AutoGrowingTextArea(props: {
       onBlur={props.onBlur}
     />
   );
+}
+
+export function addTextToTextbox(text: string) {
+  // Only run this function in the browser
+  console.log("addTextToTextbox", text);
+  if (typeof window !== "undefined") {
+    const textarea = document.getElementById(
+      "sf-chatbot-textarea"
+    ) as HTMLTextAreaElement;
+    console.log("textarea", textarea);
+    if (textarea) {
+      console.log("got the text area yo");
+      textarea.value = text;
+      const event = new Event("change", { bubbles: true });
+      textarea.dispatchEvent(event);
+    }
+    return true;
+  }
+
+  return false;
 }
