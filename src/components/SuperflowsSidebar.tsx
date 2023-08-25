@@ -344,12 +344,18 @@ export default function SuperflowsSidebar(props: {
                             onConfirm={onConfirm}
                           />
                         );
+                        // Hide debug messages if not in dev mode
                       } else if (chatItem.role === "debug") return <></>;
                       else if (chatItem.role === "function") {
-                        let contentString = "";
-                        const functionJsonResponse = JSON.parse(
-                          chatItem.content,
-                        ) as Json;
+                        let contentString = chatItem.content;
+                        let functionJsonResponse: Json = {};
+                        try {
+                          functionJsonResponse = JSON.parse(
+                            chatItem.content,
+                          ) as Json;
+                        } catch (e) {
+                          functionJsonResponse = chatItem.content;
+                        }
                         if (
                           // Empty array
                           (Array.isArray(functionJsonResponse) &&
@@ -360,7 +366,7 @@ export default function SuperflowsSidebar(props: {
                             Object.entries(functionJsonResponse).length === 0)
                         ) {
                           if (
-                            devChatContents[idx - 1].role === "function" ||
+                            devChatContents[idx - 1]?.role === "function" ||
                             devChatContents[idx + 1]?.role === "function"
                           ) {
                             // If the function call is adjacent to other function calls we don't need to tell them it
@@ -370,18 +376,10 @@ export default function SuperflowsSidebar(props: {
                             );
                           }
                           contentString = "No data returned";
-                        } else if (
-                          functionJsonResponse &&
-                          typeof functionJsonResponse === "object"
-                        ) {
-                          contentString = chatItem.content;
                         }
                         return (
-                          <DevChatItem
-                            chatItem={{
-                              ...chatItem,
-                              content: contentString,
-                            }}
+                          <UserChatItem
+                            chatItem={{ ...chatItem, content: contentString }}
                             key={idx.toString() + chatItem.content}
                           />
                         );

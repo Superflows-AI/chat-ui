@@ -29,6 +29,7 @@ export type ChatGPTMessage =
       role: "function";
       content: string;
       name: string;
+      summary?: string;
     };
 
 type NonSystemGPTMessage = Exclude<ChatGPTMessage, { role: "system" }>;
