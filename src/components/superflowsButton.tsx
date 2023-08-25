@@ -15,6 +15,7 @@ export default function SuperflowsButton(props: {
   mockApiResponses?: boolean;
   styling?: SidebarStyle;
   buttonStyling?: string; // TODO: weird mismatch in type between this and styling
+  initialMessage?: string;
 }) {
   const [open, setOpen] = useState(false);
   return (
