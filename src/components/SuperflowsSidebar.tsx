@@ -366,7 +366,7 @@ export default function SuperflowsSidebar(props: {
                       else if (chatItem.role === "function") {
                         let contentString = "";
                         const functionJsonResponse = JSON.parse(
-                          chatItem.content
+                          chatItem.content,
                         ) as Json;
                         if (
                           // Empty array
@@ -479,7 +479,7 @@ export default function SuperflowsSidebar(props: {
                         ? "sf-bg-gray-500 sf-cursor-not-allowed"
                         : `hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500`,
                       !props.styling?.buttonColor &&
-                        !(loading || !userText) &&
+                        !(loading || userText.length <= 3) &&
                         "sf-bg-purple-500",
                     )}
                     onClick={() => {
