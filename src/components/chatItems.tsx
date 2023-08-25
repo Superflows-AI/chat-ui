@@ -36,7 +36,7 @@ export function DevChatItem(props: {
   AIname?: string;
   onConfirm?: (confirm: boolean) => Promise<void>;
 }) {
-  let graphedData: GraphData | null = null;
+  // TODO: Refactor this and UserChatItem into components for each chat role
   let content = props.chatItem.content;
   if (!content) return <></>;
 
@@ -53,17 +53,9 @@ export function DevChatItem(props: {
       })
       .join("")}`;
   }
-
   if (props.chatItem.role === "function") {
-    graphedData = extractGraphData(props.chatItem.content);
     try {
-      const functionJsonResponse = JSON.parse(props.chatItem.content) as Json;
-      if (functionJsonResponse && typeof functionJsonResponse === "object") {
-        content = convertToRenderable(
-          functionJsonResponse,
-          `${functionNameToDisplay(props.chatItem?.name ?? "")} result`,
-        );
-      }
+      content = JSON.stringify(JSON.parse(props.chatItem.content), null, 2);
     } catch {}
   }
 
@@ -78,8 +70,6 @@ export function DevChatItem(props: {
       }, 3000);
     }
   }, [saveSuccessfulFeedback]);
-
-  const [tabOpen, setTabOpen] = useState<"table" | "graph">("table");
 
   const matches = splitContentByParts(content);
 
@@ -101,15 +91,10 @@ export function DevChatItem(props: {
           : "",
       )}
     >
-      {graphedData && (
-        <div className="-sf-py-4">
-          <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />{" "}
-        </div>
-      )}
       <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
         {props.chatItem.role === "assistant"
           ? (props.AIname ?? "Assistant") + " AI"
-          : props.chatItem.role === "function" && tabOpen === "table"
+          : props.chatItem.role === "function"
           ? "Function called"
           : props.chatItem.role === "confirmation"
           ? "Confirmation required"
@@ -181,9 +166,14 @@ export function DevChatItem(props: {
             </div>
           );
         }
-
-        if (tabOpen === "graph") return <Graph {...graphedData} />;
-        else return <StyledMarkdown key={idx}>{text}</StyledMarkdown>;
+        if (props.chatItem.role === "assistant")
+          return <StyledMarkdown>{props.chatItem.content}</StyledMarkdown>;
+        else
+          return (
+            <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap">
+              {content}
+            </div>
+          );
       })}
       {props.onConfirm &&
         props.chatItem.role === "confirmation" &&
@@ -239,6 +229,26 @@ export function UserChatItem(props: {
   chatItem: StreamingStepInput;
   AIname?: string;
 }) {
+  let graphedData: GraphData | null = null;
+  let content = props.chatItem.content;
+
+  if (props.chatItem.role === "function") {
+    graphedData = extractGraphData(props.chatItem.content);
+    try {
+      const functionJsonResponse = JSON.parse(props.chatItem.content) as Json;
+      if (functionJsonResponse && typeof functionJsonResponse === "object") {
+        content = convertToRenderable(
+          functionJsonResponse,
+          `${functionNameToDisplay(props.chatItem?.name ?? "")} result`,
+        );
+      }
+    } catch {
+      // If not JSON, then there may be a summary
+      content = props.chatItem.summary ?? props.chatItem.content;
+    }
+  }
+  const [tabOpen, setTabOpen] = useState<"table" | "graph">("table");
+
   const [saveSuccessfulFeedback, setSaveSuccessfulFeedback] = useState(false);
   useEffect(() => {
     if (saveSuccessfulFeedback) {
@@ -248,13 +258,36 @@ export function UserChatItem(props: {
     }
   }, [saveSuccessfulFeedback]);
   if (!props.chatItem.content) return <></>;
-  const matches = splitContentByParts(props.chatItem.content);
+  const matches = splitContentByParts(content);
 
   const outputObj = parseOutput(props.chatItem.content);
   return (
-    <div className="sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-bg-gray-200 sf-text-left sf-place-items-baseline">
+    <div
+      className={classNames(
+        "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full",
+        props.chatItem.role === "user"
+          ? "sf-bg-gray-100 sf-text-right sf-place-items-end"
+          : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
+        props.chatItem.role === "error"
+          ? "sf-bg-red-200"
+          : props.chatItem.role === "debug"
+          ? "sf-bg-green-100"
+          : props.chatItem.role === "function"
+          ? "sf-bg-green-200"
+          : props.chatItem.role === "confirmation"
+          ? "sf-bg-blue-100"
+          : "",
+      )}
+    >
+      {graphedData && (
+        <div className="-sf-py-4">
+          <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />{" "}
+        </div>
+      )}
       <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
-        {(props.AIname ?? "Assistant") + " AI"}
+        {props.chatItem.role === "assistant"
+          ? (props.AIname ?? "Assistant") + " AI"
+          : "Function called"}
       </p>
       {matches.map((text, idx) => {
         if (feedbackRegex.exec(text) && feedbackRegex.exec(text)!.length > 0) {
@@ -316,6 +349,11 @@ export function UserChatItem(props: {
             </div>
           );
         }
+        if (props.chatItem.role === "function") {
+          if (tabOpen === "graph") return <Graph {...graphedData} />;
+          else return <StyledMarkdown key={idx}>{text}</StyledMarkdown>;
+        }
+
         return (
           <div key={idx} className="sf-w-full">
             {outputObj.reasoning && (
