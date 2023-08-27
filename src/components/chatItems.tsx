@@ -1,7 +1,5 @@
 import {
   CheckCircleIcon,
-  HandThumbDownIcon,
-  HandThumbUpIcon,
   LightBulbIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
@@ -17,8 +15,6 @@ import {
   functionNameToDisplay,
 } from "../lib/utils";
 import { Graph, GraphData, extractGraphData } from "./graph";
-
-const feedbackRegex = /<button>Feedback<\/button>/;
 
 export interface FunctionCall {
   name: string;
@@ -75,13 +71,7 @@ export function DevChatItem(props: {
     }
   }, [saveSuccessfulFeedback]);
 
-  useEffect(() => {
-    const ele = document.getElementById("sf-scrollable-chat-contents");
-    // If the element exists, and it's near the bottom, scroll to the bottom
-    if (ele && ele.scrollHeight - ele.scrollTop >= 50) {
-      ele.scrollTop = ele.scrollHeight;
-    }
-  }, [content]);
+  useEffect(scrollToBottom, [content]);
 
   if (!content) return <></>;
   return (
@@ -120,7 +110,7 @@ export function DevChatItem(props: {
       {props.chatItem.role === "confirmation" ? (
         <StyledMarkdown>{content}</StyledMarkdown>
       ) : (
-        <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap">
+        <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap">
           {content}
         </div>
       )}
@@ -222,13 +212,7 @@ export function UserChatItem(props: {
     }
   }, [saveSuccessfulFeedback]);
 
-  useEffect(() => {
-    const ele = document.getElementById("sf-scrollable-chat-contents");
-    // If the element exists, and it's near the bottom, scroll to the bottom
-    if (ele && ele.scrollHeight - ele.scrollTop >= 50) {
-      ele.scrollTop = ele.scrollHeight;
-    }
-  }, [content]);
+  useEffect(scrollToBottom, [content]);
 
   if (!content) return <></>;
 
@@ -266,7 +250,7 @@ export function UserChatItem(props: {
         ) : isJson ? (
           <StyledMarkdown>{content}</StyledMarkdown>
         ) : (
-          <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-break-words">
+          <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-break-words">
             {content}
           </div>
         )
@@ -284,7 +268,7 @@ export function UserChatItem(props: {
             </div>
           )}
           {assistantChatObj.tellUser && (
-            <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-words sf-w-full">
+            <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-words sf-w-full">
               {assistantChatObj.tellUser}
             </div>
           )}
@@ -297,7 +281,7 @@ export function UserChatItem(props: {
 function StyledMarkdown(props: { children: string }) {
   return (
     <ReactMarkdown
-      className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full"
+      className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full"
       components={{
         a: ({ node, ...props }) => (
           <a className="sf-text-blue-500 hover:sf-underline" {...props} />
@@ -391,4 +375,14 @@ export function Tabs(props: {
       ))}
     </nav>
   );
+}
+
+function scrollToBottom() {
+  if (typeof window !== "undefined") {
+    const ele = document.getElementById("sf-scrollable-chat-contents");
+    // If the element exists, and it's near the bottom, scroll to the bottom
+    if (ele && ele.scrollHeight - ele.scrollTop >= 50) {
+      ele.scrollTop = ele.scrollHeight;
+    }
+  }
 }

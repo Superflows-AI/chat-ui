@@ -1,6 +1,8 @@
-import SuperflowsSidebar from "./components/SuperflowsSidebar";
-import { DevChatItem, UserChatItem } from "./components/chatItems";
 import SuperflowsButton from "./components/superflowsButton";
+import SuperflowsSidebar from "./components/sidebar";
+import SuperflowsModal from "./components/modal";
+import SuperflowsChat from "./components/chat";
+import { DevChatItem, UserChatItem } from "./components/chatItems";
 import {
   FunctionCall,
   getLastSectionName,
@@ -21,4 +23,6 @@ export {
   getLastSectionName,
   parseOutput,
   SuperflowsSidebar,
+  SuperflowsModal,
+  SuperflowsChat,
 }; // Add more exports here
