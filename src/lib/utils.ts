@@ -42,7 +42,7 @@ export function convertToRenderable(
     if (!caption) {
       // Make the first key the caption
       output += `### ${functionNameToDisplay(
-        Object.keys(functionOutput)[0],
+        Object.keys(functionOutput)[0] ?? "",
       )}\n\n`;
     }
     functionOutput = functionOutput[Object.keys(functionOutput)[0]];
@@ -96,7 +96,8 @@ export function convertToRenderable(
               if (typeof subValue === "object") {
                 item[`${key}: ${subKey}`] = stringify(subValue);
               } else {
-                item[`${key}: ${functionNameToDisplay(subKey)}`] = subValue;
+                item[`${key}: ${functionNameToDisplay(subKey ?? "")}`] =
+                  subValue;
               }
             });
             delete item[key];

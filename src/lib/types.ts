@@ -1,3 +1,5 @@
+import { Ref } from "react";
+
 export type Json =
   | string
   | number
@@ -13,9 +15,29 @@ export type ChatItem =
       content: string;
     };
 
-export interface SidebarStyle {
+export type SuperflowsStyle = {
+  solidIcon?: boolean;
+} & (
+  | ({
+      type: "sidebar";
+    } & SidebarStyle)
+  | ({
+      type: "modal";
+    } & ModalStyle)
+);
+
+export type ModalStyle = { modalClasses?: string } & HeaderStyle & ChatStyle;
+
+export type SidebarStyle = {
   slideoverSide?: "right" | "left";
+} & HeaderStyle &
+  ChatStyle;
+
+export interface ChatStyle {
   buttonColor?: string;
+}
+
+interface HeaderStyle {
   headerBackgroundColor?: string;
   headerTextColor?: string;
 }
@@ -39,17 +61,35 @@ export type StreamingStepInput =
   | { role: "error" | "debug" | "confirmation"; content: string };
 export type StreamingStep = StreamingStepInput & { id: number };
 
-export interface ButtonProps {
+export type SuperflowsModalProps = PrebuiltComponentProps & {
+  styling?: ModalStyle;
+};
+
+export type SuperflowsSidebarProps = PrebuiltComponentProps & {
+  styling?: SidebarStyle;
+};
+
+type PrebuiltComponentProps = ButtonProps & {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+};
+
+export interface ButtonProps extends Omit<ChatProps, "initialFocus"> {
+  AIname?: string;
+  styling?: SuperflowsStyle;
+  buttonStyling?: string; // TODO: weird mismatch in type between this and styling
+}
+
+export interface ChatProps {
   superflowsApiKey: string;
   superflowsUrl?: string;
-  AIname?: string;
   userApiKey?: string;
   userDescription?: string;
   suggestions?: string[];
   devMode?: boolean;
   mockApiResponses?: boolean;
-  styling?: SidebarStyle;
-  buttonStyling?: string; // TODO: weird mismatch in type between this and styling
+  styling?: ChatStyle;
   initialMessage?: string;
   welcomeText?: string;
+  initialFocus?: Ref<any>;
 }

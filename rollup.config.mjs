@@ -18,7 +18,7 @@ export default {
     },
   ],
   plugins: [
-    resolve(),
+    resolve({ browser: true }),
     commonjs({
       include: "node_modules/**",
     }),
