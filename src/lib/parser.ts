@@ -92,7 +92,8 @@ export function parseOutput(gptString: string): ParsedOutput {
   }
   // Note: this gives true while streaming in. This is of course, incorrect!
   const completed =
-    (commandsIn || tellUserIn || planIn) && commands.length === 0;
+    (reasoningIn || planIn || tellUserIn || commandsIn) &&
+    commands.length === 0;
 
   return { reasoning, plan, tellUser, commands, completed };
 }
