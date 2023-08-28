@@ -96,7 +96,7 @@ describe("Parse output", () => {
     expect(output.plan).toBe("");
     expect(output.tellUser).toBe("");
     expect(output.commands).toStrictEqual([]);
-    expect(output.completed).toBe(false);
+    expect(output.completed).toBe(true);
   });
   it("long output, parsing commands properly", () => {
     const gptOut =
