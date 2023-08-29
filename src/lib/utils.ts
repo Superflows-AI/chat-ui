@@ -1,4 +1,5 @@
 import tablemark from "tablemark";
+import { validate } from "uuid";
 
 export function classNames(
   ...classes: (string | undefined | null | boolean)[]
@@ -24,8 +25,10 @@ export function convertToRenderable(
   functionOutput: Record<string, any> | any[],
   caption?: string,
 ): string {
-  /** Converts a function's output to a Markdown table
-   * In the future, it could also output graphs when applicable **/
+  /** Converts a function's output to a Markdown table **/
+
+  functionOutput = removeUUIDs(functionOutput);
+
   let output = "";
   if (caption) {
     output += `### ${caption}\n\n`;
@@ -47,7 +50,7 @@ export function convertToRenderable(
 
   if (Array.isArray(functionOutput)) {
     // Assume all elements have the same type
-    if (typeof functionOutput[0] !== "object") {
+    if (typeof (functionOutput as any[])[0] !== "object") {
       if (functionOutput.length < 7) {
         // And did those feet in ancient time,
         return (
@@ -69,8 +72,8 @@ export function convertToRenderable(
     }
     // Otherwise, we have an array of arrays/objects
     let columns: { name?: string; align: "center" }[];
-    if (Array.isArray(functionOutput[0])) {
-      functionOutput = functionOutput.map((item) => {
+    if (Array.isArray((functionOutput as any[])[0])) {
+      functionOutput = functionOutput.map((item: any) => {
         // Format: [[{a,b,c,d}, {a,b,c,d}], [{a,b,c,d}, {a,b,c,d}]]
         return item.map((subItem: any) => {
           // .slice() cuts out the starting and end [] or {}
@@ -78,11 +81,10 @@ export function convertToRenderable(
           else return subItem;
         });
       });
-      // @ts-ignore
-      columns = functionOutput[0].map(() => ({ align: "center" }));
+      columns = (functionOutput as any[])[0].map(() => ({ align: "center" }));
     } else {
       // Array of objects
-      functionOutput = functionOutput.map((item) => {
+      functionOutput = functionOutput.map((item: any) => {
         // Format: [{a,b,c,d}, {a,b,c,d}, {a,b,c,d}, {a,b,c,d}]
         Object.entries(item).forEach(([key, value]: any) => {
           // Deal with nested objects: [{a,b:{c,d}}, {a,b:{c,d}}]
@@ -103,8 +105,7 @@ export function convertToRenderable(
         });
         return item;
       });
-      // @ts-ignore
-      columns = Object.keys(functionOutput[0]).map((n) => ({
+      columns = Object.keys((functionOutput as object[])[0]).map((n) => ({
         name: functionNameToDisplay(n),
         align: "center",
       }));
@@ -158,4 +159,26 @@ export function splitContentByParts(content: string): string[] {
     }
   }
   return matches;
+}
+
+function isUUID(str: string): boolean {
+  return validate(str);
+}
+
+export function removeUUIDs(
+  data: Record<string, any> | any[],
+): Record<string, any> | any[] {
+  if (Array.isArray(data)) {
+    return data.filter((item) => !isUUID(item)).map(removeUUIDs);
+  } else if (typeof data === "object" && data !== null) {
+    const result: Record<string, any> = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (!isUUID(key) && !isUUID(value)) {
+        result[key] = removeUUIDs(value);
+      }
+    }
+    return result;
+  } else {
+    return data;
+  }
 }

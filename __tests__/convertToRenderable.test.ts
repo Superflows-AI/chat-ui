@@ -197,4 +197,69 @@ describe("convertToRenderable", () => {
 `,
     );
   });
+
+  it("removes uuid from key:value pairs", () => {
+    const input = {
+      well: "i dreamed i saw the knights in armor coming",
+      saying: "something about a queen",
+      uuid: crypto.randomUUID(),
+    };
+    const output = convertToRenderable(input);
+    expect(output).toEqual(
+      `| Name   | Value                                       |
+| :----- | :------------------------------------------ |
+| well   | i dreamed i saw the knights in armor coming |
+| saying | something about a queen                     |
+`,
+    );
+  });
+
+  it("removes uuid from array", () => {
+    const input = "look at mother nature on the run".split(" ");
+    input.push(crypto.randomUUID());
+    const output = convertToRenderable(input);
+    const expected = `|   |
+|---|
+| look |
+| at |
+| mother |
+| nature |
+| on |
+| the |
+| run |
+`;
+    expect(output).toEqual(expected);
+  });
+  it("removes nested uuid from array", () => {
+    const input = [
+      ["i", "was"],
+      ["lying", "in"],
+      ["a", "burned"],
+      ["out", "basement"],
+      ["with", crypto.randomUUID()],
+    ];
+    const output = convertToRenderable(input);
+    const expected = `|   0   |    1     |
+| :---: | :------: |
+|   i   |   was    |
+| lying |    in    |
+|   a   |  burned  |
+|  out  | basement |
+| with  |          |
+`;
+    expect(output).toEqual(expected);
+  });
+  it("removes uuid from nested object", () => {
+    const input = [
+      { flying: "mother nature's silver seed", to: "a new home in the sun" },
+      { flying: "mother nature's on the run", to: crypto.randomUUID() },
+    ];
+    const output = convertToRenderable(input);
+    const expected = `|           Flying            |          To           |
+| :-------------------------: | :-------------------: |
+| mother nature's silver seed | a new home in the sun |
+| mother nature's on the run  |                       |
+`;
+    expect(output).toEqual(expected);
+  });
 });
