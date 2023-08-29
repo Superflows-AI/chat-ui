@@ -138,13 +138,19 @@ export default function SuperflowsSidebar(props: {
               const data = JSON.parse(chunkOfChunk) as StreamingStep;
               if (conversationId === null) setConversationId(data.id);
               if (
+                // Different message role from the last message
                 data.role !== outputMessages[outputMessages.length - 1]?.role ||
+                // Not the assistant (e.g. function, debug etc where the entire contents of a message is 1 chunk)
+                data.role !== "assistant" ||
+                // Includes explicit new message tag
                 data.content.includes("<<[NEW-MESSAGE]>>")
               ) {
                 if (data.content.includes("<<[NEW-MESSAGE]>>"))
                   data.content = data.content.replace("<<[NEW-MESSAGE]>>", "");
+                // Add new message
                 outputMessages.push({ ...data });
               } else {
+                // Append message data to preceding message
                 outputMessages[outputMessages.length - 1].content +=
                   data.content;
               }
@@ -348,7 +354,7 @@ export default function SuperflowsSidebar(props: {
                       } else if (chatItem.role === "debug") return <></>;
                       else if (chatItem.role === "function") {
                         let contentString = chatItem.content;
-                        let functionJsonResponse: Json = {};
+                        let functionJsonResponse: Json;
                         try {
                           functionJsonResponse = JSON.parse(
                             chatItem.content,

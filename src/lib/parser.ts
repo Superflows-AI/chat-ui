@@ -34,6 +34,8 @@ function getSectionText(
 }
 
 export function parseOutput(gptString: string): ParsedOutput {
+  // TODO: Below booleans could be wrong if by chance any of the below strings are used
+  //  by GPT in an earlier stage of the response
   const reasoningIn = gptString.toLowerCase().includes("reasoning:");
   const planIn = gptString.toLowerCase().includes("plan:");
   const tellUserIn = gptString.toLowerCase().includes("tell user:");
