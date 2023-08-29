@@ -234,7 +234,7 @@ export function UserChatItem(props: {
   AIname?: string;
 }) {
   let [graphedData, setGraphedData] = useState<GraphData | null>(null);
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(props.chatItem.content);
   const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
     {} as ParsedOutput,
   );
