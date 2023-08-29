@@ -434,7 +434,7 @@ export default function SuperflowsSidebar(props: {
                   onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
-                      if (userText.length > 3) {
+                      if (userText) {
                         void callSuperflowsApi([
                           ...devChatContents,
                           { role: "user", content: userText },
@@ -465,15 +465,15 @@ export default function SuperflowsSidebar(props: {
                     type="submit"
                     className={classNames(
                       "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
-                      loading || userText.length <= 3
+                      loading || !userText
                         ? "sf-bg-gray-500 sf-cursor-not-allowed"
                         : `hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500`,
                       !props.styling?.buttonColor &&
-                        !(loading || userText.length <= 3) &&
+                        !(loading || !userText) &&
                         "sf-bg-purple-500",
                     )}
                     onClick={() => {
-                      if (!loading && userText.length > 3) {
+                      if (!loading && userText) {
                         void callSuperflowsApi([
                           ...devChatContents,
                           { role: "user", content: userText },
@@ -483,8 +483,7 @@ export default function SuperflowsSidebar(props: {
                       }
                     }}
                     style={
-                      props.styling?.buttonColor &&
-                      !(loading || userText.length <= 3)
+                      props.styling?.buttonColor && !(loading || !userText)
                         ? { backgroundColor: props.styling?.buttonColor }
                         : {}
                     }
