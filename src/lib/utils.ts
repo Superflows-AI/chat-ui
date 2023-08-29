@@ -24,8 +24,7 @@ export function convertToRenderable(
   functionOutput: Record<string, any> | any[],
   caption?: string,
 ): string {
-  /** Converts a function's output to a Markdown table
-   * In the future, it could also output graphs when applicable **/
+  /** Converts a function's output to a Markdown table **/
   let output = "";
   if (caption) {
     output += `### ${caption}\n\n`;
@@ -47,7 +46,10 @@ export function convertToRenderable(
 
   if (Array.isArray(functionOutput)) {
     // Assume all elements have the same type
-    if (typeof functionOutput[0] !== "object") {
+    functionOutput = functionOutput.filter((item: any) => {
+      return !(typeof item === "string") || !isUUID(item);
+    });
+    if (typeof (functionOutput as any[])[0] !== "object") {
       if (functionOutput.length < 7) {
         // And did those feet in ancient time,
         return (
@@ -69,20 +71,24 @@ export function convertToRenderable(
     }
     // Otherwise, we have an array of arrays/objects
     let columns: { name?: string; align: "center" }[];
-    if (Array.isArray(functionOutput[0])) {
-      functionOutput = functionOutput.map((item) => {
+    if (Array.isArray((functionOutput as any[])[0])) {
+      functionOutput = functionOutput.map((item: any) => {
         // Format: [[{a,b,c,d}, {a,b,c,d}], [{a,b,c,d}, {a,b,c,d}]]
-        return item.map((subItem: any) => {
-          // .slice() cuts out the starting and end [] or {}
-          if (typeof subItem === "object") return stringify(subItem);
-          else return subItem;
-        });
+        return item
+          .filter(
+            (subItem: any) => typeof subItem !== "string" || !isUUID(subItem),
+          )
+          .map((filteredSubItem: any) => {
+            // .slice() cuts out the starting and end [] or {}
+            if (typeof filteredSubItem === "object")
+              return stringify(filteredSubItem);
+            else return filteredSubItem;
+          });
       });
-      // @ts-ignore
-      columns = functionOutput[0].map(() => ({ align: "center" }));
+      columns = (functionOutput as any[])[0].map(() => ({ align: "center" }));
     } else {
       // Array of objects
-      functionOutput = functionOutput.map((item) => {
+      functionOutput = functionOutput.map((item: any) => {
         // Format: [{a,b,c,d}, {a,b,c,d}, {a,b,c,d}, {a,b,c,d}]
         Object.entries(item).forEach(([key, value]: any) => {
           // Deal with nested objects: [{a,b:{c,d}}, {a,b:{c,d}}]
@@ -95,6 +101,8 @@ export function convertToRenderable(
               }
             });
             delete item[key];
+          } else if (isUUID(value)) {
+            item[key] = undefined;
           } else if (Array.isArray(value)) {
             item[key] = stringify(value);
           } else if (typeof value === "string") {
@@ -103,8 +111,7 @@ export function convertToRenderable(
         });
         return item;
       });
-      // @ts-ignore
-      columns = Object.keys(functionOutput[0]).map((n) => ({
+      columns = Object.keys((functionOutput as object[])[0]).map((n) => ({
         name: functionNameToDisplay(n),
         align: "center",
       }));
@@ -113,6 +120,12 @@ export function convertToRenderable(
     return output + tablemark(functionOutput as any[], { columns });
   } else {
     // Format: {a, b}
+    functionOutput = Object.entries(functionOutput)
+      .filter(([_, value]) => {
+        return !isUUID(value);
+      })
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
     output += tablemark(
       Object.entries(functionOutput).map(([key, value]) => {
         return {
@@ -158,4 +171,10 @@ export function splitContentByParts(content: string): string[] {
     }
   }
   return matches;
+}
+
+export function isUUID(str: string): boolean {
+  const regexExp =
+    /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
+  return regexExp.test(str);
 }
