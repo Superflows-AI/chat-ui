@@ -101,7 +101,7 @@ describe("findFirstArray", () => {
 
 describe("extractGraphData", () => {
   it("basic match", () => {
-    const data = `{ "numberOfCustomers": [1, 2, 3] }`;
+    const data = { numberOfCustomers: [1, 2, 3] };
     const expected: GraphData = {
       data: [
         { x: 0, y: 1 },
@@ -113,7 +113,12 @@ describe("extractGraphData", () => {
     expect(extractGraphData(data)).toEqual(expected);
   });
   it("match array of objects", () => {
-    const data = `{ "numberOfCustomers": [{"category": 1, "value": 2}, {"category": 2, "value": 3}]}`;
+    const data = {
+      numberOfCustomers: [
+        { category: 1, value: 2 },
+        { category: 2, value: 3 },
+      ],
+    };
     const expected: GraphData = {
       data: [
         { x: 1, y: 2 },
@@ -127,7 +132,12 @@ describe("extractGraphData", () => {
     expect(extractGraphData(data)).toEqual(expected);
   });
   it("match array of objects date", () => {
-    const data = `{ "numberOfCustomers": [{"date": "2023-08-22", "value": 2}, {"date": "2023-08-23", "value": 3}]}`;
+    const data = {
+      numberOfCustomers: [
+        { date: "2023-08-22", value: 2 },
+        { date: "2023-08-23", value: 3 },
+      ],
+    };
     expect(extractGraphData(data)?.xIsdate).toEqual(true);
     expect(extractGraphData(data)?.data[0].y).toEqual(2);
     expect(extractGraphData(data)?.data[1].y).toEqual(3);
@@ -139,11 +149,16 @@ describe("extractGraphData", () => {
     );
   });
   it("no arrays", () => {
-    const data = `{ "numberOfCustomers": 100}`;
+    const data = { numberOfCustomers: 100 };
     expect(extractGraphData(data)).toEqual(null);
   });
   it("Only y axis match", () => {
-    const data = `{ "numberOfCustomers": [{"snooker": 1, "score": 2}, {"snooker": 2, "score": 3}]}`;
+    const data = {
+      numberOfCustomers: [
+        { snooker: 1, score: 2 },
+        { snooker: 2, score: 3 },
+      ],
+    };
     const expected: GraphData = {
       data: [
         { x: 0, y: 2 },
@@ -157,11 +172,21 @@ describe("extractGraphData", () => {
   });
 
   it("No y axis match, but x axis match", () => {
-    const data = `{ "numberOfCustomers": [{"date": 1, "year": 2}, {"date": 2, "year": 3}]}`;
+    const data = {
+      numberOfCustomers: [
+        { date: 1, year: 2 },
+        { date: 2, year: 3 },
+      ],
+    };
     expect(extractGraphData(data)).toEqual(null);
   });
   it("multiple y axis match and x axis match", () => {
-    const data = `{ "numberOfCustomers": [{"date": 1, "year": 2, "score": 100}, {"date": 2, "year": 3, "score": 105}]}`;
+    const data = {
+      numberOfCustomers: [
+        { date: 1, year: 2, score: 100 },
+        { date: 2, year: 3, score: 105 },
+      ],
+    };
     // This might be a bad test because the order of keys in a json is not guaranteed
     const expected: GraphData = {
       data: [
