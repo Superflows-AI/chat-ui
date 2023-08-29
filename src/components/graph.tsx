@@ -9,6 +9,7 @@ import {
 } from "recharts";
 
 import { DateTime } from "luxon";
+import { Json } from "../lib/types";
 
 let formats = [
   "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
@@ -206,14 +207,7 @@ export const possibleYlabels = [
   "Satisfaction",
 ];
 
-export function extractGraphData(data: string): GraphData | null {
-  try {
-    data = JSON.parse(data);
-  } catch {
-    console.log(`Could not parse data: ${data} as json`);
-    return null;
-  }
-
+export function extractGraphData(data: Json): GraphData | null {
   const { result: array, arrayKey } = findFirstArray(data);
 
   if (array === null) {
