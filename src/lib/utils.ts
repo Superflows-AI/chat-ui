@@ -1,4 +1,5 @@
 import tablemark from "tablemark";
+import { validate } from "uuid";
 
 export function classNames(
   ...classes: (string | undefined | null | boolean)[]
@@ -25,6 +26,9 @@ export function convertToRenderable(
   caption?: string,
 ): string {
   /** Converts a function's output to a Markdown table **/
+
+  functionOutput = removeUUIDs(functionOutput);
+
   let output = "";
   if (caption) {
     output += `### ${caption}\n\n`;
@@ -46,9 +50,6 @@ export function convertToRenderable(
 
   if (Array.isArray(functionOutput)) {
     // Assume all elements have the same type
-    functionOutput = functionOutput.filter((item: any) => {
-      return !(typeof item === "string") || !isUUID(item);
-    });
     if (typeof (functionOutput as any[])[0] !== "object") {
       if (functionOutput.length < 7) {
         // And did those feet in ancient time,
@@ -74,16 +75,11 @@ export function convertToRenderable(
     if (Array.isArray((functionOutput as any[])[0])) {
       functionOutput = functionOutput.map((item: any) => {
         // Format: [[{a,b,c,d}, {a,b,c,d}], [{a,b,c,d}, {a,b,c,d}]]
-        return item
-          .filter(
-            (subItem: any) => typeof subItem !== "string" || !isUUID(subItem),
-          )
-          .map((filteredSubItem: any) => {
-            // .slice() cuts out the starting and end [] or {}
-            if (typeof filteredSubItem === "object")
-              return stringify(filteredSubItem);
-            else return filteredSubItem;
-          });
+        return item.map((subItem: any) => {
+          // .slice() cuts out the starting and end [] or {}
+          if (typeof subItem === "object") return stringify(subItem);
+          else return subItem;
+        });
       });
       columns = (functionOutput as any[])[0].map(() => ({ align: "center" }));
     } else {
@@ -101,8 +97,6 @@ export function convertToRenderable(
               }
             });
             delete item[key];
-          } else if (isUUID(value)) {
-            item[key] = undefined;
           } else if (Array.isArray(value)) {
             item[key] = stringify(value);
           } else if (typeof value === "string") {
@@ -120,12 +114,6 @@ export function convertToRenderable(
     return output + tablemark(functionOutput as any[], { columns });
   } else {
     // Format: {a, b}
-    functionOutput = Object.entries(functionOutput)
-      .filter(([_, value]) => {
-        return !isUUID(value);
-      })
-      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
-
     output += tablemark(
       Object.entries(functionOutput).map(([key, value]) => {
         return {
@@ -173,8 +161,24 @@ export function splitContentByParts(content: string): string[] {
   return matches;
 }
 
-export function isUUID(str: string): boolean {
-  const regexExp =
-    /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
-  return regexExp.test(str);
+function isUUID(str: string): boolean {
+  return validate(str);
+}
+
+export function removeUUIDs(
+  data: Record<string, any> | any[],
+): Record<string, any> | any[] {
+  if (Array.isArray(data)) {
+    return data.filter((item) => !isUUID(item)).map(removeUUIDs);
+  } else if (typeof data === "object" && data !== null) {
+    const result: Record<string, any> = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (!isUUID(key) && !isUUID(value)) {
+        result[key] = removeUUIDs(value);
+      }
+    }
+    return result;
+  } else {
+    return data;
+  }
 }
