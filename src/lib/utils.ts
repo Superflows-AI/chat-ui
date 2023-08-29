@@ -137,8 +137,9 @@ function stringify(obj: Record<string, any> | any[]): string {
 }
 
 export function splitContentByParts(content: string): string[] {
-  /** We split the message into different parts (based on whether they're a <table>, <button> or just text),
+  /** We split the message into different parts (based on whether they're a <button> or just text),
    * and then render parts one-by-one **/
+  // TODO: Remove this - it's no longer necessary!
   const fullRegex = /(<button>.*?<\/button>)|([\s\S]+?)/g;
 
   let match;
