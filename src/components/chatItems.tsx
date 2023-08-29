@@ -9,7 +9,7 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { parseOutput } from "../lib/parser";
+import { ParsedOutput, parseOutput } from "../lib/parser";
 import { Json, StreamingStepInput } from "../lib/types";
 import {
   classNames,
@@ -37,27 +37,31 @@ export function DevChatItem(props: {
   onConfirm?: (confirm: boolean) => Promise<void>;
 }) {
   // TODO: Refactor this and UserChatItem into components for each chat role
-  let content = props.chatItem.content;
-  if (!content) return <></>;
+  const [content, setContent] = useState(props.chatItem.content);
+  const [matches, setMatches] = useState<string[]>([]);
 
-  if (props.chatItem.role === "confirmation") {
-    const toConfirm = JSON.parse(props.chatItem.content) as ToConfirm[];
-    content = `The following action${
-      toConfirm.length > 1 ? "s require" : " requires"
-    } confirmation:\n\n${toConfirm
-      .map((action) => {
-        return `${convertToRenderable(
-          action.args,
-          functionNameToDisplay(action.name),
-        )}`;
-      })
-      .join("")}`;
-  }
-  if (props.chatItem.role === "function") {
-    try {
-      content = JSON.stringify(JSON.parse(props.chatItem.content), null, 2);
-    } catch {}
-  }
+  useEffect(() => {
+    if (props.chatItem.role === "confirmation") {
+      const toConfirm = JSON.parse(props.chatItem.content) as ToConfirm[];
+      setContent(
+        `The following action${
+          toConfirm.length > 1 ? "s require" : " requires"
+        } confirmation:\n\n${toConfirm
+          .map((action) => {
+            return `${convertToRenderable(
+              action.args,
+              functionNameToDisplay(action.name),
+            )}`;
+          })
+          .join("")}`,
+      );
+    }
+    if (props.chatItem.role === "function") {
+      try {
+        setContent(JSON.stringify(JSON.parse(props.chatItem.content), null, 2));
+      } catch {}
+    }
+  }, [props.chatItem.content]);
 
   const [saveSuccessfulFeedback, setSaveSuccessfulFeedback] =
     useState<boolean>(false);
@@ -71,8 +75,11 @@ export function DevChatItem(props: {
     }
   }, [saveSuccessfulFeedback]);
 
-  const matches = splitContentByParts(content);
+  useEffect(() => {
+    if (content) setMatches(splitContentByParts(content));
+  }, [content]);
 
+  if (!content) return <></>;
   return (
     <div
       className={classNames(
@@ -230,23 +237,38 @@ export function UserChatItem(props: {
   AIname?: string;
 }) {
   let graphedData: GraphData | null = null;
-  let content = props.chatItem.content;
+  const [content, setContent] = useState("");
+  const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
+    {} as ParsedOutput,
+  );
+  const [matches, setMatches] = useState<string[]>([]);
 
-  if (props.chatItem.role === "function") {
-    graphedData = extractGraphData(props.chatItem.content);
-    try {
-      const functionJsonResponse = JSON.parse(props.chatItem.content) as Json;
-      if (functionJsonResponse && typeof functionJsonResponse === "object") {
-        content = convertToRenderable(
-          functionJsonResponse,
-          `${functionNameToDisplay(props.chatItem?.name ?? "")} result`,
-        );
+  useEffect(() => {
+    if (props.chatItem.role === "function") {
+      graphedData = extractGraphData(props.chatItem.content);
+      try {
+        const functionJsonResponse = JSON.parse(props.chatItem.content) as Json;
+        if (functionJsonResponse && typeof functionJsonResponse === "object") {
+          setContent(
+            convertToRenderable(
+              functionJsonResponse,
+              `${functionNameToDisplay(props.chatItem?.name ?? "")} result`,
+            ),
+          );
+        }
+      } catch {
+        // If not JSON, then there may be a summary
+        setContent(props.chatItem.summary ?? props.chatItem.content);
       }
-    } catch {
-      // If not JSON, then there may be a summary
-      content = props.chatItem.summary ?? props.chatItem.content;
+    } else {
+      setAssistantChatObj(parseOutput(props.chatItem.content));
     }
-  }
+  }, [props.chatItem.content]);
+
+  useEffect(() => {
+    if (content) setMatches(splitContentByParts(content));
+  }, [content]);
+
   const [tabOpen, setTabOpen] = useState<"table" | "graph">("table");
 
   const [saveSuccessfulFeedback, setSaveSuccessfulFeedback] = useState(false);
@@ -257,10 +279,8 @@ export function UserChatItem(props: {
       }, 3000);
     }
   }, [saveSuccessfulFeedback]);
-  if (!props.chatItem.content) return <></>;
-  const matches = splitContentByParts(content);
+  if (!content) return <></>;
 
-  const outputObj = parseOutput(props.chatItem.content);
   return (
     <div
       className={classNames(
@@ -356,19 +376,19 @@ export function UserChatItem(props: {
 
         return (
           <div key={idx} className="sf-w-full">
-            {outputObj.reasoning && (
+            {assistantChatObj.reasoning && (
               <div className="sf-bg-yellow-100 sf-rounded-md sf-px-4 sf-py-2 sf-border sf-border-yellow-300 sf-w-full">
                 <p className="sf-flex sf-flex-row sf-gap-x-1.5 sf-text-yellow-800">
                   <LightBulbIcon className="sf-h-5 sf-w-5 sf-text-yellow-600" />{" "}
                   Thoughts
                 </p>
                 <p className="sf-mt-1 sf-text-little sf-whitespace-pre-line sf-text-gray-700">
-                  {outputObj.reasoning}
+                  {assistantChatObj.reasoning}
                 </p>
               </div>
             )}
-            {outputObj.tellUser && (
-              <StyledMarkdown>{outputObj.tellUser}</StyledMarkdown>
+            {assistantChatObj.tellUser && (
+              <StyledMarkdown>{assistantChatObj.tellUser}</StyledMarkdown>
             )}
           </div>
         );
