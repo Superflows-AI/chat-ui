@@ -173,14 +173,11 @@ export function DevChatItem(props: {
             </div>
           );
         }
-        if (props.chatItem.role === "assistant")
-          return <StyledMarkdown>{props.chatItem.content}</StyledMarkdown>;
-        else
-          return (
-            <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap">
-              {content}
-            </div>
-          );
+        return (
+          <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap">
+            {content}
+          </div>
+        );
       })}
       {props.onConfirm &&
         props.chatItem.role === "confirmation" &&
@@ -236,18 +233,20 @@ export function UserChatItem(props: {
   chatItem: StreamingStepInput;
   AIname?: string;
 }) {
-  let graphedData: GraphData | null = null;
+  let [graphedData, setGraphedData] = useState<GraphData | null>(null);
   const [content, setContent] = useState("");
   const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
     {} as ParsedOutput,
   );
   const [matches, setMatches] = useState<string[]>([]);
+  const [isJson, setIsJson] = useState(false);
 
   useEffect(() => {
     if (props.chatItem.role === "function") {
-      graphedData = extractGraphData(props.chatItem.content);
       try {
         const functionJsonResponse = JSON.parse(props.chatItem.content) as Json;
+        setIsJson(true);
+        setGraphedData(extractGraphData(functionJsonResponse));
         if (functionJsonResponse && typeof functionJsonResponse === "object") {
           setContent(
             convertToRenderable(
@@ -257,6 +256,9 @@ export function UserChatItem(props: {
           );
         }
       } catch {
+        let dataToShow = props.chatItem.content.slice(0, 100);
+        if (props.chatItem.content.length > 100) dataToShow += "...";
+        console.log(`Could not parse data: ${dataToShow} as json`);
         // If not JSON, then there may be a summary
         setContent(props.chatItem.summary ?? props.chatItem.content);
       }
@@ -370,8 +372,18 @@ export function UserChatItem(props: {
           );
         }
         if (props.chatItem.role === "function") {
-          if (tabOpen === "graph") return <Graph {...graphedData} />;
-          else return <StyledMarkdown key={idx}>{text}</StyledMarkdown>;
+          if (tabOpen === "graph") return <Graph key={idx} {...graphedData} />;
+          else if (isJson)
+            return <StyledMarkdown key={idx}>{text}</StyledMarkdown>;
+          else
+            return (
+              <div
+                key={idx}
+                className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full"
+              >
+                {text}
+              </div>
+            );
         }
 
         return (
@@ -388,7 +400,9 @@ export function UserChatItem(props: {
               </div>
             )}
             {assistantChatObj.tellUser && (
-              <StyledMarkdown>{assistantChatObj.tellUser}</StyledMarkdown>
+              <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full">
+                {assistantChatObj.tellUser}
+              </div>
             )}
           </div>
         );
