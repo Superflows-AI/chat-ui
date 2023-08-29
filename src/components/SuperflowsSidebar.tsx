@@ -330,6 +330,7 @@ export default function SuperflowsSidebar(props: {
                       }
                       onClick={() => {
                         setDevChatContents([]);
+                        setConversationId(null);
                       }}
                     >
                       <ArrowPathIcon className="sf-h-4 sf-w-4" /> Clear chat
@@ -345,7 +346,7 @@ export default function SuperflowsSidebar(props: {
                       ) {
                         return (
                           <DevChatItem
-                            key={idx.toString() + chatItem.content}
+                            key={idx.toString()}
                             chatItem={chatItem}
                             onConfirm={onConfirm}
                           />
@@ -377,23 +378,21 @@ export default function SuperflowsSidebar(props: {
                           ) {
                             // If the function call is adjacent to other function calls we don't need to tell them it
                             // was empty - otherwise we get a lot of empty messages clogging up the chat interface
-                            return (
-                              <div key={idx.toString() + chatItem.content} />
-                            );
+                            return <div key={idx.toString()} />;
                           }
                           contentString = "No data returned";
                         }
                         return (
                           <UserChatItem
                             chatItem={{ ...chatItem, content: contentString }}
-                            key={idx.toString() + chatItem.content}
+                            key={idx.toString()}
                           />
                         );
                       }
                       return (
                         <UserChatItem
                           chatItem={chatItem}
-                          key={idx.toString() + chatItem.content}
+                          key={idx.toString()}
                         />
                       );
                     })}

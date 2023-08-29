@@ -236,7 +236,7 @@ export function UserChatItem(props: {
   let [graphedData, setGraphedData] = useState<GraphData | null>(null);
   const [content, setContent] = useState(props.chatItem.content);
   const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
-    {} as ParsedOutput,
+    parseOutput(props.chatItem.content),
   );
   const [matches, setMatches] = useState<string[]>([]);
   const [isJson, setIsJson] = useState(false);
@@ -379,7 +379,7 @@ export function UserChatItem(props: {
             return (
               <div
                 key={idx}
-                className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full"
+                className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-break-words"
               >
                 {text}
               </div>
@@ -394,13 +394,13 @@ export function UserChatItem(props: {
                   <LightBulbIcon className="sf-h-5 sf-w-5 sf-text-yellow-600" />{" "}
                   Thoughts
                 </p>
-                <p className="sf-mt-1 sf-text-little sf-whitespace-pre-line sf-text-gray-700">
+                <p className="sf-mt-1 sf-text-little sf-whitespace-pre-line sf-break-words sf-text-gray-700">
                   {assistantChatObj.reasoning}
                 </p>
               </div>
             )}
             {assistantChatObj.tellUser && (
-              <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full">
+              <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-words sf-w-full">
                 {assistantChatObj.tellUser}
               </div>
             )}
