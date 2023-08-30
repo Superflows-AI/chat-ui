@@ -48,6 +48,9 @@ export function convertToRenderable(
     functionOutput = functionOutput[Object.keys(functionOutput)[0]];
   }
 
+  // Do this here so we get the correct caption
+  functionOutput = removeSingleKeyNodes(functionOutput);
+
   if (Array.isArray(functionOutput)) {
     // Assume all elements have the same type
     if (typeof (functionOutput as any[])[0] !== "object") {
@@ -181,4 +184,47 @@ export function removeUUIDs(
   } else {
     return data;
   }
+}
+
+export function removeSingleKeyNodes(
+  data: Record<string, any> | any[],
+): Record<string, any> | any[] {
+  // Recursively removes nodes with a single key where the value of the node
+  // is an object
+  // TODO: currently doesn't deal explicitly with key clashes
+  if (Array.isArray(data)) {
+    return data.map(removeSingleKeyNodes);
+  }
+
+  function helper(
+    obj: Record<string, any>,
+    result: Record<string, any>,
+  ): Record<string, any> {
+    if (typeof obj !== "object") {
+      return obj;
+    }
+
+    const keys = Object.keys(obj);
+    if (keys.length === 1) {
+      const value = obj[keys[0]];
+      if (typeof value === "object" && !Array.isArray(value)) {
+        return helper(value, result);
+      } else {
+        result[keys[0]] = value;
+        return result;
+      }
+    } else {
+      keys.forEach((key) => {
+        const value = obj[key];
+        if (typeof value === "object" && !Array.isArray(value)) {
+          result = { ...result, ...helper(value, {}) };
+        } else {
+          result[key] = value;
+        }
+      });
+      return result;
+    }
+  }
+
+  return helper(data, {});
 }

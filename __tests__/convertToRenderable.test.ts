@@ -96,13 +96,12 @@ describe("convertToRenderable", () => {
       { a: 4, b: 5, c: { fire: 1, sale: 2, aaaa: 3, theburning: 4 } },
     ];
     const output = convertToRenderable(input);
-    expect(output).toEqual(
-      `|   a   |   b   | c: Fire | c: Sale | c: Aaaa | c: Theburning |
-| :---: | :---: | :-----: | :-----: | :-----: | :-----------: |
-|   1   |   2   |    1    |    2    |    3    |       4       |
-|   4   |   5   |    1    |    2    |    3    |       4       |
-`,
-    );
+    expect(output)
+      .toEqual(`|   a   |   b   | Fire  | Sale  | Aaaa  | Theburning |
+| :---: | :---: | :---: | :---: | :---: | :--------: |
+|   1   |   2   |   1   |   2   |   3   |     4      |
+|   4   |   5   |   1   |   2   |   3   |     4      |
+`);
   });
   it("should convert object with long array of objects into a markdown table", () => {
     const input = {
@@ -189,13 +188,14 @@ describe("convertToRenderable", () => {
       and: { not: "be", tired: "of", waiting: "." },
     };
     const output = convertToRenderable(input);
-    expect(output).toEqual(
-      `| Name  | Value                     |
-| :---- | :------------------------ |
-| if    | you ,can ,wait            |
-| and   | not:be,tired:of,waiting:. |
-`,
-    );
+    const expected = `| Name    | Value          |
+| :------ | :------------- |
+| if      | you ,can ,wait |
+| not     | be             |
+| tired   | of             |
+| waiting | .              |
+`;
+    expect(output).toEqual(expected);
   });
 
   it("removes uuid from key:value pairs", () => {
