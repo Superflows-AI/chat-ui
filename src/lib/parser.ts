@@ -14,68 +14,58 @@ export interface ParsedOutput {
 
 function getSectionText(
   inputStr: string,
-  sectionName: string,
-  nextSectionName: string,
+  sectionInfo: { index: number; searchString: string },
+  allSectionInfo: { index: number }[],
 ): string {
-  const sectionIndex = inputStr.indexOf(sectionName + ":");
-  const nextSectionIdx = inputStr.indexOf(nextSectionName + ":");
+  const sectionIndex = sectionInfo.index;
+  const nextSectionIdx = [...allSectionInfo]
+    // Sort into ascending order
+    .sort((s1, s2) => s1.index - s2.index)
+    // Get the lowest index that is greater than sectionIndex
+    .find((s) => s.index > sectionIndex)?.index;
 
-  if (sectionIndex === -1 || sectionIndex > nextSectionIdx) {
+  if (sectionIndex === -1) {
     return "Invalid input string: " + inputStr;
   }
 
-  if (nextSectionIdx === -1) {
-    return inputStr.slice(sectionIndex + sectionName.length + 1).trim();
+  if (nextSectionIdx === -1 || !nextSectionIdx) {
+    // This returns the rest of the string after the section name
+    return inputStr
+      .slice(sectionIndex + sectionInfo.searchString.length + 1)
+      .trim();
   }
 
   return inputStr
-    .slice(sectionIndex + sectionName.length + 1, nextSectionIdx)
+    .slice(sectionIndex + sectionInfo.searchString.length + 1, nextSectionIdx)
     .trim();
 }
 
+const sections = [
+  { searchString: "reasoning:" },
+  { searchString: "plan:" },
+  { searchString: "tell user:" },
+  { searchString: "commands:" },
+];
+
 export function parseOutput(gptString: string): ParsedOutput {
-  // TODO: Below booleans could be wrong if by chance any of the below strings are used
-  //  by GPT in an earlier stage of the response
-  const reasoningIn = gptString.toLowerCase().includes("reasoning:");
-  const planIn = gptString.toLowerCase().includes("plan:");
-  const tellUserIn = gptString.toLowerCase().includes("tell user:");
-  const commandsIn = gptString.toLowerCase().includes("commands:");
-
-  let reasoning = "";
-  if (reasoningIn && (planIn || tellUserIn || commandsIn)) {
-    reasoning = getSectionText(
-      gptString,
-      "Reasoning",
-      planIn ? "Plan" : tellUserIn ? "Tell user" : "Commands",
-    );
-  } else if (reasoningIn) {
-    // Response streaming in, reasoning present, but no other sections yet
-    reasoning = gptString.split("Reasoning:")[1].trim();
-  } // Either streaming in, reasoning word incomplete, or no reasoning
-
-  let plan: string = "";
-  if (planIn) {
-    if (tellUserIn) {
-      plan = getSectionText(gptString, "Plan", "Tell user");
-    } else if (commandsIn) {
-      plan = getSectionText(gptString, "Plan", "Commands");
-    } else {
-      plan = gptString.split("Plan:")[1].trim();
-    }
-  }
-
-  let tellUser: string = "";
-  if (tellUserIn) {
-    if (commandsIn) {
-      tellUser = getSectionText(gptString, "Tell user", "Commands");
-    } else {
-      tellUser = gptString.split("Tell user:")[1].trim();
-    }
-  }
+  const sectionInfo = sections
+    .map((section) => ({
+      ...section,
+      // TODO: Below booleans could be wrong if by chance any of the below strings are used
+      //  by GPT in an earlier stage of the response
+      inString: gptString.toLowerCase().includes(section.searchString),
+      index: gptString.toLowerCase().indexOf(section.searchString),
+    }))
+    .map((section, _, overall) => ({
+      ...section,
+      sectionText: section.inString
+        ? getSectionText(gptString, section, overall)
+        : "",
+    }));
 
   let commands: FunctionCall[] = [];
-  if (commandsIn) {
-    const commandsText = gptString.split("Commands:")[1].trim();
+  if (sectionInfo[3].inString) {
+    const commandsText = sectionInfo[3].sectionText;
     commandsText
       .split("\n")
       // Filter out comments & empty lines
@@ -88,16 +78,18 @@ export function parseOutput(gptString: string): ParsedOutput {
         } catch (e) {}
       });
   }
-  // When the response is not in the expected format, for example if the user says "hi"
-  if (!reasoningIn && !planIn && !tellUserIn && !commandsIn) {
-    return { reasoning, plan, tellUser: gptString, commands, completed: true };
-  }
-  // Note: this gives true while streaming in. This is of course, incorrect!
-  const completed =
-    (reasoningIn || planIn || tellUserIn || commandsIn) &&
-    commands.length === 0;
 
-  return { reasoning, plan, tellUser, commands, completed };
+  // When the response is not in the expected format, for example if the user says "hi", the commands = []
+  const completed = commands.length === 0;
+  // Note: this gives true while streaming in. This is of course, incorrect!
+
+  return {
+    reasoning: sectionInfo[0].sectionText,
+    plan: sectionInfo[1].sectionText,
+    tellUser: sectionInfo[2].sectionText,
+    commands,
+    completed,
+  };
 }
 
 export function getLastSectionName(gptString: string): string {

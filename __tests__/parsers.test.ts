@@ -158,6 +158,25 @@ describe("Parse output", () => {
       completed: false,
     });
   });
+  it("incorrectly-ordered real world output", () => {
+    console.log("Incorrectly ordered real world output");
+    const gptOut =
+      "Reasoning: To create a new account for the client, I will use the 'create_account' function. The required parameters are 'workflow' and 'data'. Under 'workflow', I will set the code to 'client.sub-account' as we are creating a sub-account for an existing client. Under 'data', I will provide the clientId (which in this case is 23030138) and a currency code as per ISO 4217.\n" +
+      "\n" +
+      "Tell user: Please provide the currency for the new account.\n" +
+      "\n" +
+      "Plan:\n" +
+      '- Use create_account function with workflow code "client.sub-account" and data containing clientId and currency.';
+    const output = parseOutput(gptOut);
+    expect(output).toStrictEqual({
+      reasoning:
+        "To create a new account for the client, I will use the 'create_account' function. The required parameters are 'workflow' and 'data'. Under 'workflow', I will set the code to 'client.sub-account' as we are creating a sub-account for an existing client. Under 'data', I will provide the clientId (which in this case is 23030138) and a currency code as per ISO 4217.",
+      plan: '- Use create_account function with workflow code "client.sub-account" and data containing clientId and currency.',
+      tellUser: "Please provide the currency for the new account.",
+      commands: [],
+      completed: true,
+    });
+  });
 });
 
 describe("parseFunctionCall", () => {
