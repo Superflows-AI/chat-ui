@@ -188,17 +188,34 @@ export function removeUUIDs(
 
 export function removeSingleKeyNodes(
   data: Record<string, any> | any[],
+  fieldName: string[] = [],
 ): Record<string, any> | any[] {
   // Recursively removes nodes with a single key where the value of the node
   // is an object
-  // TODO: currently doesn't deal explicitly with key clashes
+
+  // Handle special case where parent object is e.g. {a: [1,2,3]}, should return [1,2,3]
+  if (
+    !Array.isArray(data) &&
+    Object.keys(data).length === 1 &&
+    Array.isArray(data[Object.keys(data)[0]]) &&
+    fieldName.length === 0
+  ) {
+    return data[Object.keys(data)[0]];
+  }
+
   if (Array.isArray(data)) {
-    return data.map(removeSingleKeyNodes);
+    const result: any[] = [];
+    data.forEach((item, index) => {
+      const itemFieldName = [...fieldName, index.toString()];
+      result.push(removeSingleKeyNodes(item, itemFieldName));
+    });
+    return result;
   }
 
   function helper(
     obj: Record<string, any>,
     result: Record<string, any>,
+    fieldNames: string[],
   ): Record<string, any> {
     if (typeof obj !== "object") {
       return obj;
@@ -207,24 +224,28 @@ export function removeSingleKeyNodes(
     const keys = Object.keys(obj);
     if (keys.length === 1) {
       const value = obj[keys[0]];
+      fieldNames.push(keys[0]);
       if (typeof value === "object" && !Array.isArray(value)) {
-        return helper(value, result);
+        return helper(value, result, fieldNames);
       } else {
-        result[keys[0]] = value;
+        result[fieldNames.join(" -> ")] = value;
         return result;
       }
     } else {
+      const fieldResult: Record<string, any> = {};
       keys.forEach((key) => {
         const value = obj[key];
+        const thisFieldName = [...fieldNames, key];
         if (typeof value === "object" && !Array.isArray(value)) {
-          result = { ...result, ...helper(value, {}) };
+          result = { ...result, ...helper(value, fieldResult, thisFieldName) };
         } else {
-          result[key] = value;
+          result[thisFieldName.join(" -> ")] = value;
         }
       });
       return result;
     }
   }
 
-  return helper(data, {});
+  const initialResult: Record<string, any> = {};
+  return helper(data, initialResult, fieldName);
 }

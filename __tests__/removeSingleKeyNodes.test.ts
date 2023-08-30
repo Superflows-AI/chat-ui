@@ -17,6 +17,13 @@ describe("remove single key nodes", () => {
     expect(output).toEqual(expected);
   });
 
+  it("special case single array", () => {
+    const data = { oldGregg: [1, 2, 3] };
+    const expected = [1, 2, 3];
+    const output = removeSingleKeyNodes(data);
+    expect(output).toEqual(expected);
+  });
+
   it("single node key nested inside complex object", () => {
     const data = {
       umbrella: {
@@ -27,9 +34,9 @@ describe("remove single key nodes", () => {
     };
 
     const expected = {
-      data: [1, 2, 3],
-      theHitcher: "put you in the picture",
-      harrison: "outrage",
+      "umbrella -> responses -> data": [1, 2, 3],
+      "umbrella -> theHitcher": "put you in the picture",
+      "umbrella -> tony -> harrison": "outrage",
     };
     const output = removeSingleKeyNodes(data);
     expect(output).toEqual(expected);
@@ -37,7 +44,7 @@ describe("remove single key nodes", () => {
 
   it("Handles nested single key arrays", () => {
     const data = { root: { branch: { leaf: [1, 2, 3] } } };
-    const expected = { leaf: [1, 2, 3] };
+    const expected = { "root -> branch -> leaf": [1, 2, 3] };
 
     expect(removeSingleKeyNodes(data)).toEqual(expected);
   });
@@ -53,8 +60,8 @@ describe("remove single key nodes", () => {
     };
 
     const expected = {
-      inner: "value",
-      middle2: "value2",
+      "outer -> middle -> inner": "value",
+      "outer -> middle2": "value2",
     };
 
     expect(removeSingleKeyNodes(data)).toEqual(expected);
@@ -65,20 +72,38 @@ describe("remove single key nodes", () => {
       first: {
         second: {
           third: {
-            fourth: "value",
+            fourth: { fifth: "minor fall, major lift" },
           },
           other: "value2",
         },
         third: {
-          fifth: "value3",
+          fifth: [
+            "i",
+            "remember",
+            "you",
+            "well",
+            "in",
+            "the",
+            "chelsea",
+            "hotel",
+          ],
         },
       },
     };
 
     const expected = {
-      fourth: "value",
-      other: "value2",
-      fifth: "value3",
+      "first -> second -> third -> fourth -> fifth": "minor fall, major lift",
+      "first -> second -> other": "value2",
+      "first -> third -> fifth": [
+        "i",
+        "remember",
+        "you",
+        "well",
+        "in",
+        "the",
+        "chelsea",
+        "hotel",
+      ],
     };
 
     expect(removeSingleKeyNodes(data)).toEqual(expected);
