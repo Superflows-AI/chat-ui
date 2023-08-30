@@ -205,9 +205,8 @@ export function removeSingleKeyNodes(
 
   if (Array.isArray(data)) {
     const result: any[] = [];
-    data.forEach((item, index) => {
-      const itemFieldName = [...fieldName, index.toString()];
-      result.push(removeSingleKeyNodes(item, itemFieldName));
+    data.forEach((item) => {
+      result.push(removeSingleKeyNodes(item, fieldName));
     });
     return result;
   }

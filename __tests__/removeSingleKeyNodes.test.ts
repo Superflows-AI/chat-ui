@@ -24,6 +24,36 @@ describe("remove single key nodes", () => {
     expect(output).toEqual(expected);
   });
 
+  it("array of objects", () => {
+    const data = [
+      { a: 1, b: 2, c: 3 },
+      { a: 4, b: 5, c: 6 },
+    ];
+    const output = removeSingleKeyNodes(data);
+    expect(output).toEqual(data);
+  });
+
+  it("nested array of objects", () => {
+    const data = {
+      a: {
+        b: [
+          { nice: 1, nested: { boy: 2 } },
+          { nice: 2, nested: { boy: 3 } },
+        ],
+      },
+    };
+
+    // Not sure this is 100% the optimal behaviour but its' reasonable
+    const expected = {
+      "a -> b": [
+        { nice: 1, nested: { boy: 2 } },
+        { nice: 2, nested: { boy: 3 } },
+      ],
+    };
+    const output = removeSingleKeyNodes(data);
+    expect(output).toEqual(expected);
+  });
+
   it("single node key nested inside complex object", () => {
     const data = {
       umbrella: {
