@@ -364,10 +364,15 @@ export default function SuperflowsSidebar(props: {
                         // Hide debug messages if not in dev mode
                       } else if (chatItem.role === "debug") return <></>;
                       else if (chatItem.role === "function") {
-                        let contentString = "";
-                        const functionJsonResponse = JSON.parse(
-                          chatItem.content,
-                        ) as Json;
+                        let contentString = chatItem.content;
+                        let functionJsonResponse: Json;
+                        try {
+                          functionJsonResponse = JSON.parse(
+                            chatItem.content,
+                          ) as Json;
+                        } catch (e) {
+                          functionJsonResponse = chatItem.content;
+                        }
                         if (
                           // Empty array
                           (Array.isArray(functionJsonResponse) &&
@@ -479,7 +484,7 @@ export default function SuperflowsSidebar(props: {
                         ? "sf-bg-gray-500 sf-cursor-not-allowed"
                         : `hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500`,
                       !props.styling?.buttonColor &&
-                        !(loading || userText.length <= 3) &&
+                        !(loading || !userText) &&
                         "sf-bg-purple-500",
                     )}
                     onClick={() => {
