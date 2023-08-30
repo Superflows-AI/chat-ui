@@ -115,8 +115,6 @@ export function getLastSectionName(gptString: string): string {
 export function parseFunctionCall(text: string): FunctionCall {
   const functionCallRegex = /(\w+)\(([^)]*)\)/;
   const argumentRegex = /([^,\s]+?)=({.*?}|'.*?'|".*?"|\[.*?\]|[^,]*)/g;
-  const dictionaryRegex = /{(.*?)}/g;
-  const arrayRegex = /\[(.*?)\]/g;
 
   const functionCallMatch = text.match(functionCallRegex);
   if (!functionCallMatch) {
@@ -132,18 +130,24 @@ export function parseFunctionCall(text: string): FunctionCall {
     const key = argMatch[1];
     let value;
 
+    // Below regexes must stay as inline variables, otherwise they will exhibit below behaviour:
+    // E.g.
+    // let regex = /o/g;
+    // let text = 'hello world';
+    //
+    // console.log(regex.test(text));  // true
+    // console.log(regex.test(text));  // true
+    // console.log(regex.test(text));  // false
     if (/^\d+(\.\d+)?$/.test(argMatch[2])) {
       value = parseFloat(argMatch[2]);
     } else if (/^["'](.*)["']$/.test(argMatch[2])) {
       value = argMatch[2].slice(1, -1);
     } else if (/^(true|false)$/.test(argMatch[2])) {
       value = argMatch[2] === "true";
-    } else if (
-      dictionaryRegex.test(argMatch[2]) ||
-      arrayRegex.test(argMatch[2])
-    ) {
+    } else if (/\{.*?}/g.test(argMatch[2]) || /\[(.*?)\]/g.test(argMatch[2])) {
+      const objText = extractObjText(argMatch[2], argsText);
       try {
-        value = JSON.parse(argMatch[2].replaceAll(/'/g, '"'));
+        value = JSON.parse(objText.replaceAll(/'/g, '"'));
       } catch (e) {
         value = argMatch[2];
       }
@@ -155,4 +159,31 @@ export function parseFunctionCall(text: string): FunctionCall {
   }
 
   return { name, args };
+}
+
+export function extractObjText(matchText: string, argsText: string): string {
+  const index = argsText.indexOf(matchText);
+  const textToMatch = argsText.slice(index);
+
+  let openBrackets = "";
+  let chatIdx = 0;
+
+  while (
+    chatIdx < textToMatch.length &&
+    (textToMatch[chatIdx] !== "," || openBrackets)
+  ) {
+    const char = textToMatch[chatIdx];
+    const lastBracket = openBrackets[openBrackets.length - 1];
+    if ("{[".includes(char)) {
+      openBrackets += char;
+    } else if (
+      ("}" === char && lastBracket === "{") ||
+      ("]" === char && lastBracket === "[")
+    ) {
+      // Remove last element from openBrackets
+      openBrackets = openBrackets.slice(0, -1);
+    }
+    chatIdx++;
+  }
+  return textToMatch.slice(0, chatIdx);
 }

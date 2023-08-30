@@ -300,5 +300,24 @@ describe("parseFunctionCall", () => {
         ],
       },
     };
+    expect(output).toEqual(expectedOutput);
+  });
+  it("nested dictionaries", () => {
+    const commandText = `create_account(workflow={"code": "client.sub-account"}, data={"account": {"clientId": "09f42c3a-dcea-4468-a77a-40f1e6d456f1", "currency": "USD", "mainAccountId": "74ef55ef-a583-4a96-92f2-b3ad3b5c0682"}})`;
+    const output = parseFunctionCall(commandText);
+    const expectedOutput = {
+      name: "create_account",
+      args: {
+        workflow: { code: "client.sub-account" },
+        data: {
+          account: {
+            clientId: "09f42c3a-dcea-4468-a77a-40f1e6d456f1",
+            currency: "USD",
+            mainAccountId: "74ef55ef-a583-4a96-92f2-b3ad3b5c0682",
+          },
+        },
+      },
+    };
+    expect(output).toEqual(expectedOutput);
   });
 });
