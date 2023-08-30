@@ -31,6 +31,7 @@ export default function SuperflowsSidebar(props: {
   devMode?: boolean;
   mockApiResponses?: boolean;
   styling?: SidebarStyle;
+  initialMessage?: string;
 }) {
   const ref = useRef(null);
   const [userText, setUserText] = useState<string>("");
@@ -61,6 +62,15 @@ export default function SuperflowsSidebar(props: {
   const killSwitchClicked = useRef(false);
 
   const hostname = props.superflowsUrl ?? "https://dashboard.superflows.ai";
+
+  useEffect(() => {
+    if (props.initialMessage) {
+      callSuperflowsApi([
+        ...devChatContents,
+        { role: "user", content: props.initialMessage },
+      ]);
+    }
+  }, []);
 
   const callSuperflowsApi = useCallback(
     async (chat: StreamingStepInput[]) => {
