@@ -48,6 +48,9 @@ export function convertToRenderable(
     functionOutput = functionOutput[Object.keys(functionOutput)[0]];
   }
 
+  // Do this here so we get the correct caption
+  functionOutput = removeSingleKeyNodes(functionOutput);
+
   if (Array.isArray(functionOutput)) {
     // Assume all elements have the same type
     if (typeof (functionOutput as any[])[0] !== "object") {
@@ -180,5 +183,81 @@ export function removeUUIDs(
     return result;
   } else {
     return data;
+  }
+}
+
+export function removeSingleKeyNodes(
+  data: Record<string, any> | any[],
+  fieldName: string[] = [],
+): Record<string, any> | any[] {
+  // Recursively removes nodes with a single key where the value of the node
+  // is an object
+
+  // Handle special case where parent object is e.g. {a: [1,2,3]}, should return [1,2,3]
+  if (!Array.isArray(data)) {
+    const specialCaseRes = specialCaseDeNesting(data);
+    if (specialCaseRes) {
+      return specialCaseRes;
+    }
+  }
+
+  if (Array.isArray(data)) {
+    const result: any[] = [];
+    data.forEach((item) => {
+      result.push(removeSingleKeyNodes(item, fieldName));
+    });
+    return result;
+  }
+
+  function helper(
+    obj: Record<string, any>,
+    result: Record<string, any>,
+    fieldNames: string[],
+  ): Record<string, any> {
+    if (typeof obj !== "object") {
+      return obj;
+    }
+
+    const keys = Object.keys(obj);
+    if (keys.length === 1) {
+      const value = obj[keys[0]];
+      fieldNames.push(keys[0]);
+      if (typeof value === "object" && !Array.isArray(value)) {
+        return helper(value, result, fieldNames);
+      } else {
+        result[fieldNames.join(" -> ")] = value;
+        return result;
+      }
+    } else {
+      const fieldResult: Record<string, any> = {};
+      keys.forEach((key) => {
+        const value = obj[key];
+        const thisFieldName = [...fieldNames, key];
+        if (typeof value === "object" && !Array.isArray(value)) {
+          result = { ...result, ...helper(value, fieldResult, thisFieldName) };
+        } else {
+          result[thisFieldName.join(" -> ")] = value;
+        }
+      });
+      return result;
+    }
+  }
+
+  const initialResult: Record<string, any> = {};
+  return helper(data, initialResult, fieldName);
+}
+
+function specialCaseDeNesting(obj: Record<string, any>): any[] | null {
+  // If obj contains only single key: value pairs and an array. Return the array. Else return null
+  if (typeof obj !== "object") return null;
+  const keys = Object.keys(obj);
+  if (keys.length !== 1) {
+    return null;
+  }
+  const value = obj[keys[0]];
+  if (Array.isArray(value)) {
+    return value;
+  } else {
+    return specialCaseDeNesting(value);
   }
 }
