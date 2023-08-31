@@ -52,11 +52,14 @@ export function DevChatItem(props: {
           })
           .join("")}`,
       );
-    }
-    if (props.chatItem.role === "function") {
+    } else if (props.chatItem.role === "function") {
       try {
         setContent(JSON.stringify(JSON.parse(props.chatItem.content), null, 2));
-      } catch {}
+      } catch {
+        setContent(props.chatItem.content);
+      }
+    } else {
+      setContent(props.chatItem.content);
     }
   }, [props.chatItem.content]);
 
