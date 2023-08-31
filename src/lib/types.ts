@@ -51,5 +51,5 @@ export interface ButtonProps {
   styling?: SidebarStyle;
   buttonStyling?: string; // TODO: weird mismatch in type between this and styling
   initialMessage?: string;
-  greetingText?: string;
+  welcomeText?: string;
 }
