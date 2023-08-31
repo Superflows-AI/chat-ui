@@ -16,23 +16,16 @@ import {
   StreamingStep,
   StreamingStepInput,
   SidebarStyle,
+  ButtonProps,
 } from "../lib/types";
 import { DevChatItem, UserChatItem } from "./chatItems";
 
-export default function SuperflowsSidebar(props: {
+type SuperflowsSidebarProps = ButtonProps & {
   open: boolean;
   setOpen: (open: boolean) => void;
-  superflowsApiKey: string;
-  superflowsUrl?: string;
-  AIname?: string;
-  userApiKey?: string;
-  userDescription?: string;
-  suggestions?: string[];
-  devMode?: boolean;
-  mockApiResponses?: boolean;
-  styling?: SidebarStyle;
-  initialMessage?: string;
-}) {
+};
+
+export default function SuperflowsSidebar(props: SuperflowsSidebarProps) {
   const ref = useRef(null);
   const [userText, setUserText] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -48,7 +41,9 @@ export default function SuperflowsSidebar(props: {
 
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [devChatContents, setDevChatContents] = useState<StreamingStepInput[]>(
-    [],
+    props.greetingText
+      ? [{ role: "assistant", content: props.greetingText }]
+      : [],
   );
 
   useEffect(() => {
@@ -406,7 +401,8 @@ export default function SuperflowsSidebar(props: {
                         />
                       );
                     })}
-                    {devChatContents.length === 0 &&
+                    {(devChatContents.length === 0 ||
+                      (devChatContents.length === 1 && props.greetingText)) &&
                       props.suggestions &&
                       props.suggestions.length > 0 && (
                         <div className="sf-py-4 sf-px-1.5">
