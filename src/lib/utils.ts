@@ -140,30 +140,6 @@ function stringify(obj: Record<string, any> | any[]): string {
   );
 }
 
-export function splitContentByParts(content: string): string[] {
-  /** We split the message into different parts (based on whether they're a <button> or just text),
-   * and then render parts one-by-one **/
-  // TODO: Remove this - it's no longer necessary!
-  const fullRegex = /(<button>.*?<\/button>)|([\s\S]+?)/g;
-
-  let match;
-  const matches: string[] = [];
-  while ((match = fullRegex.exec(content)) !== null) {
-    if (match[1]) matches.push(match[1]);
-    if (match[2]) {
-      // This is because the 3rd match group is lazy, so only captures 1 character at a time
-      const prev = matches[matches.length - 1];
-      if (
-        matches.length === 0 ||
-        (prev.startsWith("<") && prev.endsWith(">"))
-      ) {
-        matches.push(match[2]);
-      } else matches[matches.length - 1] += match[2];
-    }
-  }
-  return matches;
-}
-
 function isUUID(str: string): boolean {
   return validate(str);
 }

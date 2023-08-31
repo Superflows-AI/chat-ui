@@ -15,12 +15,10 @@ import {
   classNames,
   convertToRenderable,
   functionNameToDisplay,
-  splitContentByParts,
 } from "../lib/utils";
 import { Graph, GraphData, extractGraphData } from "./graph";
 
 const feedbackRegex = /<button>Feedback<\/button>/;
-const buttonRegex = /<button>(?![^<]*<button>)(.*?)<\/button>/;
 
 export interface FunctionCall {
   name: string;
@@ -38,7 +36,6 @@ export function DevChatItem(props: {
 }) {
   // TODO: Refactor this and UserChatItem into components for each chat role
   const [content, setContent] = useState(props.chatItem.content);
-  const [matches, setMatches] = useState<string[]>([]);
 
   useEffect(() => {
     if (props.chatItem.role === "confirmation") {
@@ -76,16 +73,12 @@ export function DevChatItem(props: {
   }, [saveSuccessfulFeedback]);
 
   useEffect(() => {
-    if (content) setMatches(splitContentByParts(content));
-  }, [content]);
-
-  useEffect(() => {
     const ele = document.getElementById("sf-scrollable-chat-contents");
     // If the element exists, and it's near the bottom, scroll to the bottom
     if (ele && ele.scrollHeight - ele.scrollTop >= 50) {
       ele.scrollTop = ele.scrollHeight;
     }
-  }, [matches]);
+  }, [content]);
 
   if (!content) return <></>;
   return (
@@ -121,72 +114,13 @@ export function DevChatItem(props: {
           ? "Error"
           : ""}
       </p>
-      {matches.map((text, idx) => {
-        if (feedbackRegex.exec(text) && feedbackRegex.exec(text)!.length > 0) {
-          return (
-            <div
-              key={idx}
-              className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2"
-            >
-              Did this response answer your question?
-              <div className="sf-flex sf-flex-row sf-gap-x-4">
-                <button
-                  onClick={() => setSaveSuccessfulFeedback(true)}
-                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-red-500 sf-ring-red-500 hover:sf-bg-red-600`}
-                >
-                  <HandThumbDownIcon className="sf-h-5 sf-w-5" />
-                  No
-                </button>
-                <button
-                  onClick={() => setSaveSuccessfulFeedback(true)}
-                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-green-500 sf-ring-green-500 hover:sf-bg-green-600`}
-                >
-                  <HandThumbUpIcon className="sf-h-5 sf-w-5" />
-                  Yes
-                </button>
-              </div>
-              <div
-                className={classNames(
-                  "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
-                )}
-              >
-                <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
-                <div className="sf-text-sm">Thanks for your feedback!</div>
-              </div>
-            </div>
-          );
-        }
-        const buttonMatches = buttonRegex.exec(text);
-        if (buttonMatches && buttonMatches.length > 0) {
-          return (
-            <div
-              key={idx}
-              className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2"
-            >
-              <button
-                onClick={() => setSaveSuccessfulFeedback(true)}
-                className={`sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-ring-purple-600 sf-bg-purple-600 sf-text-white`}
-              >
-                {buttonMatches[1].trim()}
-              </button>
-              <div className="sf-flex sf-flex-row sf-place-items-center sf-gap-x-1">
-                {saveSuccessfulFeedback && (
-                  <>
-                    <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
-                    <div className="sf-text-sm">Successful!</div>
-                  </>
-                )}
-              </div>
-            </div>
-          );
-        }
-        return (
-          <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap">
-            {content}
-          </div>
-        );
-      })}
+      {props.chatItem.role === "confirmation" ? (
+        <StyledMarkdown>{content}</StyledMarkdown>
+      ) : (
+        <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap">
+          {content}
+        </div>
+      )}
       {props.onConfirm &&
         props.chatItem.role === "confirmation" &&
         (confirmed === null ? (
@@ -246,7 +180,6 @@ export function UserChatItem(props: {
   const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
     parseOutput(props.chatItem.content),
   );
-  const [matches, setMatches] = useState<string[]>([]);
   const [isJson, setIsJson] = useState(false);
 
   useEffect(() => {
@@ -275,10 +208,6 @@ export function UserChatItem(props: {
     }
   }, [props.chatItem.content]);
 
-  useEffect(() => {
-    if (content) setMatches(splitContentByParts(content));
-  }, [content]);
-
   const [tabOpen, setTabOpen] = useState<"table" | "graph">("table");
 
   const [saveSuccessfulFeedback, setSaveSuccessfulFeedback] = useState(false);
@@ -296,7 +225,7 @@ export function UserChatItem(props: {
     if (ele && ele.scrollHeight - ele.scrollTop >= 50) {
       ele.scrollTop = ele.scrollHeight;
     }
-  }, [matches]);
+  }, [content]);
 
   if (!content) return <></>;
 
@@ -328,102 +257,36 @@ export function UserChatItem(props: {
           ? (props.AIname ?? "Assistant") + " AI"
           : "Function called"}
       </p>
-      {matches.map((text, idx) => {
-        if (feedbackRegex.exec(text) && feedbackRegex.exec(text)!.length > 0) {
-          return (
-            <div
-              key={idx}
-              className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2"
-            >
-              Did this response answer your question?
-              <div className="sf-flex sf-flex-row sf-gap-x-4">
-                <button
-                  onClick={() => setSaveSuccessfulFeedback(true)}
-                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-red-500 sf-ring-red-500 hover:sf-bg-red-600`}
-                >
-                  <HandThumbDownIcon className="sf-h-5 sf-w-5" />
-                  No
-                </button>
-                <button
-                  onClick={() => setSaveSuccessfulFeedback(true)}
-                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-green-500 sf-ring-green-500 hover:sf-bg-green-600`}
-                >
-                  <HandThumbUpIcon className="sf-h-5 sf-w-5" />
-                  Yes
-                </button>
-              </div>
-              <div
-                className={classNames(
-                  "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                  saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
-                )}
-              >
-                <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
-                <div className="sf-text-sm">Thanks for your feedback!</div>
-              </div>
-            </div>
-          );
-        }
-        const buttonMatches = buttonRegex.exec(text);
-        if (buttonMatches && buttonMatches.length > 0) {
-          return (
-            <div
-              key={idx}
-              className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2"
-            >
-              <button
-                onClick={() => setSaveSuccessfulFeedback(true)}
-                className={`px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-ring-purple-600 sf-bg-purple-600 sf-text-white`}
-              >
-                {buttonMatches[1].trim()}
-              </button>
-              <div className="sf-flex sf-flex-row sf-place-items-center sf-gap-x-1">
-                {saveSuccessfulFeedback && (
-                  <>
-                    <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
-                    <div className="sf-text-sm">Successful!</div>
-                  </>
-                )}
-              </div>
-            </div>
-          );
-        }
-        if (props.chatItem.role === "function") {
-          if (tabOpen === "graph") return <Graph key={idx} {...graphedData} />;
-          else if (isJson)
-            return <StyledMarkdown key={idx}>{text}</StyledMarkdown>;
-          else
-            return (
-              <div
-                key={idx}
-                className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-break-words"
-              >
-                {text}
-              </div>
-            );
-        }
-
-        return (
-          <div key={idx} className="sf-w-full">
-            {assistantChatObj.reasoning && (
-              <div className="sf-bg-yellow-100 sf-rounded-md sf-px-4 sf-py-2 sf-border sf-border-yellow-300 sf-w-full">
-                <p className="sf-flex sf-flex-row sf-gap-x-1.5 sf-text-yellow-800">
-                  <LightBulbIcon className="sf-h-5 sf-w-5 sf-text-yellow-600" />{" "}
-                  Thoughts
-                </p>
-                <p className="sf-mt-1 sf-text-little sf-whitespace-pre-line sf-break-words sf-text-gray-700">
-                  {assistantChatObj.reasoning}
-                </p>
-              </div>
-            )}
-            {assistantChatObj.tellUser && (
-              <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-words sf-w-full">
-                {assistantChatObj.tellUser}
-              </div>
-            )}
+      {content && props.chatItem.role === "function" ? (
+        tabOpen === "graph" ? (
+          <Graph {...graphedData} />
+        ) : isJson ? (
+          <StyledMarkdown>{content}</StyledMarkdown>
+        ) : (
+          <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-break-words">
+            {content}
           </div>
-        );
-      })}
+        )
+      ) : (
+        <div className="sf-w-full">
+          {assistantChatObj.reasoning && (
+            <div className="sf-bg-yellow-100 sf-rounded-md sf-px-4 sf-py-2 sf-border sf-border-yellow-300 sf-w-full">
+              <p className="sf-flex sf-flex-row sf-gap-x-1.5 sf-text-yellow-800">
+                <LightBulbIcon className="sf-h-5 sf-w-5 sf-text-yellow-600" />{" "}
+                Thoughts
+              </p>
+              <p className="sf-mt-1 sf-text-little sf-whitespace-pre-line sf-break-words sf-text-gray-700">
+                {assistantChatObj.reasoning}
+              </p>
+            </div>
+          )}
+          {assistantChatObj.tellUser && (
+            <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-words sf-w-full">
+              {assistantChatObj.tellUser}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
