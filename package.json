@@ -30,7 +30,7 @@
     "react-dom": "^16 || ^17 || ^18"
   },
   "scripts": {
-    "build": "rollup -c && mv dist/src/index.d.ts dist/index.d.ts",
+    "build": "rollup -c && mv dist/src/index.d.ts dist/index.d.ts && sed -i 's/.\\/components/.\\/src\\/components/g' dist/index.d.ts && sed -i 's/.\\/lib/.\\/src\\/lib/g' dist/index.d.ts",
     "start": "rollup -c -w",
     "dev": "next dev",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
