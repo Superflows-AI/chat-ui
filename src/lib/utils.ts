@@ -190,7 +190,7 @@ export function removeSingleKeyNodes(
     result: Record<string, any>,
     fieldNames: string[],
   ): Record<string, any> {
-    if (typeof obj !== "object") {
+    if (typeof obj !== "object" || !obj) {
       return obj;
     }
 

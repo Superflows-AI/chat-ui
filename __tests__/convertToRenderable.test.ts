@@ -262,4 +262,47 @@ describe("convertToRenderable", () => {
 `;
     expect(output).toEqual(expected);
   });
+  it("real world example - nested object", () => {
+    const input = {
+      workflow: { code: "client.sub-account" },
+      data: {
+        account: {
+          id: "6e9e250d-47d9-4fda-b223-9687a71afc0b",
+          clientId: "a800b3e5-15e0-4b3c-9d0f-e95f3aed30ba",
+          status: "active",
+          country: "GB",
+          currency: "GBP",
+          alias: "GBP Account",
+          routingCodes: {},
+          // @ts-ignore
+          iban: null,
+          // @ts-ignore
+          accountNumber: null,
+          ledgerNumber: "43668932",
+          availableBalance: 0,
+          accountHolderIdentityType: "corporate",
+          accountHolderName: "I.F Technology Ltd",
+          mainAccountId: "f51db37b-9da6-47e3-a20a-93e642a8fb2c",
+        },
+      },
+      connect: { type: "explicit", serviceProvider: "currencycloud" },
+      metadata: {},
+    };
+    const output = convertToRenderable(input);
+    const expected = `| Name                                         | Value              |
+| :------------------------------------------- | :----------------- |
+| workflow -> code                             | client.sub-account |
+| data -> account -> status                    | active             |
+| data -> account -> country                   | GB                 |
+| data -> account -> currency                  | GBP                |
+| data -> account -> alias                     | GBP Account        |
+| data -> account -> ledgerNumber              | 43668932           |
+| data -> account -> availableBalance          | 0                  |
+| data -> account -> accountHolderIdentityType | corporate          |
+| data -> account -> accountHolderName         | I.F Technology Ltd |
+| connect -> type                              | explicit           |
+| connect -> serviceProvider                   | currencycloud      |
+`;
+    expect(output).toEqual(expected);
+  });
 });
