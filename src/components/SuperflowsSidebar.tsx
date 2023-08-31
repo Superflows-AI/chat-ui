@@ -46,14 +46,6 @@ export default function SuperflowsSidebar(props: SuperflowsSidebarProps) {
       : [],
   );
 
-  useEffect(() => {
-    const ele = document.getElementById("scrollable-chat-contents");
-    // If the element exists, and it's near the bottom, scroll to the bottom
-    if (ele && ele.scrollHeight - ele.scrollTop >= 50) {
-      ele.scrollTop = ele.scrollHeight;
-    }
-  }, [devChatContents]);
-
   const killSwitchClicked = useRef(false);
 
   const hostname = props.superflowsUrl ?? "https://dashboard.superflows.ai";
@@ -325,7 +317,7 @@ export default function SuperflowsSidebar(props: SuperflowsSidebarProps) {
                 </div>
                 <div
                   className="sf-relative sf-overflow-y-auto sf-h-full sf-flex sf-flex-col"
-                  id={"scrollable-chat-contents"}
+                  id={"sf-scrollable-chat-contents"}
                 >
                   {/* Show clear chat button only when there is chat to clear */}
                   {devChatContents.length > 0 && (

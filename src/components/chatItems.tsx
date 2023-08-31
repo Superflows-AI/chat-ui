@@ -79,6 +79,14 @@ export function DevChatItem(props: {
     if (content) setMatches(splitContentByParts(content));
   }, [content]);
 
+  useEffect(() => {
+    const ele = document.getElementById("sf-scrollable-chat-contents");
+    // If the element exists, and it's near the bottom, scroll to the bottom
+    if (ele && ele.scrollHeight - ele.scrollTop >= 50) {
+      ele.scrollTop = ele.scrollHeight;
+    }
+  }, [matches]);
+
   if (!content) return <></>;
   return (
     <div
@@ -281,6 +289,15 @@ export function UserChatItem(props: {
       }, 3000);
     }
   }, [saveSuccessfulFeedback]);
+
+  useEffect(() => {
+    const ele = document.getElementById("sf-scrollable-chat-contents");
+    // If the element exists, and it's near the bottom, scroll to the bottom
+    if (ele && ele.scrollHeight - ele.scrollTop >= 50) {
+      ele.scrollTop = ele.scrollHeight;
+    }
+  }, [matches]);
+
   if (!content) return <></>;
 
   return (
