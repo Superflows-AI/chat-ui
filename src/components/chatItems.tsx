@@ -124,14 +124,18 @@ export function DevChatItem(props: {
               <div className="sf-flex sf-flex-row sf-gap-x-4">
                 <button
                   onClick={() => setSaveSuccessfulFeedback(true)}
-                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-red-500 sf-ring-red-500 hover:sf-bg-red-600`}
+                  className={
+                    "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-red-500 sf-ring-red-500 hover:sf-bg-red-600"
+                  }
                 >
                   <HandThumbDownIcon className="sf-h-5 sf-w-5" />
                   No
                 </button>
                 <button
                   onClick={() => setSaveSuccessfulFeedback(true)}
-                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-green-500 sf-ring-green-500 hover:sf-bg-green-600`}
+                  className={
+                    "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-green-500 sf-ring-green-500 hover:sf-bg-green-600"
+                  }
                 >
                   <HandThumbUpIcon className="sf-h-5 sf-w-5" />
                   Yes
@@ -158,7 +162,9 @@ export function DevChatItem(props: {
             >
               <button
                 onClick={() => setSaveSuccessfulFeedback(true)}
-                className={`sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-ring-purple-600 sf-bg-purple-600 sf-text-white`}
+                className={
+                  "sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-ring-purple-600 sf-bg-purple-600 sf-text-white"
+                }
               >
                 {buttonMatches[1].trim()}
               </button>
@@ -174,7 +180,10 @@ export function DevChatItem(props: {
           );
         }
         return (
-          <div className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap">
+          <div
+            key={idx}
+            className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap"
+          >
             {content}
           </div>
         );
@@ -190,7 +199,9 @@ export function DevChatItem(props: {
                   setConfirmed(false);
                   void props.onConfirm!(false);
                 }}
-                className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-700 sf-px-4 sf-border sf-border-gray-400 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-gray-100 sf-ring-gray-500 hover:sf-bg-gray-200`}
+                className={
+                  "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-700 sf-px-4 sf-border sf-border-gray-400 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-gray-100 sf-ring-gray-500 hover:sf-bg-gray-200"
+                }
               >
                 Cancel
               </button>
@@ -199,7 +210,9 @@ export function DevChatItem(props: {
                   setConfirmed(true);
                   void props.onConfirm!(true);
                 }}
-                className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-blue-500 sf-ring-blue-500 hover:sf-bg-blue-600`}
+                className={
+                  "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-blue-500 sf-ring-blue-500 hover:sf-bg-blue-600"
+                }
               >
                 Confirm
               </button>
@@ -233,7 +246,7 @@ export function UserChatItem(props: {
   chatItem: StreamingStepInput;
   AIname?: string;
 }) {
-  let [graphedData, setGraphedData] = useState<GraphData | null>(null);
+  const [graphedData, setGraphedData] = useState<GraphData | null>(null);
   const [content, setContent] = useState(props.chatItem.content);
   const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
     parseOutput(props.chatItem.content),
@@ -322,14 +335,18 @@ export function UserChatItem(props: {
               <div className="sf-flex sf-flex-row sf-gap-x-4">
                 <button
                   onClick={() => setSaveSuccessfulFeedback(true)}
-                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-red-500 sf-ring-red-500 hover:sf-bg-red-600`}
+                  className={
+                    "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-red-500 sf-ring-red-500 hover:sf-bg-red-600"
+                  }
                 >
                   <HandThumbDownIcon className="sf-h-5 sf-w-5" />
                   No
                 </button>
                 <button
                   onClick={() => setSaveSuccessfulFeedback(true)}
-                  className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-green-500 sf-ring-green-500 hover:sf-bg-green-600`}
+                  className={
+                    "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-green-500 sf-ring-green-500 hover:sf-bg-green-600"
+                  }
                 >
                   <HandThumbUpIcon className="sf-h-5 sf-w-5" />
                   Yes
@@ -356,7 +373,9 @@ export function UserChatItem(props: {
             >
               <button
                 onClick={() => setSaveSuccessfulFeedback(true)}
-                className={`px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-ring-purple-600 sf-bg-purple-600 sf-text-white`}
+                className={
+                  "px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-ring-purple-600 sf-bg-purple-600 sf-text-white"
+                }
               >
                 {buttonMatches[1].trim()}
               </button>
@@ -411,7 +430,7 @@ export function UserChatItem(props: {
   );
 }
 
-function StyledMarkdown(props: { children: string }) {
+function StyledMarkdown(props: { children: string; style?: string }) {
   return (
     <ReactMarkdown
       className="sf-px-2 sf-mt-3 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full"

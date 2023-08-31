@@ -41,8 +41,8 @@ export default function SuperflowsSidebar(props: SuperflowsSidebarProps) {
 
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [devChatContents, setDevChatContents] = useState<StreamingStepInput[]>(
-    props.greetingText
-      ? [{ role: "assistant", content: props.greetingText }]
+    props.welcomeText
+      ? [{ role: "assistant", content: props.welcomeText }]
       : [],
   );
 
@@ -274,7 +274,7 @@ export default function SuperflowsSidebar(props: SuperflowsSidebarProps) {
               <div className="sf-flex sf-min-h-0 sf-flex-1 sf-flex-col sf-pb-1">
                 <div
                   className={classNames(
-                    `sf-py-4 sf-px-3 sf-min-h-[3.75rem] sf-text-gray-900 sf-border-b sf-border-gray-200`,
+                    "sf-py-4 sf-px-3 sf-min-h-[3.75rem] sf-text-gray-900 sf-border-b sf-border-gray-200",
                   )}
                   style={{
                     backgroundColor: props.styling?.headerBackgroundColor,
@@ -402,7 +402,7 @@ export default function SuperflowsSidebar(props: SuperflowsSidebarProps) {
                       );
                     })}
                     {(devChatContents.length === 0 ||
-                      (devChatContents.length === 1 && props.greetingText)) &&
+                      (devChatContents.length === 1 && props.welcomeText)) &&
                       props.suggestions &&
                       props.suggestions.length > 0 && (
                         <div className="sf-py-4 sf-px-1.5">
@@ -434,7 +434,7 @@ export default function SuperflowsSidebar(props: SuperflowsSidebarProps) {
                       ? "sf-overflow-auto-y"
                       : "sf-overflow-hidden",
                     props.styling?.buttonColor
-                      ? `focus:sf-border-gray-500 focus:sf-ring-gray-500`
+                      ? "focus:sf-border-gray-500 focus:sf-ring-gray-500"
                       : "focus:sf-border-purple-300 focus:sf-ring-purple-300",
                   )}
                   placeholder={"Send a message"}
@@ -478,7 +478,7 @@ export default function SuperflowsSidebar(props: SuperflowsSidebarProps) {
                       "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
                       loading || !userText
                         ? "sf-bg-gray-500 sf-cursor-not-allowed"
-                        : `hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500`,
+                        : "hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500",
                       !props.styling?.buttonColor &&
                         !(loading || !userText) &&
                         "sf-bg-purple-500",

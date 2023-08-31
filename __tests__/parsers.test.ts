@@ -162,7 +162,8 @@ describe("Parse output", () => {
 
 describe("parseFunctionCall", () => {
   it("hyphenated argument name", () => {
-    const str = `get_account(gtmhub-accountId="64b17ac6548041a751aaf2f6", id_team="64b17ac6548041a751aaf2f7")`;
+    const str =
+      'get_account(gtmhub-accountId="64b17ac6548041a751aaf2f6", id_team="64b17ac6548041a751aaf2f7")';
     const output = parseFunctionCall(str);
     const expectedOutput = {
       name: "get_account",
@@ -174,7 +175,7 @@ describe("parseFunctionCall", () => {
     expect(output).toStrictEqual(expectedOutput);
   });
   it("argument name with dots in", () => {
-    const str = `list_accounts(data.account.availableBalanceFrom="1000")`;
+    const str = 'list_accounts(data.account.availableBalanceFrom="1000")';
     const output = parseFunctionCall(str);
     const expectedOutput = {
       name: "list_accounts",
@@ -185,7 +186,7 @@ describe("parseFunctionCall", () => {
     expect(output).toStrictEqual(expectedOutput);
   });
   it("argument name with space in skipped", () => {
-    const str = `list_accounts(data availableBalanceFrom="1000")`;
+    const str = 'list_accounts(data availableBalanceFrom="1000")';
     const output = parseFunctionCall(str);
     const expectedOutput = {
       name: "list_accounts",
@@ -196,7 +197,8 @@ describe("parseFunctionCall", () => {
     expect(output).toStrictEqual(expectedOutput);
   });
   it("object passed to function", () => {
-    const str = `create_goal(gtmhub-accountId='64b94e50c1815107739582f9', goal={"title": "Close sales"}, ownerIds=['64b94e50c1815107739582fa'], sessionId='64b94e50c1815107739582fc')`;
+    const str =
+      "create_goal(gtmhub-accountId='64b94e50c1815107739582f9', goal={\"title\": \"Close sales\"}, ownerIds=['64b94e50c1815107739582fa'], sessionId='64b94e50c1815107739582fc')";
     const output = parseFunctionCall(str);
     const expectedOutput = {
       name: "create_goal",
@@ -211,7 +213,7 @@ describe("parseFunctionCall", () => {
   });
 
   it("correctly parses function with floating point argument", () => {
-    const str = `set_coordinates(x=3.14, y=0.98)`;
+    const str = "set_coordinates(x=3.14, y=0.98)";
     const output = parseFunctionCall(str);
     const expectedOutput = {
       name: "set_coordinates",
@@ -220,7 +222,7 @@ describe("parseFunctionCall", () => {
     expect(output).toEqual(expectedOutput);
   });
   it("correctly parses function mixed argument types", () => {
-    const str = `set_coordinates(x=3.14, placeName="The Moon", y=0.98)`;
+    const str = 'set_coordinates(x=3.14, placeName="The Moon", y=0.98)';
     const output = parseFunctionCall(str);
     const expectedOutput = {
       name: "set_coordinates",
@@ -229,7 +231,8 @@ describe("parseFunctionCall", () => {
     expect(output).toEqual(expectedOutput);
   });
   it("string has a comma in it", () => {
-    const str = `set_coordinates(x=3.14, placeName="The Moon, the sun", y=0.98)`;
+    const str =
+      'set_coordinates(x=3.14, placeName="The Moon, the sun", y=0.98)';
     const output = parseFunctionCall(str);
     const expectedOutput = {
       name: "set_coordinates",
@@ -238,7 +241,8 @@ describe("parseFunctionCall", () => {
     expect(output).toEqual(expectedOutput);
   });
   it("string has a comma and single quotes in it", () => {
-    const str = `set_coordinates(x=3.14, placeName="The Moon, 'very nice eh', the sun", y=0.98)`;
+    const str =
+      "set_coordinates(x=3.14, placeName=\"The Moon, 'very nice eh', the sun\", y=0.98)";
     const output = parseFunctionCall(str);
     const expectedOutput = {
       name: "set_coordinates",
@@ -265,13 +269,14 @@ describe("parseFunctionCall", () => {
   //   expect(output).toEqual(expectedOutput);
   // });
   it("returns function with no arguments when none are provided", () => {
-    const str = `do_something()`;
+    const str = "do_something()";
     const output = parseFunctionCall(str);
     const expectedOutput = { name: "do_something", args: {} };
     expect(output).toEqual(expectedOutput);
   });
   it("throws an error when function call format is invalid", () => {
-    const str = `getAccount "64b17ac6548041a751aaf2f6" "64b17ac6548041a751aaf2f7"`;
+    const str =
+      'getAccount "64b17ac6548041a751aaf2f6" "64b17ac6548041a751aaf2f7"';
     expect(() => parseFunctionCall(str)).toThrowError(
       "Invalid function call format: " + str,
     );

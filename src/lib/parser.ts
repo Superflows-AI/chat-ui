@@ -73,7 +73,7 @@ export function parseOutput(gptString: string): ParsedOutput {
     }
   }
 
-  let commands: FunctionCall[] = [];
+  const commands: FunctionCall[] = [];
   if (commandsIn) {
     const commandsText = gptString.split("Commands:")[1].trim();
     commandsText
