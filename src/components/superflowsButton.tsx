@@ -2,21 +2,9 @@ import * as React from "react";
 import { SparklesIcon } from "@heroicons/react/24/outline";
 import SuperflowsSidebar from "./SuperflowsSidebar";
 import { useState } from "react";
-import { SidebarStyle } from "../lib/types";
+import { ButtonProps } from "../lib/types";
 
-export default function SuperflowsButton(props: {
-  superflowsApiKey: string;
-  superflowsUrl?: string;
-  AIname?: string;
-  userApiKey?: string;
-  userDescription?: string;
-  suggestions?: string[];
-  devMode?: boolean;
-  mockApiResponses?: boolean;
-  styling?: SidebarStyle;
-  buttonStyling?: string; // TODO: weird mismatch in type between this and styling
-  initialMessage?: string;
-}) {
+export default function SuperflowsButton(props: ButtonProps) {
   const [open, setOpen] = useState(false);
   return (
     <>
