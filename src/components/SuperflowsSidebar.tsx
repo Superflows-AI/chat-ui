@@ -41,8 +41,8 @@ export default function SuperflowsSidebar(props: SuperflowsSidebarProps) {
 
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [devChatContents, setDevChatContents] = useState<StreamingStepInput[]>(
-    props.greetingText
-      ? [{ role: "assistant", content: props.greetingText }]
+    props.welcomeText
+      ? [{ role: "assistant", content: props.welcomeText }]
       : [],
   );
 
@@ -394,7 +394,7 @@ export default function SuperflowsSidebar(props: SuperflowsSidebarProps) {
                       );
                     })}
                     {(devChatContents.length === 0 ||
-                      (devChatContents.length === 1 && props.greetingText)) &&
+                      (devChatContents.length === 1 && props.welcomeText)) &&
                       props.suggestions &&
                       props.suggestions.length > 0 && (
                         <div className="sf-py-4 sf-px-1.5">

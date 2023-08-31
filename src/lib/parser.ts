@@ -83,10 +83,19 @@ export function parseOutput(gptString: string): ParsedOutput {
   const completed = commands.length === 0;
   // Note: this gives true while streaming in. This is of course, incorrect!
 
+  let tellUser;
+  if (sectionInfo.every((section) => !section.inString)) {
+    // When the response is not in the expected format, for example if the user says "hi"
+    tellUser = gptString;
+  } else {
+    // Otherwise set to the "Tell user:" section
+    tellUser = sectionInfo[2].sectionText;
+  }
+
   return {
     reasoning: sectionInfo[0].sectionText,
     plan: sectionInfo[1].sectionText,
-    tellUser: sectionInfo[2].sectionText,
+    tellUser,
     commands,
     completed,
   };
