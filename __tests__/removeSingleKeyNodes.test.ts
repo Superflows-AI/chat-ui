@@ -23,17 +23,13 @@ describe("remove single key nodes", () => {
     const output = removeSingleKeyNodes(data);
     expect(output).toEqual(expected);
   });
+  it("nested special case", () => {
+    const data = { root: { branch: { leaf: [1, 2, 3] } } };
+    const expected = [1, 2, 3];
 
-  it("array of objects", () => {
-    const data = [
-      { a: 1, b: 2, c: 3 },
-      { a: 4, b: 5, c: 6 },
-    ];
-    const output = removeSingleKeyNodes(data);
-    expect(output).toEqual(data);
+    expect(removeSingleKeyNodes(data)).toEqual(expected);
   });
-
-  it("nested array of objects", () => {
+  it("more complex nested special case", () => {
     const data = {
       a: {
         b: [
@@ -43,15 +39,22 @@ describe("remove single key nodes", () => {
       },
     };
 
-    // Not sure this is 100% the optimal behaviour but its' reasonable
-    const expected = {
-      "a -> b": [
-        { nice: 1, nested: { boy: 2 } },
-        { nice: 2, nested: { boy: 3 } },
-      ],
-    };
+    const expected = [
+      { nice: 1, nested: { boy: 2 } },
+      { nice: 2, nested: { boy: 3 } },
+    ];
+
     const output = removeSingleKeyNodes(data);
     expect(output).toEqual(expected);
+  });
+
+  it("array of objects", () => {
+    const data = [
+      { a: 1, b: 2, c: 3 },
+      { a: 4, b: 5, c: 6 },
+    ];
+    const output = removeSingleKeyNodes(data);
+    expect(output).toEqual(data);
   });
 
   it("single node key nested inside complex object", () => {
@@ -70,13 +73,6 @@ describe("remove single key nodes", () => {
     };
     const output = removeSingleKeyNodes(data);
     expect(output).toEqual(expected);
-  });
-
-  it("Handles nested single key arrays", () => {
-    const data = { root: { branch: { leaf: [1, 2, 3] } } };
-    const expected = { "root -> branch -> leaf": [1, 2, 3] };
-
-    expect(removeSingleKeyNodes(data)).toEqual(expected);
   });
 
   it("Does not lose data for multiple nested single key", () => {

@@ -194,13 +194,11 @@ export function removeSingleKeyNodes(
   // is an object
 
   // Handle special case where parent object is e.g. {a: [1,2,3]}, should return [1,2,3]
-  if (
-    !Array.isArray(data) &&
-    Object.keys(data).length === 1 &&
-    Array.isArray(data[Object.keys(data)[0]]) &&
-    fieldName.length === 0
-  ) {
-    return data[Object.keys(data)[0]];
+  if (!Array.isArray(data)) {
+    const specialCaseRes = specialCaseDeNesting(data);
+    if (specialCaseRes) {
+      return specialCaseRes;
+    }
   }
 
   if (Array.isArray(data)) {
@@ -247,4 +245,19 @@ export function removeSingleKeyNodes(
 
   const initialResult: Record<string, any> = {};
   return helper(data, initialResult, fieldName);
+}
+
+function specialCaseDeNesting(obj: Record<string, any>): any[] | null {
+  // If obj contains only single key: value pairs and an array. Return the array. Else return null
+  if (typeof obj !== "object") return null;
+  const keys = Object.keys(obj);
+  if (keys.length !== 1) {
+    return null;
+  }
+  const value = obj[keys[0]];
+  if (Array.isArray(value)) {
+    return value;
+  } else {
+    return specialCaseDeNesting(value);
+  }
 }
