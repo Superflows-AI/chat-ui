@@ -51,8 +51,8 @@ export function parseOutput(gptString: string): ParsedOutput {
   const sectionInfo = sections
     .map((section) => ({
       ...section,
-      // TODO: Below booleans could be wrong if by chance any of the below strings are used
-      //  by GPT in an earlier stage of the response
+      // TODO: Both `inString` and `index` could be wrong if by chance any of the
+      //  searchStrings are used by GPT in an earlier stage of the response
       inString: gptString.toLowerCase().includes(section.searchString),
       index: gptString.toLowerCase().indexOf(section.searchString),
     }))
