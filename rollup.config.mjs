@@ -3,6 +3,7 @@ import typescript from "rollup-plugin-typescript2";
 import postcss from "rollup-plugin-postcss";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
+import nodePolyfills from "rollup-plugin-polyfill-node";
 
 import pkg from "./package.json" assert { type: "json" };
 
@@ -18,7 +19,8 @@ export default {
     },
   ],
   plugins: [
-    resolve({ browser: true }),
+    resolve(),
+    nodePolyfills({ include: ["process*", "path", "url*"] }),
     commonjs({
       include: "node_modules/**",
     }),
