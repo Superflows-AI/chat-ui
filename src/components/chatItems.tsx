@@ -212,7 +212,7 @@ export function UserChatItem(props: {
     }
   }, [saveSuccessfulFeedback]);
 
-  useEffect(scrollToBottom, [content]);
+  useEffect(scrollToBottom, [content, assistantChatObj]);
 
   if (!content) return <></>;
 
