@@ -1,6 +1,6 @@
 {
   "name": "@superflows/chat-ui-react",
-  "version": "1.1.17",
+  "version": "1.1.18-beta.0",
   "main": "dist/index.js",
   "devDependencies": {
     "@heroicons/react": "^2.0.18",
@@ -47,6 +47,7 @@
     "react-markdown": "^8",
     "recharts": "^2.7.2",
     "remark-gfm": "^3.0.1",
+    "rollup-plugin-polyfill-node": "^0.12.0",
     "tablemark": "^3.0.0",
     "uuid": "^9.0.0"
   }
