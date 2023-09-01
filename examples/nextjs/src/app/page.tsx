@@ -52,18 +52,18 @@ export default function Home() {
             superflowsApiKey={process.env.NEXT_PUBLIC_SUPERFLOWS_API_KEY ?? ""}
             userDescription={process.env.NEXT_PUBLIC_USER_DESCRIPTION}
             userApiKey={process.env.NEXT_PUBLIC_USER_API_KEY}
-            AIname={"Superflows Assistant"}
+            AIname={"Integrated Finance"}
             styling={{
-              type: "modal",
+              type: "sidebar",
+              slideoverSide: "right",
+              // buttonColor: "green",
               // modalClasses: "bg-gray-50",
               // slideoverSide: "right",
               // headerTextColor: "#146ef5",
               // buttonColor: "#146ef5",
             }}
-            mockApiResponses={false}
-            suggestions={process.env.NEXT_PUBLIC_SUPERFLOWS_SUGGESTIONS?.split(
-              ",",
-            )}
+            welcomeText={"Welcome to Acme CRM"}
+            suggestions={process.env.NEXT_PUBLIC_SUGGESTIONS?.split(",")}
           />
 
           {[1, 2, 3].map((n) => (
@@ -91,37 +91,6 @@ export default function Home() {
           ))}
         </div>
       </div>
-      {/*<img className={"absolute inset-0"} src={"/highlevel-bg.png"} />*/}
-      {/*<div className="absolute top-1.5 right-[10.5rem]">*/}
-      {/*  <SuperflowsButton*/}
-      {/*    superflowsApiKey={process.env.NEXT_PUBLIC_SUPERFLOWS_API_KEY ?? ""}*/}
-      {/*    // superflowsUrl={process.env.NEXT_PUBLIC_SUPERFLOWS_API_URL}*/}
-      {/*    userDescription={process.env.NEXT_PUBLIC_USER_DESCRIPTION}*/}
-      {/*    userApiKey={process.env.NEXT_PUBLIC_USER_API_KEY}*/}
-      {/*    AIname={"Superflows Assistant"}*/}
-      {/*    styling={{*/}
-      {/*      type: "modal",*/}
-      {/*      modalClasses: "max-w-6xl bg-gray-50 min-h-[30rem]",*/}
-      {/*      solidIcon: true,*/}
-      {/*      buttonColor: "white",*/}
-      {/*      // slideoverSide: "right",*/}
-      {/*      // headerTextColor: "#146ef5",*/}
-      {/*      // buttonColor: "#146ef5",*/}
-      {/*    }}*/}
-      {/*    // devMode={true}*/}
-      {/*    // mockApiResponses={false}*/}
-      {/*    // suggestions={[*/}
-      {/*    //   "When am I meeting Alex from Alphabet Inc?",*/}
-      {/*    //   "Who was the top-performing sales rep last quarter?",*/}
-      {/*    //   "What's the most valuable open opportunity?",*/}
-      {/*    // ]}*/}
-      {/*    suggestions={process.env.NEXT_PUBLIC_SUPERFLOWS_SUGGESTIONS?.split(*/}
-      {/*      ",",*/}
-      {/*    )}*/}
-      {/*    // TODO: THIS DOESN'T WORK!*/}
-      {/*    buttonStyling="p-1 bg-amber-500 text-black"*/}
-      {/*  />*/}
-      {/*</div>*/}
     </main>
   );
 }
