@@ -52,7 +52,7 @@ export default function Home() {
             superflowsApiKey={process.env.NEXT_PUBLIC_SUPERFLOWS_API_KEY ?? ""}
             userDescription={process.env.NEXT_PUBLIC_USER_DESCRIPTION}
             userApiKey={process.env.NEXT_PUBLIC_USER_API_KEY}
-            AIname={"Integrated Finance"}
+            AIname={"Superflows Assistant"}
             styling={{
               type: "sidebar",
               slideoverSide: "right",
@@ -74,7 +74,6 @@ export default function Home() {
         <div className="ml-24 w-full h-full flex flex-col rounded-md">
           <div className="text-2xl text-gray-600 mb-6 w-44 rounded-full h-7 animate-pulse bg-gray-400" />
           {[
-            // 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
             1,
             2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
           ].map((n) => (
