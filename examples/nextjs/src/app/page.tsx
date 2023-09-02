@@ -73,10 +73,7 @@ export default function Home() {
         </div>
         <div className="ml-24 w-full h-full flex flex-col rounded-md">
           <div className="text-2xl text-gray-600 mb-6 w-44 rounded-full h-7 animate-pulse bg-gray-400" />
-          {[
-            1,
-            2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
-          ].map((n) => (
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
             <div
               key={n}
               className="w-full bg-gray-100 border-b border-gray-400 animate-pulse flex space-x-4 px-6"
