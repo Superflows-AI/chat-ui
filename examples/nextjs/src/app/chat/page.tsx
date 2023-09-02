@@ -15,7 +15,6 @@ export default function Home() {
         superflowsApiKey={process.env.NEXT_PUBLIC_SUPERFLOWS_API_KEY ?? ""}
         userDescription={process.env.NEXT_PUBLIC_USER_DESCRIPTION}
         userApiKey={process.env.NEXT_PUBLIC_USER_API_KEY}
-        // AIname={"Integrated Finance"}
         styling={
           {
             // type: "modal",
