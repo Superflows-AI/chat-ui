@@ -63,7 +63,7 @@ export function parseOutput(gptString: string): ParsedOutput {
         : "",
     }));
 
-  let commands: FunctionCall[] = [];
+  const commands: FunctionCall[] = [];
   if (sectionInfo[3].inString) {
     const commandsText = sectionInfo[3].sectionText;
     commandsText

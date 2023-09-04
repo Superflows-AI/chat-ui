@@ -3,7 +3,7 @@ import {
   LightBulbIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import * as React from "react";
+import React from "react";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -175,7 +175,7 @@ export function UserChatItem(props: {
   AIname?: string;
   isLoading?: boolean;
 }) {
-  let [graphedData, setGraphedData] = useState<GraphData | null>(null);
+  const [graphedData, setGraphedData] = useState<GraphData | null>(null);
   const [content, setContent] = useState(props.chatItem.content);
   const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
     parseOutput(props.chatItem.content),
@@ -377,7 +377,7 @@ function StyledMarkdown(props: { children: string }) {
         td: ({ node, ...props }) => (
           <td
             className="sf-bg-gray-200 sf-border sf-border-gray-300 sf-whitespace-wrap sf-px-2 sf-py-2.5 sf-text-xs md:sf-text-sm sf-text-gray-700 sf-break-words sf-break"
-            style={{ ...props.style, wordBreak: "break-word" }}
+            style={{ wordBreak: "break-word" }}
             {...props}
           />
         ),
