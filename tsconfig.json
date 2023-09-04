@@ -12,6 +12,10 @@
     "forceConsistentCasingInFileNames": false,
     "noImplicitReturns": true,
     "noImplicitThis": true,
+    "paths": {
+      "react": ["./node_modules/react"],
+      "react-dom": ["./node_modules/react-dom"]
+    },
     "noImplicitAny": true,
     "strictNullChecks": false,
     "noUnusedLocals": false,

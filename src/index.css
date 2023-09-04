@@ -2,6 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-.sf-break {
+.break {
   word-break: break-word;
 }

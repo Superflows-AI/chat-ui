@@ -215,26 +215,26 @@ export default function Chat(props: ChatProps) {
     ],
   );
   return (
-    <div className="sf-flex sf-min-h-0 sf-h-full sf-w-full sf-flex-1 sf-flex-col">
+    <div className="flex min-h-0 h-full w-full flex-1 flex-col">
       <div
-        className="sf-relative sf-overflow-y-auto sf-h-full sf-flex sf-flex-col sf-flex-1 sf-pb-1"
-        id={"sf-scrollable-chat-contents"}
+        className="relative overflow-y-auto h-full flex flex-col flex-1 pb-1"
+        id={"scrollable-chat-contents"}
       >
         {/* Show clear chat button only when there is chat to clear */}
         {devChatContents.length > 0 && (
           <button
             className={
-              "sf-absolute sf-top-2 sf-right-2 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-px-2 sf-py-1 sf-rounded-md sf-bg-white sf-border focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500 sf-transition sf-border-gray-300 hover:sf-border-gray-400 sf-text-gray-500 hover:sf-text-gray-600"
+              "absolute top-2 right-2 flex flex-row place-items-center gap-x-1 px-2 py-1 rounded-md bg-white border focus:outline-none focus:ring-2 focus:ring-gray-500 transition border-gray-300 hover:border-gray-400 text-gray-500 hover:text-gray-600"
             }
             onClick={() => {
               setDevChatContents([]);
               setConversationId(null);
             }}
           >
-            <ArrowPathIcon className="sf-h-4 sf-w-4" /> Clear chat
+            <ArrowPathIcon className="h-4 w-4" /> Clear chat
           </button>
         )}
-        <div className="sf-mt-6 sf-flex-1 sf-px-1 sf-shrink-0 sf-flex sf-flex-col sf-justify-end sf-gap-y-2">
+        <div className="mt-6 flex-1 px-1 shrink-0 flex flex-col justify-end gap-y-2">
           {devChatContents.map((chatItem: StreamingStepInput, idx: number) => {
             if (
               props.devMode ||
@@ -291,13 +291,13 @@ export default function Chat(props: ChatProps) {
             (devChatContents.length === 1 && props.welcomeText)) &&
             props.suggestions &&
             props.suggestions.length > 0 && (
-              <div className="sf-py-4 sf-px-1.5">
-                <h2 className="sf-ml-2 sf-font-medium">Suggestions</h2>
-                <div className="sf-mt-1 sf-flex sf-flex-col sf-gap-y-2 sf-place-items-baseline">
+              <div className="py-4 px-1.5">
+                <h2 className="ml-2 font-medium"></h2>
+                <div className="mt-1 flex flex-col gap-y-2 place-items-baseline">
                   {props.suggestions.map((text) => (
                     <button
                       key={text}
-                      className="sf-text-left sf-px-2 sf-py-1 sf-rounded-md sf-border sf-bg-white sf-text-little sf-text-gray-800 sf-shadow hover:sf-shadow-md"
+                      className="text-left px-2 py-1 rounded-md border bg-white text-little text-gray-800 shadow hover:shadow-md"
                       onClick={() => setUserText(text)}
                     >
                       {text}
@@ -309,14 +309,14 @@ export default function Chat(props: ChatProps) {
         </div>
       </div>
       {/* Textbox user types into */}
-      <div className="sf-flex sf-flex-col sf-pt-4">
+      <div className="flex flex-col pt-4">
         <AutoGrowingTextArea
           className={classNames(
-            "sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400",
-            userText.length > 300 ? "sf-overflow-auto-y" : "sf-overflow-hidden",
+            "text-sm resize-none mx-1 rounded py-2 px-4 border-gray-300 border focus:ring-1 focus:outline-0 placeholder:text-gray-400",
+            userText.length > 300 ? "overflow-auto-y" : "overflow-hidden",
             props.styling?.buttonColor
-              ? `focus:sf-border-gray-500 focus:sf-ring-gray-500`
-              : "focus:sf-border-purple-300 focus:sf-ring-purple-300",
+              ? `focus:border-gray-500 focus:ring-gray-500`
+              : "focus:border-purple-300 focus:ring-purple-300",
           )}
           placeholder={"Send a message"}
           value={userText}
@@ -336,13 +336,13 @@ export default function Chat(props: ChatProps) {
             }
           }}
         />
-        <div className="sf-flex sf-flex-shrink-0 sf-w-full sf-justify-between sf-px-1 sf-pb-4 sf-pt-2">
+        <div className="flex flex-shrink-0 w-full justify-between px-1 pb-4 pt-2">
           <button
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-shadow-sm sf-border",
+              "flex flex-row gap-x-1 place-items-center ml-4 justify-center select-none focus:outline-0 rounded-md px-3 py-2 text-sm shadow-sm border",
               loading
-                ? "sf-text-gray-500 sf-bg-gray-100 hover:sf-bg-gray-200 sf-border-gray-300"
-                : "sf-invisible",
+                ? "text-gray-500 bg-gray-100 hover:bg-gray-200 border-gray-300"
+                : "invisible",
             )}
             onClick={() => {
               killSwitchClicked.current = true;
@@ -356,13 +356,13 @@ export default function Chat(props: ChatProps) {
             ref={props.initialFocus}
             type="submit"
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
+              "flex flex-row gap-x-1 place-items-center ml-4 justify-center select-none focus:outline-0 rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm",
               loading || !userText
-                ? "sf-bg-gray-500 sf-cursor-not-allowed"
-                : `hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500`,
+                ? "bg-gray-500 cursor-not-allowed"
+                : `hover:opacity-90 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-sky-500`,
               !props.styling?.buttonColor &&
                 !(loading || !userText) &&
-                "sf-bg-purple-500",
+                "bg-purple-500",
             )}
             onClick={() => {
               if (!loading && userText) {
@@ -380,7 +380,7 @@ export default function Chat(props: ChatProps) {
                 : {}
             }
           >
-            {loading && <LoadingSpinner classes="sf-h-4 sf-w-4" />}
+            {loading && <LoadingSpinner classes="h-4 w-4" />}
             Submit
           </button>
         </div>

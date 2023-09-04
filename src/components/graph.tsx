@@ -112,7 +112,7 @@ export function Graph(props: GraphData) {
   }
 
   return (
-    <ResponsiveContainer width="80%" aspect={2} className="sf-mx-auto sf-mt-2">
+    <ResponsiveContainer width="80%" aspect={2} className="mx-auto mt-2">
       <LineChart data={props.data}>
         <XAxis
           dataKey="x"

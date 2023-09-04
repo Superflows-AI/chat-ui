@@ -3,7 +3,7 @@ module.exports = {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   important: true,
   plugins: [require("@tailwindcss/forms")],
-  prefix: "sf-",
+  prefix: "",
   theme: {
     extend: {
       colors: {
