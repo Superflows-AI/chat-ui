@@ -15,6 +15,12 @@ import {
   functionNameToDisplay,
 } from "../lib/utils";
 import { Graph, GraphData, extractGraphData } from "./graph";
+import { LoadingSpinner } from "./loadingspinner";
+import {
+  BoltIcon,
+  MapIcon,
+  LightBulbIcon as LightBulbSolidIcon,
+} from "@heroicons/react/24/solid";
 
 export interface FunctionCall {
   name: string;
@@ -167,6 +173,7 @@ export function DevChatItem(props: {
 export function UserChatItem(props: {
   chatItem: StreamingStepInput;
   AIname?: string;
+  isLoading?: boolean;
 }) {
   let [graphedData, setGraphedData] = useState<GraphData | null>(null);
   const [content, setContent] = useState(props.chatItem.content);
@@ -214,12 +221,10 @@ export function UserChatItem(props: {
 
   useEffect(scrollToBottom, [content, assistantChatObj]);
 
-  if (!content) return <></>;
-
   return (
     <div
       className={classNames(
-        "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full",
+        "sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full",
         props.chatItem.role === "user"
           ? "sf-bg-gray-100 sf-text-right sf-place-items-end"
           : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
@@ -258,20 +263,66 @@ export function UserChatItem(props: {
         <div className="sf-w-full">
           {assistantChatObj.reasoning && (
             <div className="sf-bg-yellow-100 sf-rounded-md sf-px-4 sf-py-2 sf-border sf-border-yellow-300 sf-w-full">
-              <p className="sf-flex sf-flex-row sf-gap-x-1.5 sf-text-yellow-800">
+              <p className="sf-flex sf-flex-row sf-gap-x-1 sf-text-yellow-800 sf-text-little">
                 <LightBulbIcon className="sf-h-5 sf-w-5 sf-text-yellow-600" />{" "}
                 Thoughts
               </p>
-              <p className="sf-mt-1 sf-text-little sf-whitespace-pre-line sf-break-words sf-text-gray-700">
+              <p className="sf-mt-0.5 sf-text-little sf-whitespace-pre-line sf-break-words sf-text-gray-700">
                 {assistantChatObj.reasoning}
               </p>
             </div>
           )}
           {assistantChatObj.tellUser && (
-            <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-words sf-w-full">
+            <div className="sf-px-2 sf-mt-2.5 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-words sf-w-full">
               {assistantChatObj.tellUser}
             </div>
           )}
+          {props.isLoading &&
+            (!props.chatItem.content ||
+              (assistantChatObj.plan && !assistantChatObj.tellUser) ||
+              props.chatItem.content.includes("Commands:")) && (
+              <div
+                className={classNames(
+                  "sf-w-full sf-flex sf-flex-row sf-justify-center sf-text-sm",
+                  !props.chatItem.content ? "" : "sf-mt-1.5",
+                )}
+              >
+                <div
+                  className={classNames(
+                    "sf-px-8 sf-py-1 sf-rounded sf-border sf-flex sf-flex-col sf-place-items-center",
+                    !props.chatItem.content &&
+                      "sf-border-orange-300 sf-bg-orange-200 sf-text-orange-700",
+                    assistantChatObj.plan &&
+                      !assistantChatObj.tellUser &&
+                      "sf-border-blue-300 sf-bg-blue-200 sf-text-blue-700",
+                    props.chatItem.content.includes("Commands:") &&
+                      "sf-border-purple-300 sf-bg-purple-200 sf-text-purple-700",
+                  )}
+                >
+                  <div className="sf-flex sf-flex-row sf-place-items-center sf-gap-x-1">
+                    {!props.chatItem.content ? (
+                      <>
+                        <LightBulbSolidIcon className="sf-w-4 sf-h-4" />
+                        Thinking...
+                      </>
+                    ) : props.chatItem.content.includes("Commands:") ? (
+                      <>
+                        <BoltIcon className="sf-w-4 sf-h-4" />
+                        Taking actions...
+                      </>
+                    ) : (
+                      <>
+                        <MapIcon className={"sf-w-4 sf-h-4"} />
+                        Planning next steps...
+                      </>
+                    )}
+                  </div>
+                  <LoadingSpinner
+                    classes={"sf-mt-1 sf-w-5 sf-h-5 sf-mx-auto"}
+                  />
+                </div>
+              </div>
+            )}
         </div>
       )}
     </div>
