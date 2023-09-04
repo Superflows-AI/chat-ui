@@ -49,7 +49,8 @@ export default function Chat(props: ChatProps) {
 
   const callSuperflowsApi = useCallback(
     async (chat: StreamingStepInput[]) => {
-      setDevChatContents(chat);
+      // Below adds a message so the loading spinner comes up while we're waiting
+      setDevChatContents([...chat, { role: "assistant", content: "" }]);
       if (loading || alreadyRunning.current) return;
       alreadyRunning.current = true;
       setLoading(true);
@@ -285,7 +286,14 @@ export default function Chat(props: ChatProps) {
                 />
               );
             }
-            return <UserChatItem chatItem={chatItem} key={idx.toString()} />;
+            return (
+              <UserChatItem
+                chatItem={chatItem}
+                key={idx.toString()}
+                // Below ensures that loading spinner is only shown on the message currently streaming in
+                isLoading={loading && idx === devChatContents.length - 1}
+              />
+            );
           })}
           {(devChatContents.length === 0 ||
             (devChatContents.length === 1 && props.welcomeText)) &&
