@@ -42,6 +42,7 @@
   "dependencies": {
     "@headlessui/react": "1.4",
     "@heroicons/react": "^2.0.18",
+    "@superflows/chat-ui-react": "^1.1.20",
     "@tailwindcss/forms": "^0.5.4",
     "luxon": "^3.4.0",
     "react-markdown": "^8",
