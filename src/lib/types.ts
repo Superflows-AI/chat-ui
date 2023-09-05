@@ -8,7 +8,7 @@ export type Json =
   | { [key: string]: Json }
   | Json[];
 
-export type ChatItem =
+export type ChatItemType =
   | StreamingStep
   | {
       role: "user";

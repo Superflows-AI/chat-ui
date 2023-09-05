@@ -3,8 +3,7 @@ import {
   LightBulbIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ParsedOutput, parseOutput } from "../lib/parser";
@@ -31,30 +30,46 @@ export interface ToConfirm extends FunctionCall {
   actionId: number;
 }
 
+type ChatItemRole =
+  | "system"
+  | "user"
+  | "assistant"
+  | "function"
+  | "error"
+  | "confirmation"
+  | "debug";
+
+export function ChatItem(props: {
+  chatItem: StreamingStepInput;
+  devMode: boolean;
+  AIname?: string;
+  onConfirm?: (confirm: boolean) => Promise<void>;
+  isLoading?: boolean;
+  prevAndNextChatRoles?: ChatItemRole[];
+}) {
+  useEffect(scrollToBottom, [props.chatItem.content]);
+
+  const chatItem = props.chatItem;
+  if (chatItem.role === "confirmation") {
+    return <ConfirmationChatItem {...props} />;
+  } else if (props.devMode || ["error", "user"].includes(chatItem.role)) {
+    return <DevChatItem {...props} />;
+  } else if (chatItem.role === "function") {
+    return <FunctionVizChatItem {...props} chatItem={chatItem} />;
+  } else {
+    return <UserChatItem {...props} />;
+  }
+}
+
 export function DevChatItem(props: {
   chatItem: StreamingStepInput;
   AIname?: string;
   onConfirm?: (confirm: boolean) => Promise<void>;
 }) {
-  // TODO: Refactor this and UserChatItem into components for each chat role
   const [content, setContent] = useState(props.chatItem.content);
 
   useEffect(() => {
-    if (props.chatItem.role === "confirmation") {
-      const toConfirm = JSON.parse(props.chatItem.content) as ToConfirm[];
-      setContent(
-        `The following action${
-          toConfirm.length > 1 ? "s require" : " requires"
-        } confirmation:\n\n${toConfirm
-          .map((action) => {
-            return `${convertToRenderable(
-              action.args,
-              functionNameToDisplay(action.name),
-            )}`;
-          })
-          .join("")}`,
-      );
-    } else if (props.chatItem.role === "function") {
+    if (props.chatItem.role === "function") {
       try {
         setContent(JSON.stringify(JSON.parse(props.chatItem.content), null, 2));
       } catch {
@@ -63,6 +78,140 @@ export function DevChatItem(props: {
     } else {
       setContent(props.chatItem.content);
     }
+  }, [props.chatItem.content]);
+
+  if (!content) return <></>;
+  return (
+    <div
+      className={classNames(
+        "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full",
+        props.chatItem.role === "user"
+          ? "sf-bg-gray-100 sf-text-right sf-place-items-end"
+          : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
+        props.chatItem.role === "error"
+          ? "sf-bg-red-200"
+          : props.chatItem.role === "debug"
+          ? "sf-bg-green-100"
+          : props.chatItem.role === "function"
+          ? "sf-bg-green-200"
+          : "",
+      )}
+    >
+      <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
+        {props.chatItem.role === "assistant"
+          ? (props.AIname ?? "Assistant") + " AI"
+          : props.chatItem.role === "function"
+          ? "Function called"
+          : props.chatItem.role === "user"
+          ? "You"
+          : props.chatItem.role === "debug"
+          ? "Debug"
+          : props.chatItem.role === "error"
+          ? "Error"
+          : ""}
+      </p>
+      <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap">
+        {content}
+      </div>
+    </div>
+  );
+}
+
+export function FunctionVizChatItem(props: {
+  chatItem: Extract<StreamingStepInput, { role: "function" }>;
+  prevAndNextChatRoles?: ChatItemRole[];
+}) {
+  if (props.chatItem.role !== "function")
+    throw new Error("Not a function chat item");
+
+  const [graphedData, setGraphedData] = useState<GraphData | null>(null);
+  const [content, setContent] = useState(props.chatItem.content);
+  const [isJson, setIsJson] = useState(false);
+  const [tabOpen, setTabOpen] = useState<"table" | "graph">("table");
+
+  useEffect(() => {
+    if (["[]", "{}"].includes(props.chatItem.content)) {
+      setContent("No data returned");
+      return;
+    }
+    try {
+      const functionJsonResponse = JSON.parse(props.chatItem.content) as Json;
+      setIsJson(true);
+      setGraphedData(extractGraphData(functionJsonResponse));
+      if (functionJsonResponse && typeof functionJsonResponse === "object") {
+        setContent(
+          convertToRenderable(
+            functionJsonResponse,
+            `${functionNameToDisplay(props.chatItem?.name ?? "")} result`,
+          ),
+        );
+      }
+    } catch {
+      let dataToShow = props.chatItem.content.slice(0, 100);
+      if (props.chatItem.content.length > 100) dataToShow += "...";
+      console.log(`Could not parse data: ${dataToShow} as json`);
+      // If not JSON, then there may be a summary
+      setContent(props.chatItem.summary ?? props.chatItem.content);
+    }
+  }, []);
+
+  // TODO: Perhaps remove this?
+  // If this chat item is empty and the previous and next chat items are functions, then don't show anything
+  if (
+    ["[]", "{}"].includes(props.chatItem.content) ||
+    props.prevAndNextChatRoles.every((role) => role === "function")
+  ) {
+    return <></>;
+  }
+
+  return (
+    <div
+      className={
+        "sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-green-200"
+      }
+    >
+      {graphedData && (
+        <div className="-sf-py-4">
+          <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />{" "}
+        </div>
+      )}
+      <p className="sf-text-xs sf-text-gray-600 sf-mb-1">Function called</p>
+      {content &&
+        (tabOpen === "graph" ? (
+          <Graph {...graphedData} />
+        ) : isJson ? (
+          <StyledMarkdown>{content}</StyledMarkdown>
+        ) : (
+          <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-break-words">
+            {content}
+          </div>
+        ))}
+    </div>
+  );
+}
+
+export function ConfirmationChatItem(props: {
+  chatItem: StreamingStepInput;
+  onConfirm?: (confirm: boolean) => Promise<void>;
+}) {
+  if (props.chatItem.role !== "confirmation")
+    throw new Error("Not a confirmation chat item");
+  const [content, setContent] = useState(props.chatItem.content);
+
+  useEffect(() => {
+    const toConfirm = JSON.parse(props.chatItem.content) as ToConfirm[];
+    setContent(
+      `The following action${
+        toConfirm.length > 1 ? "s require" : " requires"
+      } confirmation:\n\n${toConfirm
+        .map((action) => {
+          return `${convertToRenderable(
+            action.args,
+            functionNameToDisplay(action.name),
+          )}`;
+        })
+        .join("")}`,
+    );
   }, [props.chatItem.content]);
 
   const [saveSuccessfulFeedback, setSaveSuccessfulFeedback] =
@@ -77,51 +226,18 @@ export function DevChatItem(props: {
     }
   }, [saveSuccessfulFeedback]);
 
-  useEffect(scrollToBottom, [content]);
-
   if (!content) return <></>;
   return (
     <div
-      className={classNames(
-        "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col  sf-w-full",
-        props.chatItem.role === "user"
-          ? "sf-bg-gray-100 sf-text-right sf-place-items-end"
-          : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
-        props.chatItem.role === "error"
-          ? "sf-bg-red-200"
-          : props.chatItem.role === "debug"
-          ? "sf-bg-green-100"
-          : props.chatItem.role === "function"
-          ? "sf-bg-green-200"
-          : props.chatItem.role === "confirmation"
-          ? "sf-bg-blue-100"
-          : "",
-      )}
+      className={
+        "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-bg-blue-100 sf-text-left sf-place-items-baseline"
+      }
     >
       <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
-        {props.chatItem.role === "assistant"
-          ? (props.AIname ?? "Assistant") + " AI"
-          : props.chatItem.role === "function"
-          ? "Function called"
-          : props.chatItem.role === "confirmation"
-          ? "Confirmation required"
-          : props.chatItem.role === "user"
-          ? "You"
-          : props.chatItem.role === "debug"
-          ? "Debug"
-          : props.chatItem.role === "error"
-          ? "Error"
-          : ""}
+        Confirmation required
       </p>
-      {props.chatItem.role === "confirmation" ? (
-        <StyledMarkdown>{content}</StyledMarkdown>
-      ) : (
-        <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap">
-          {content}
-        </div>
-      )}
+      <StyledMarkdown>{content}</StyledMarkdown>
       {props.onConfirm &&
-        props.chatItem.role === "confirmation" &&
         (confirmed === null ? (
           <div className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2">
             Are you sure you want to continue?
@@ -175,51 +291,15 @@ export function UserChatItem(props: {
   AIname?: string;
   isLoading?: boolean;
 }) {
-  const [graphedData, setGraphedData] = useState<GraphData | null>(null);
-  const [content, setContent] = useState(props.chatItem.content);
   const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
     parseOutput(props.chatItem.content),
   );
-  const [isJson, setIsJson] = useState(false);
 
   useEffect(() => {
-    if (props.chatItem.role === "function") {
-      try {
-        const functionJsonResponse = JSON.parse(props.chatItem.content) as Json;
-        setIsJson(true);
-        setGraphedData(extractGraphData(functionJsonResponse));
-        if (functionJsonResponse && typeof functionJsonResponse === "object") {
-          setContent(
-            convertToRenderable(
-              functionJsonResponse,
-              `${functionNameToDisplay(props.chatItem?.name ?? "")} result`,
-            ),
-          );
-        }
-      } catch {
-        let dataToShow = props.chatItem.content.slice(0, 100);
-        if (props.chatItem.content.length > 100) dataToShow += "...";
-        console.log(`Could not parse data: ${dataToShow} as json`);
-        // If not JSON, then there may be a summary
-        setContent(props.chatItem.summary ?? props.chatItem.content);
-      }
-    } else {
-      setAssistantChatObj(parseOutput(props.chatItem.content));
-    }
+    setAssistantChatObj(parseOutput(props.chatItem.content));
   }, [props.chatItem.content]);
 
-  const [tabOpen, setTabOpen] = useState<"table" | "graph">("table");
-
-  const [saveSuccessfulFeedback, setSaveSuccessfulFeedback] = useState(false);
-  useEffect(() => {
-    if (saveSuccessfulFeedback) {
-      setTimeout(() => {
-        setSaveSuccessfulFeedback(false);
-      }, 3000);
-    }
-  }, [saveSuccessfulFeedback]);
-
-  useEffect(scrollToBottom, [content, assistantChatObj]);
+  if (props.chatItem.role === "debug") return <></>;
 
   return (
     <div
@@ -230,36 +310,15 @@ export function UserChatItem(props: {
           : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
         props.chatItem.role === "error"
           ? "sf-bg-red-200"
-          : props.chatItem.role === "debug"
-          ? "sf-bg-green-100"
           : props.chatItem.role === "function"
           ? "sf-bg-green-200"
-          : props.chatItem.role === "confirmation"
-          ? "sf-bg-blue-100"
           : "",
       )}
     >
-      {graphedData && (
-        <div className="-sf-py-4">
-          <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />{" "}
-        </div>
-      )}
       <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
-        {props.chatItem.role === "assistant"
-          ? (props.AIname ?? "Assistant") + " AI"
-          : "Function called"}
+        {props.AIname ?? "Assistant" + " AI"}
       </p>
-      {content && props.chatItem.role === "function" ? (
-        tabOpen === "graph" ? (
-          <Graph {...graphedData} />
-        ) : isJson ? (
-          <StyledMarkdown>{content}</StyledMarkdown>
-        ) : (
-          <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-break-words">
-            {content}
-          </div>
-        )
-      ) : (
+      {
         <div className="sf-w-full">
           {assistantChatObj.reasoning && (
             <div className="sf-bg-yellow-100 sf-rounded-md sf-px-4 sf-py-2 sf-border sf-border-yellow-300 sf-w-full">
@@ -324,7 +383,7 @@ export function UserChatItem(props: {
               </div>
             )}
         </div>
-      )}
+      }
     </div>
   );
 }

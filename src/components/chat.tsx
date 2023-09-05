@@ -1,8 +1,8 @@
 import * as React from "react";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { DevChatItem, UserChatItem } from "./chatItems";
+import { ChatItem } from "./chatItems";
 import {
-  ChatItem,
+  ChatItemType,
   ChatProps,
   ChatStyle,
   Json,
@@ -106,7 +106,9 @@ export default function Chat(props: ChatProps) {
       const reader = data.getReader();
       const decoder = new TextDecoder();
       let done = false;
-      const outputMessages = [{ role: "assistant", content: "" }] as ChatItem[];
+      const outputMessages = [
+        { role: "assistant", content: "" },
+      ] as ChatItemType[];
 
       while (!done) {
         const { value, done: doneReading } = await reader.read();
@@ -237,61 +239,20 @@ export default function Chat(props: ChatProps) {
         )}
         <div className="sf-mt-6 sf-flex-1 sf-px-1 sf-shrink-0 sf-flex sf-flex-col sf-justify-end sf-gap-y-2">
           {devChatContents.map((chatItem: StreamingStepInput, idx: number) => {
-            if (
-              props.devMode ||
-              ["error", "confirmation", "user"].includes(chatItem.role)
-            ) {
-              return (
-                <DevChatItem
-                  key={idx.toString()}
-                  chatItem={chatItem}
-                  onConfirm={onConfirm}
-                />
-              );
-            } else if (chatItem.role === "debug") return <></>;
-            else if (chatItem.role === "function") {
-              let contentString = chatItem.content;
-              let functionJsonResponse: Json;
-              try {
-                functionJsonResponse = JSON.parse(chatItem.content) as Json;
-              } catch {
-                functionJsonResponse = chatItem.content;
-              }
-              if (
-                // Empty array
-                (Array.isArray(functionJsonResponse) &&
-                  functionJsonResponse.length === 0) ||
-                // Empty object
-                (functionJsonResponse &&
-                  typeof functionJsonResponse === "object" &&
-                  Object.entries(functionJsonResponse).length === 0)
-              ) {
-                if (
-                  devChatContents[idx - 1]?.role === "function" ||
-                  devChatContents[idx + 1]?.role === "function"
-                ) {
-                  // If the function call is adjacent to other function calls we don't need to tell them it
-                  // was empty - otherwise we get a lot of empty messages clogging up the chat interface
-                  return <div key={idx.toString()} />;
-                }
-                contentString = "No data returned";
-              }
-              return (
-                <UserChatItem
-                  chatItem={{
-                    ...chatItem,
-                    content: contentString,
-                  }}
-                  key={idx.toString()}
-                />
-              );
-            }
             return (
-              <UserChatItem
-                chatItem={chatItem}
+              <ChatItem
                 key={idx.toString()}
+                chatItem={chatItem}
                 // Below ensures that loading spinner is only shown on the message currently streaming in
                 isLoading={loading && idx === devChatContents.length - 1}
+                onConfirm={onConfirm}
+                // If the function call is adjacent to other function calls we don't need to tell them it
+                // was empty - otherwise we get a lot of empty messages clogging up the chat interface
+                prevAndNextChatRoles={[
+                  devChatContents[idx - 1]?.role,
+                  devChatContents[idx + 1]?.role,
+                ]}
+                devMode={props.devMode}
               />
             );
           })}
