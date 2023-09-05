@@ -5,7 +5,6 @@ import {
 } from "@heroicons/react/24/outline";
 import React from "react";
 import { useEffect, useState } from "react";
-// import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ParsedOutput, parseOutput } from "../lib/parser";
 import { Json, StreamingStepInput } from "../lib/types";
@@ -83,22 +82,22 @@ export function DevChatItem(props: {
   return (
     <div
       className={classNames(
-        "py-4 px-1.5 rounded flex flex-col  w-full",
+        "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col  sf-w-full",
         props.chatItem.role === "user"
-          ? "bg-gray-100 text-right place-items-end"
-          : "bg-gray-200 text-left place-items-baseline",
+          ? "sf-bg-gray-100 sf-text-right sf-place-items-end"
+          : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
         props.chatItem.role === "error"
-          ? "bg-red-200"
+          ? "sf-bg-red-200"
           : props.chatItem.role === "debug"
-          ? "bg-green-100"
+          ? "sf-bg-green-100"
           : props.chatItem.role === "function"
-          ? "bg-green-200"
+          ? "sf-bg-green-200"
           : props.chatItem.role === "confirmation"
-          ? "bg-blue-100"
+          ? "sf-bg-blue-100"
           : "",
       )}
     >
-      <p className="text-xs text-gray-600 mb-1">
+      <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
         {props.chatItem.role === "assistant"
           ? (props.AIname ?? "Assistant") + " AI"
           : props.chatItem.role === "function"
@@ -116,22 +115,22 @@ export function DevChatItem(props: {
       {props.chatItem.role === "confirmation" ? (
         <StyledMarkdown>{content}</StyledMarkdown>
       ) : (
-        <div className="px-2 mt-1 text-little text-gray-900 w-full whitespace-pre-wrap">
+        <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap">
           {content}
         </div>
       )}
       {props.onConfirm &&
         props.chatItem.role === "confirmation" &&
         (confirmed === null ? (
-          <div className="my-5 w-full flex flex-col place-items-center gap-y-2">
+          <div className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2">
             Are you sure you want to continue?
-            <div className="flex flex-row gap-x-8">
+            <div className="sf-flex sf-flex-row sf-gap-x-8">
               <button
                 onClick={() => {
                   setConfirmed(false);
                   void props.onConfirm!(false);
                 }}
-                className={`flex flex-row gap-x-1.5 font-medium place-items-center text-gray-700 px-4 border border-gray-400 rounded-md py-2 text-base hover:opacity-90 transition focus:ring-2 focus:ring-offset-2 bg-gray-100 ring-gray-500 hover:bg-gray-200`}
+                className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-700 sf-px-4 sf-border sf-border-gray-400 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-gray-100 sf-ring-gray-500 hover:sf-bg-gray-200`}
               >
                 Cancel
               </button>
@@ -140,29 +139,29 @@ export function DevChatItem(props: {
                   setConfirmed(true);
                   void props.onConfirm!(true);
                 }}
-                className={`flex flex-row gap-x-1.5 font-medium place-items-center text-gray-50 px-4 rounded-md py-2 text-base hover:opacity-90 transition focus:ring-2 focus:ring-offset-2 bg-blue-500 ring-blue-500 hover:bg-blue-600`}
+                className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-blue-500 sf-ring-blue-500 hover:sf-bg-blue-600`}
               >
                 Confirm
               </button>
             </div>
             <div
               className={classNames(
-                "flex flex-row place-items-center gap-x-1",
-                saveSuccessfulFeedback ? "visible" : "invisible",
+                "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
+                saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
               )}
             >
-              <CheckCircleIcon className="h-5 w-5 text-green-500" />
-              <div className="text-sm">Thanks for your feedback!</div>
+              <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
+              <div className="sf-text-sm">Thanks for your feedback!</div>
             </div>
           </div>
         ) : confirmed ? (
-          <div className="my-5 w-full font-semibold flex flex-row justify-center gap-x-1 place-items-center">
-            <CheckCircleIcon className="h-5 w-5 text-green-500" />
+          <div className="sf-my-5 sf-w-full sf-font-semibold sf-flex sf-flex-row sf-justify-center sf-gap-x-1 sf-place-items-center">
+            <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
             Confirmed
           </div>
         ) : (
-          <div className="my-5 w-full flex flex-row font-semibold justify-center gap-x-2 place-items-center">
-            <XCircleIcon className="h-5 w-5 text-red-500" />
+          <div className="sf-my-5 sf-w-full sf-flex sf-flex-row sf-font-semibold sf-justify-center sf-gap-x-2 sf-place-items-center">
+            <XCircleIcon className="sf-h-5 sf-w-5 sf-text-red-500" />
             Cancelled
           </div>
         ))}
@@ -224,28 +223,27 @@ export function UserChatItem(props: {
   return (
     <div
       className={classNames(
-        "py-4 px-1.5 rounded flex flex-col w-full",
         "sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full",
         props.chatItem.role === "user"
-          ? "bg-gray-100 text-right place-items-end"
-          : "bg-gray-200 text-left place-items-baseline",
+          ? "sf-bg-gray-100 sf-text-right sf-place-items-end"
+          : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
         props.chatItem.role === "error"
-          ? "bg-red-200"
+          ? "sf-bg-red-200"
           : props.chatItem.role === "debug"
-          ? "bg-green-100"
+          ? "sf-bg-green-100"
           : props.chatItem.role === "function"
-          ? "bg-green-200"
+          ? "sf-bg-green-200"
           : props.chatItem.role === "confirmation"
-          ? "bg-blue-100"
+          ? "sf-bg-blue-100"
           : "",
       )}
     >
       {graphedData && (
-        <div className="-py-4">
+        <div className="-sf-py-4">
           <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />{" "}
         </div>
       )}
-      <p className="text-xs text-gray-600 mb-1">
+      <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
         {props.chatItem.role === "assistant"
           ? (props.AIname ?? "Assistant") + " AI"
           : "Function called"}
@@ -256,19 +254,13 @@ export function UserChatItem(props: {
         ) : isJson ? (
           <StyledMarkdown>{content}</StyledMarkdown>
         ) : (
-          <div className="px-2 mt-1 text-little text-gray-900 whitespace-pre-line w-full break-words">
+          <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-break-words">
             {content}
           </div>
         )
       ) : (
-        <div className="w-full">
+        <div className="sf-w-full">
           {assistantChatObj.reasoning && (
-            <div className="bg-yellow-100 rounded-md px-4 py-2 border border-yellow-300 w-full">
-              <p className="flex flex-row gap-x-1.5 text-yellow-800">
-                <LightBulbIcon className="h-5 w-5 text-yellow-600" /> Thoughts
-              </p>
-              <p className="mt-1 text-little whitespace-pre-line break-words text-gray-700">
-                </p>
             <div className="sf-bg-yellow-100 sf-rounded-md sf-px-4 sf-py-2 sf-border sf-border-yellow-300 sf-w-full">
               <p className="sf-flex sf-flex-row sf-gap-x-1 sf-text-yellow-800 sf-text-little">
                 <LightBulbIcon className="sf-h-5 sf-w-5 sf-text-yellow-600" />{" "}
@@ -278,13 +270,10 @@ export function UserChatItem(props: {
                 {assistantChatObj.reasoning}
               </p>
             </div>
-            </div>
           )}
           {assistantChatObj.tellUser && (
-            <div className="px-2 mt-1 text-little text-gray-900 whitespace-pre-line break-words w-full">
             <div className="sf-px-2 sf-mt-2.5 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-words sf-w-full">
               {assistantChatObj.tellUser}
-            </div>
             </div>
           )}
           {props.isLoading &&
@@ -336,67 +325,11 @@ export function UserChatItem(props: {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function StyledMarkdown(props: { children: string }) {
-  return (
-    <></>
-    // <ReactMarkdown
-    //   className="px-2 mt-1 text-little text-gray-900 whitespace-pre-line w-full"
-    //   components={{
-    //     a: ({ node, ...props }) => (
-    //       <a className="text-blue-500 hover:underline" {...props} />
-    //     ),
-    //     li: ({ node, ...props }) => (
-    //       <li
-    //         className="marker:text-gray-700 ml-4 -my-2 text-gray-900 list-decimal"
-    //         {...props}
-    //       />
-    //     ),
-    //     p: ({ node, ...props }) => <p className="my-0" {...props} />,
-    //     h3: ({ node, ...props }) => (
-    //       <h3
-    //         className="text-little sm:text-base lg:text-lg text-center w-full font-extrabold text-gray-900 py-2 -mb-6 border bg-gray-50 border-gray-300"
-    //         {...props}
-    //       />
-    //     ),
-    //     table: ({ node, ...props }) => (
-    //       <table
-    //         className="text-center border-collapse w-full divide-y divide-gray-300 border border-gray-300"
-    //         {...props}
-    //       />
-    //     ),
-    //     thead: ({ node, ...props }) => (
-    //       <thead
-    //         className="bg-gray-100 text-xs sm:text-sm lg:text-little text-gray-900 py-2"
-    //         {...props}
-    //       />
-    //     ),
-    //     th: ({ node, ...props }) => (
-    //       <th
-    //         className="border border-gray-300 font-normal px-2 py-2"
-    //         {...props}
-    //       />
-    //     ),
-    //     tr: ({ node, ...props }) => (
-    //       <tr
-    //         className="even:bg-gray-300 border border-gray-300"
-    //         {...props}
-    //       />
-    //     ),
-    //     td: ({ node, ...props }) => (
-    //       <td
-    //         className="bg-gray-200 border border-gray-300 whitespace-wrap px-2 py-2.5 text-xs md:text-sm text-gray-700 break-words break"
-    //         style={{ ...props.style, wordBreak: "break-word" }}
-    //         {...props}
-    //       />
-    //     ),
-    //   }}
-    //   remarkPlugins={[remarkGfm]}
-    // >
-    //   {props.children}
-  );
+  return (<></>)
 }
 
 export function Tabs(props: {
@@ -405,7 +338,7 @@ export function Tabs(props: {
 }) {
   return (
     <nav
-      className="isolate flex divide-x divide-gray-200 rounded-lg shadow mb-4"
+      className="isolate sf-flex sf-divide-x sf-divide-gray-200 sf-rounded-lg sf-shadow sf-mb-4"
       aria-label="Tabs"
     >
       {["table", "graph"].map((tab, tabIdx) => (
@@ -413,11 +346,11 @@ export function Tabs(props: {
           key={tab}
           className={classNames(
             props.tabOpen === tab
-              ? "text-gray-900"
-              : "text-gray-500 hover:text-gray-700",
-            tabIdx === 0 ? "rounded-l-lg" : "",
-            tabIdx === 1 ? "rounded-r-lg" : "",
-            "group relative cursor-pointer min-w-0 flex-1 overflow-hidden bg-white py-2 px-2 text-center text-sm font-sm hover:bg-gray-50 focus:z-10",
+              ? "sf-text-gray-900"
+              : "sf-text-gray-500 hover:sf-text-gray-700",
+            tabIdx === 0 ? "sf-rounded-l-lg" : "",
+            tabIdx === 1 ? "sf-rounded-r-lg" : "",
+            "group sf-relative cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-2 sf-px-2 sf-text-center sf-text-sm sf-font-sm hover:sf-bg-gray-50 focus:sf-z-10",
           )}
           aria-current={props.tabOpen === tab ? "page" : undefined}
           onClick={() => {
@@ -428,8 +361,8 @@ export function Tabs(props: {
           <span
             aria-hidden="true"
             className={classNames(
-              props.tabOpen === tab ? "bg-indigo-500" : "bg-transparent",
-              "absolute inset-x-0 bottom-0 h-0.5",
+              props.tabOpen === tab ? "sf-bg-indigo-500" : "sf-bg-transparent",
+              "sf-absolute sf-inset-x-0 sf-bottom-0 sf-h-0.5",
             )}
           />
         </a>
@@ -440,7 +373,7 @@ export function Tabs(props: {
 
 function scrollToBottom() {
   if (typeof window !== "undefined") {
-    const ele = document.getElementById("scrollable-chat-contents");
+    const ele = document.getElementById("sf-scrollable-chat-contents");
     // If the element exists, and it's near the bottom, scroll to the bottom
     if (ele && ele.scrollHeight - ele.scrollTop >= 50) {
       ele.scrollTop = ele.scrollHeight;

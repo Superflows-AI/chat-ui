@@ -12,26 +12,26 @@ export default function SuperflowsModal(props: SuperflowsModalProps) {
     <Dialog
       open={props.open}
       as="div"
-      className="relative z-30"
+      className="sf-relative sf-z-30"
       onClose={props.setOpen}
       initialFocus={focusRef}
     >
       <Transition
         show={props.open}
         as={Fragment}
-        enter="ease-out duration-300"
-        enterFrom="opacity-0"
-        enterTo="opacity-100"
-        leave="ease-in duration-200"
-        leaveFrom="opacity-100"
-        leaveTo="opacity-0"
+        enter="sf-ease-out sf-duration-300"
+        enterFrom="sf-opacity-0"
+        enterTo="sf-opacity-100"
+        leave="sf-ease-in sf-duration-200"
+        leaveFrom="sf-opacity-100"
+        leaveTo="sf-opacity-0"
       >
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+        <div className="sf-fixed sf-inset-0 sf-bg-gray-500 sf-bg-opacity-75 sf-transition-opacity" />
       </Transition>
 
-      <div className="fixed inset-0 z-10">
+      <div className="sf-fixed sf-inset-0 sf-z-10">
         <div
-          className="flex min-h-full max-h-screen items-end justify-center p-4 text-center sm:items-center cursor-pointer"
+          className="sf-flex sf-min-h-full sf-max-h-screen sf-items-end sf-justify-center sf-p-4 sf-text-center sm:sf-items-center sf-cursor-pointer"
           onClick={() => {
             props.setOpen(false);
           }}
@@ -39,35 +39,35 @@ export default function SuperflowsModal(props: SuperflowsModalProps) {
           <Transition
             show={props.open}
             as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            enterTo="opacity-100 translate-y-0 sm:scale-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-            leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            enter="sf-ease-out sf-duration-300"
+            enterFrom="sf-opacity-0 sf-translate-y-4 sm:sf-translate-y-0 sm:sf-scale-95"
+            enterTo="sf-opacity-100 sf-translate-y-0 sm:sf-scale-100"
+            leave="sf-ease-in sf-duration-200"
+            leaveFrom="sf-opacity-100 sf-translate-y-0 sm:sf-scale-100"
+            leaveTo="sf-opacity-0 sf-translate-y-4 sm:sf-translate-y-0 sm:sf-scale-95"
           >
             <Dialog.Overlay
               as={"div"}
               className={classNames(
-                "relative h-[90vh] bg-gray-50 max-w-5xl transform rounded-lg text-left shadow-xl transition-all sm:my-8 sm:w-full",
+                "sf-relative sf-h-[90vh] sf-bg-gray-50 sf-max-w-5xl sf-transform sf-rounded-lg sf-text-left sf-shadow-xl sf-transition-all sm:sf-my-8 sm:sf-w-full",
                 props.styling?.modalClasses ?? "",
               )}
             >
               <div
-                className="h-full px-4 pb-2 pt-5 sm:p-6 sm:pb-3 flex flex-col cursor-default"
+                className="sf-h-full sf-px-4 sf-pb-2 sf-pt-5 sm:sf-p-6 sm:sf-pb-3 sf-flex sf-flex-col sf-cursor-default"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
               >
                 <button
-                  className="absolute top-2.5 right-2.5 bg-transparent"
+                  className="sf-absolute sf-top-2.5 sf-right-2.5 sf-bg-transparent"
                   onClick={() => props.setOpen(false)}
                 >
-                  <XMarkIcon className="h-8 w-8 text-gray-300 rounded-md hover:bg-gray-500 hover:opacity-50 p-1 transition focus:outline-0" />
+                  <XMarkIcon className="sf-h-8 sf-w-8 sf-text-gray-300 sf-rounded-md hover:sf-bg-gray-500 hover:sf-opacity-50 sf-p-1 sf-transition focus:sf-outline-0" />
                 </button>
-                <div className="w-full flex flex-row gap-x-2.5 border-b border-gray-200 pb-1.5">
-                  <SparklesIcon className="h-8 w-8 text-gray-500" />
-                  <Dialog.Title className="text-xl font-medium">
+                <div className="sf-w-full sf-flex sf-flex-row sf-gap-x-2.5 sf-border-b sf-border-gray-200 sf-pb-1.5">
+                  <SparklesIcon className="sf-h-8 sf-w-8 sf-text-gray-500" />
+                  <Dialog.Title className="sf-text-xl sf-font-medium">
                     {props.AIname} AI
                   </Dialog.Title>
                 </div>
