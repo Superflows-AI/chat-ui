@@ -100,10 +100,11 @@ export function Graph(props: GraphData) {
 
   let xRange: number;
   let offset: number;
+  let data = [...props.data];
 
   if (xIsNumber) {
     // sort the data by x value
-    props.data = props.data.sort((a, b) => (a.x as number) - (b.x as number));
+    data = props.data.sort((a, b) => (a.x as number) - (b.x as number));
 
     xRange =
       Math.max(...props.data.map((obj) => obj.x as number)) -
@@ -113,7 +114,7 @@ export function Graph(props: GraphData) {
 
   return (
     <ResponsiveContainer width="80%" aspect={2} className="sf-mx-auto sf-mt-2">
-      <LineChart data={props.data}>
+      <LineChart data={data}>
         <XAxis
           dataKey="x"
           tick={{ fontSize: 12 }}

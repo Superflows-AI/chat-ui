@@ -1,6 +1,8 @@
 import {
   CheckCircleIcon,
   LightBulbIcon,
+  MinusIcon,
+  PlusIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import React, { useEffect, useState } from "react";
@@ -124,6 +126,7 @@ export function FunctionVizChatItem(props: {
   if (props.chatItem.role !== "function")
     throw new Error("Not a function chat item");
 
+  const [expanded, setExpanded] = useState<boolean>(false);
   const [graphedData, setGraphedData] = useState<GraphData | null>(null);
   const [content, setContent] = useState(props.chatItem.content);
   const [isJson, setIsJson] = useState(false);
@@ -138,6 +141,8 @@ export function FunctionVizChatItem(props: {
       const functionJsonResponse = JSON.parse(props.chatItem.content) as Json;
       setIsJson(true);
       setGraphedData(extractGraphData(functionJsonResponse));
+
+      // First check is for null
       if (functionJsonResponse && typeof functionJsonResponse === "object") {
         setContent(
           convertToRenderable(
@@ -167,25 +172,46 @@ export function FunctionVizChatItem(props: {
   return (
     <div
       className={
-        "sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-green-200"
+        "sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-100 sf-border sf-border-gray-300"
       }
     >
-      {graphedData && (
-        <div className="-sf-py-4">
-          <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />{" "}
+      <button
+        className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between"
+        onClick={() => setExpanded((prev) => !prev)}
+      >
+        <p className="sf-text-xs sf-text-gray-600 sf-mb-1">Data received</p>
+        <div className="sf-text-sm">
+          Data received from{" "}
+          <b className="font-medium">
+            {functionNameToDisplay(props.chatItem?.name ?? "")}
+          </b>
         </div>
-      )}
-      <p className="sf-text-xs sf-text-gray-600 sf-mb-1">Function called</p>
-      {content &&
-        (tabOpen === "graph" ? (
-          <Graph {...graphedData} />
-        ) : isJson ? (
-          <StyledMarkdown>{content}</StyledMarkdown>
+        {expanded ? (
+          <MinusIcon className={"sf-w-5 sf-h-5 sf-mr-6"} />
         ) : (
-          <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-break-words">
-            {content}
-          </div>
-        ))}
+          <PlusIcon className={"sf-w-5 sf-h-5 sf-mr-6"} />
+        )}
+      </button>
+      {expanded && (
+        <>
+          {graphedData && (
+            <div className="-sf-py-4">
+              <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />{" "}
+            </div>
+          )}
+
+          {content &&
+            (tabOpen === "graph" ? (
+              <Graph {...graphedData} />
+            ) : isJson ? (
+              <StyledMarkdown>{content}</StyledMarkdown>
+            ) : (
+              <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-break-words">
+                {content}
+              </div>
+            ))}
+        </>
+      )}
     </div>
   );
 }
