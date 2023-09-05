@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import * as React from "react";
 import { SparklesIcon } from "@heroicons/react/24/outline";
 import { SparklesIcon as SparklesSolidIcon } from "@heroicons/react/24/solid";
 import SuperflowsSidebar from "./sidebar";
+import { useState } from "react";
 import SuperflowsModal from "./modal";
 import { ButtonProps } from "../lib/types";
 
@@ -11,17 +12,13 @@ export default function SuperflowsButton(props: ButtonProps) {
     <>
       {props.styling?.solidIcon ? (
         <SparklesSolidIcon
-          className={`p-1 focus:outline-none cursor-pointer bg-transparent text-gray-500 hover:text-[#146ef5] h-7 w-7 ${
-            props.buttonStyling ?? ""
-          }`}
+          className={`sf-p-1 focus:sf-outline-none sf-cursor-pointer sf-bg-transparent sf-text-gray-500 hover:sf-text-[#146ef5] sf-h-7 sf-w-7 ${props.buttonStyling}`}
           aria-hidden="true"
           onClick={() => setOpen(!open)}
         />
       ) : (
         <SparklesIcon
-          className={`p-1 focus:outline-none cursor-pointer bg-transparent text-gray-500 hover:text-[#146ef5] h-7 w-7 ${
-            props.buttonStyling ?? ""
-          }`}
+          className={`sf-p-1 focus:sf-outline-none sf-cursor-pointer sf-bg-transparent sf-text-gray-500 hover:sf-text-[#146ef5] sf-h-7 sf-w-7 ${props.buttonStyling}`}
           aria-hidden="true"
           onClick={() => setOpen(!open)}
         />
