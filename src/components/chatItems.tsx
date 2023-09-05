@@ -320,6 +320,7 @@ export function UserChatItem(props: {
   const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
     parseOutput(props.chatItem.content),
   );
+  const [expanded, setExpanded] = useState<boolean>(false);
 
   useEffect(() => {
     setAssistantChatObj(parseOutput(props.chatItem.content));
@@ -348,13 +349,36 @@ export function UserChatItem(props: {
         <div className="sf-w-full">
           {assistantChatObj.reasoning && (
             <div className="sf-bg-yellow-100 sf-rounded-md sf-px-4 sf-py-2 sf-border sf-border-yellow-300 sf-w-full">
-              <p className="sf-flex sf-flex-row sf-gap-x-1 sf-text-yellow-800 sf-text-little">
-                <LightBulbIcon className="sf-h-5 sf-w-5 sf-text-yellow-600" />{" "}
-                Thoughts
-              </p>
-              <p className="sf-mt-0.5 sf-text-little sf-whitespace-pre-line sf-break-words sf-text-gray-700">
-                {assistantChatObj.reasoning}
-              </p>
+              <button
+                className={classNames(
+                  "sf-w-full sf-flex sf-flex-row sf-max-h-6 sf-overflow-hidden sf-truncate sf-text-ellipsis sf-justify-between",
+                  props.isLoading ? "sf-cursor-default" : "sf-cursor-pointer",
+                )}
+                onClick={() => {
+                  if (!props.isLoading) setExpanded((prev) => !prev);
+                }}
+              >
+                <p className="sf-flex sf-flex-row sf-gap-x-1 sf-text-yellow-800 sf-text-little">
+                  <LightBulbIcon className="sf-h-5 sf-w-5 sf-text-yellow-600" />{" "}
+                  Thoughts
+                </p>
+                {!expanded && !props.isLoading && (
+                  <p className="sf-text-little sf-whitespace-pre-line sf-max-w-[50%] sf-text-yellow-600">
+                    {assistantChatObj.reasoning}
+                  </p>
+                )}
+                {!props.isLoading &&
+                  (expanded ? (
+                    <MinusIcon className="sf-h-5 sf-w-5 sf-text-yellow-600" />
+                  ) : (
+                    <PlusIcon className="sf-h-5 sf-w-5 sf-text-yellow-600" />
+                  ))}
+              </button>
+              {(expanded || props.isLoading) && (
+                <p className="sf-mt-0.5 sf-text-little sf-whitespace-pre-line sf-break-words sf-text-gray-700">
+                  {assistantChatObj.reasoning}
+                </p>
+              )}
             </div>
           )}
           {assistantChatObj.tellUser && (
