@@ -11,7 +11,7 @@ import {
 import { DateTime } from "luxon";
 import { Json } from "../lib/types";
 
-let formats = [
+const formats = [
   "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
   "yyyy-MM-dd'T'HH:mm:ss.SSS",
   "yyyy-MM-dd'T'HH:mm:ss",
@@ -52,7 +52,7 @@ function attemptDatetimeConversion(array: any[]): number[] | null {
   let matchingFormat = null;
 
   for (const format of formats) {
-    let dt = DateTime.fromFormat(array[0], format);
+    const dt = DateTime.fromFormat(array[0], format);
     if (dt.isValid) {
       matchingFormat = format;
       break;
@@ -327,7 +327,7 @@ export function checkStringMatch(
 ): boolean {
   // Match insensitive to punctuation, spaces, case and trailing s
   const processStr = (str: string) => {
-    let processed = str.toLowerCase().replace(/[\W\s]/g, "");
+    const processed = str.toLowerCase().replace(/[\W\s]/g, "");
     return processed.endsWith("s") ? processed.slice(0, -1) : processed;
   };
 

@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { SuperflowsButton, SuperflowsChat } from "@superflows/chat-ui-react";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 
