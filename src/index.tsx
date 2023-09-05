@@ -4,11 +4,12 @@ import SuperflowsModal from "./components/modal";
 import SuperflowsChat from "./components/chat";
 import { DevChatItem, UserChatItem } from "./components/chatItems";
 import {
-  FunctionCall,
   getLastSectionName,
   parseFunctionCall,
   parseOutput,
 } from "./lib/parser";
+import type { FunctionCall } from "./lib/parser";
+
 import { convertToRenderable, functionNameToDisplay } from "./lib/utils";
 import "./index.css";
 
