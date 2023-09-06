@@ -164,16 +164,18 @@ export function FunctionVizChatItem(props: {
   // If this chat item is empty and the previous and next chat items are functions, then don't show anything
   if (
     ["[]", "{}"].includes(props.chatItem.content) ||
-    props.prevAndNextChatRoles.every((role) => role === "function")
+    (props.prevAndNextChatRoles &&
+      props.prevAndNextChatRoles.every((role) => role === "function"))
   ) {
     return <></>;
   }
 
   return (
     <div
-      className={
-        "sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-100 sf-border sf-border-gray-300"
-      }
+      className={classNames(
+        "sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-green-200 sf-border sf-border-gray-300 cursor-pointer",
+        !expanded && "hover:sf-bg-green-300",
+      )}
     >
       <button
         className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between"
@@ -239,18 +241,8 @@ export function ConfirmationChatItem(props: {
         .join("")}`,
     );
   }, [props.chatItem.content]);
-
-  const [saveSuccessfulFeedback, setSaveSuccessfulFeedback] =
-    useState<boolean>(false);
   // Confirmed is null if the user hasn't confirmed yet, true if the user has confirmed, and false if the user has cancelled
   const [confirmed, setConfirmed] = useState<boolean | null>(null);
-  useEffect(() => {
-    if (saveSuccessfulFeedback) {
-      setTimeout(() => {
-        setSaveSuccessfulFeedback(false);
-      }, 3000);
-    }
-  }, [saveSuccessfulFeedback]);
 
   if (!content) return <></>;
   return (
@@ -286,15 +278,6 @@ export function ConfirmationChatItem(props: {
               >
                 Confirm
               </button>
-            </div>
-            <div
-              className={classNames(
-                "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
-              )}
-            >
-              <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
-              <div className="sf-text-sm">Thanks for your feedback!</div>
             </div>
           </div>
         ) : confirmed ? (
@@ -334,7 +317,7 @@ export function UserChatItem(props: {
         "sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full",
         props.chatItem.role === "user"
           ? "sf-bg-gray-100 sf-text-right sf-place-items-end"
-          : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
+          : "sf-bg-gray-300 sf-text-left sf-place-items-baseline",
         props.chatItem.role === "error"
           ? "sf-bg-red-200"
           : props.chatItem.role === "function"

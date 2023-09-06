@@ -1,5 +1,9 @@
 import * as React from "react";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowPathIcon,
+  HandThumbDownIcon,
+  HandThumbUpIcon,
+} from "@heroicons/react/24/outline";
 import { ChatItem } from "./chatItems";
 import {
   ChatItemType,
@@ -11,6 +15,52 @@ import { AutoGrowingTextArea } from "./autoGrowingTextarea";
 import { classNames } from "../lib/utils";
 import { LoadingSpinner } from "./loadingspinner";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { parseOutput } from "../lib/parser";
+
+function FeedbackButtons(props: {
+  feedback: "yes" | "no" | null;
+  setFeedback: (feedback: "yes" | "no" | null) => void;
+}) {
+  return (
+    <div className="sf-mt-2 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2">
+      Did this response answer your question?
+      <div className="sf-flex sf-flex-row sf-gap-x-4">
+        <button
+          onClick={() => props.setFeedback("no")}
+          className={classNames(
+            "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-sm sf-transition sf-bg-red-500 sf-ring-red-500 ",
+            !props.feedback
+              ? "hover:sf-opacity-90 hover:sf-bg-red-600"
+              : props.feedback === "no"
+              ? " sf-ring-2 sf-ring-offset-2 "
+              : props.feedback === "yes"
+              ? "sf-opacity-50 sf-cursor-not-allowed pointer-events-none"
+              : "",
+          )}
+        >
+          <HandThumbDownIcon className="sf-h-5 sf-w-5" />
+          No
+        </button>
+        <button
+          onClick={() => props.setFeedback("yes")}
+          className={classNames(
+            "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-sm  sf-bg-green-500 sf-ring-green-500 ",
+            !props.feedback
+              ? "hover:sf-opacity-90 hover:sf-bg-green-600"
+              : props.feedback === "yes"
+              ? "sf-ring-2 sf-ring-offset-2"
+              : props.feedback === "no"
+              ? "sf-opacity-50 sf-cursor-not-allowed pointer-events-none"
+              : "",
+          )}
+        >
+          <HandThumbUpIcon className="sf-h-5 sf-w-5" />
+          Yes
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function Chat(props: ChatProps) {
   const [userText, setUserText] = useState<string>("");
@@ -225,6 +275,17 @@ export default function Chat(props: ChatProps) {
       props.mockApiResponses,
     ],
   );
+
+  const [feedback, setFeedback] = useState<"yes" | "no" | null>(null);
+  // Confirmed is null if the user hasn't confirmed yet, true if the user has confirmed, and false if the user has cancelled
+  useEffect(() => {
+    if (feedback) {
+      setTimeout(() => {
+        setFeedback(null);
+      }, 3000);
+    }
+  }, [feedback]);
+
   return (
     <div className="sf-flex sf-min-h-0 sf-h-full sf-w-full sf-flex-1 sf-flex-col">
       <div
@@ -284,6 +345,9 @@ export default function Chat(props: ChatProps) {
               </div>
             )}
         </div>
+        {triggerFeedback(devChatContents) && (
+          <FeedbackButtons feedback={feedback} setFeedback={setFeedback} />
+        )}
       </div>
       {/* Textbox user types into */}
       <div className="sf-flex sf-flex-col sf-pt-4">
@@ -363,5 +427,17 @@ export default function Chat(props: ChatProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+function triggerFeedback(devChatContents: StreamingStepInput[]): boolean {
+  if (devChatContents.length === 0) return false;
+  if (!devChatContents.some((chat) => chat.role === "function")) return false;
+  const lastMessage = devChatContents[devChatContents.length - 1];
+  const parsed = parseOutput(lastMessage.content);
+  return (
+    lastMessage.role === "assistant" &&
+    parsed.tellUser &&
+    parsed.tellUser.trim()[parsed.tellUser.trim().length - 1] !== "?"
   );
 }
