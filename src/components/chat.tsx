@@ -17,90 +17,6 @@ import { LoadingSpinner } from "./loadingspinner";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { parseOutput } from "../lib/parser";
 
-// DELETE ME
-const fakeChatContents = [
-  { role: "user", content: "hi" },
-  { role: "user", content: "this is a function call" },
-  { role: "user", content: "this is a function call" },
-  { role: "user", content: "this is a function call" },
-  { role: "user", content: "this is a function call" },
-  { role: "user", content: "this is a function call" },
-  { role: "user", content: "this is a function call" },
-  {
-    role: "function",
-    content: JSON.stringify({
-      umbrella: {
-        responses: { data: [1, 2, 3] },
-        theHitcher: "put you in the picture",
-        tony: { harrison: "outrage" },
-      },
-    }),
-  },
-  { role: "assistant", content: "tell user: im a finished response" },
-] as StreamingStepInput[];
-
-function FeedbackButtons(props: {
-  feedback: "yes" | "no" | null;
-  setFeedback: (feedback: "yes" | "no" | null) => void;
-}) {
-  const [isVisible, setIsVisible] = useState(true);
-
-  useEffect(() => {
-    if (props.feedback) {
-      setIsVisible(false);
-    }
-  }, [props.feedback]);
-
-  const classes = classNames(
-    "sf-flex sf-flex-row sf-place-items-center sf-align-top",
-    !isVisible && "sf-transition-all sf-duration-[2500ms] sf-opacity-0",
-  );
-
-  return (
-    <div className={classes}>
-      <div className="sf-flex sf-flex-col sf-place-items-center sf-gap-y-1 sf-text-md  sf-align-top">
-        <div className="sf-flex sf-flex-row sf-gap-x-4">
-          Did this response answer your question?
-        </div>
-        <div className="sf-flex sf-flex-row sf-gap-x-4 ">
-          <button
-            onClick={() => props.setFeedback("no")}
-            className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-text-xs sf-transition sf-bg-red-500 sf-ring-red-500 ",
-              !props.feedback
-                ? "hover:sf-opacity-90 hover:sf-bg-red-600"
-                : props.feedback === "no"
-                ? " sf-ring-2 sf-ring-offset-2 "
-                : props.feedback === "yes"
-                ? "sf-opacity-50 sf-cursor-not-allowed pointer-events-none"
-                : "",
-            )}
-          >
-            <HandThumbDownIcon className="sf-h-5 sf-w-5" />
-            No
-          </button>
-          <button
-            onClick={() => props.setFeedback("yes")}
-            className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-xs  sf-bg-green-500 sf-ring-green-500 ",
-              !props.feedback
-                ? "hover:sf-opacity-90 hover:sf-bg-green-600"
-                : props.feedback === "yes"
-                ? "sf-ring-2 sf-ring-offset-2"
-                : props.feedback === "no"
-                ? "sf-opacity-50 sf-cursor-not-allowed pointer-events-none"
-                : "",
-            )}
-          >
-            <HandThumbUpIcon className="sf-h-5 sf-w-5" />
-            Yes
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Chat(props: ChatProps) {
   const [userText, setUserText] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -120,10 +36,6 @@ export default function Chat(props: ChatProps) {
       ? [{ role: "assistant", content: props.welcomeText }]
       : [],
   );
-
-  // DELETE ME
-  if (devChatContents.length < 2)
-    setDevChatContents([...devChatContents, ...fakeChatContents]);
 
   const killSwitchClicked = useRef(false);
 
@@ -152,7 +64,10 @@ export default function Chat(props: ChatProps) {
           Authorization: `Bearer ${props.superflowsApiKey}`,
         },
         body: JSON.stringify({
-          user_input: chat[chat.length - 1].content,
+          user_input:
+            chat[chat.length - 1].role === "user"
+              ? chat[chat.length - 1].content
+              : "",
           conversation_id: conversationId,
           user_api_key: props.userApiKey,
           user_description: props.userDescription,
@@ -289,10 +204,7 @@ export default function Chat(props: ChatProps) {
         const newChat = [...devChatContents, ...json.outs];
         setDevChatContents(newChat);
         if (confirm) {
-          // TODO: This adds an empty message to the DB and GPT chat history.
-          //  This is hacky, since all we actually want to do is restart Angela with the existing
-          //  chat history. We should refactor this to do that instead.
-          await callSuperflowsApi([...newChat, { role: "user", content: "" }]);
+          await callSuperflowsApi(newChat);
         }
       } else {
         // Handle errors here - add them to chat
@@ -320,13 +232,35 @@ export default function Chat(props: ChatProps) {
   );
 
   const [feedback, setFeedback] = useState<"yes" | "no" | null>(null);
-  // Confirmed is null if the user hasn't confirmed yet, true if the user has confirmed, and false if the user has cancelled
+  const [feedbackButtonsVisible, setFeedbackButtonsVisible] =
+    useState<boolean>(false);
+
   useEffect(() => {
-    if (feedback) {
-      setTimeout(() => {
-        setFeedback(null);
-      }, 3000);
-    }
+    setFeedbackButtonsVisible(triggerFeedback(devChatContents, loading));
+  }, [devChatContents, loading]);
+
+  useEffect(() => {
+    (async () => {
+      if (feedback === null) return;
+      console.log("sending feedback");
+      const response = await fetch(new URL("/api/v1/feedback", hostname).href, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${props.superflowsApiKey}`,
+        },
+        body: JSON.stringify({
+          conversation_id: conversationId,
+          user_message_idx: devChatContents.findLastIndex(
+            (chat) => chat.role === "user",
+          ),
+          feedback: feedback === "yes",
+        }),
+      });
+      console.log("response from feedback endpoint: ", await response.json());
+      setFeedback(null);
+      setFeedbackButtonsVisible(false);
+    })();
   }, [feedback]);
 
   return (
@@ -433,8 +367,13 @@ export default function Chat(props: ChatProps) {
           >
             Cancel
           </button>
-          {triggerFeedback(devChatContents) && (
-            <FeedbackButtons feedback={feedback} setFeedback={setFeedback} />
+          {triggerFeedback(devChatContents, loading) && (
+            <FeedbackButtons
+              feedback={feedback}
+              setFeedback={setFeedback}
+              isVisible={feedbackButtonsVisible}
+              setIsVisible={setFeedbackButtonsVisible}
+            />
           )}
           <button
             ref={props.initialFocus}
@@ -473,14 +412,81 @@ export default function Chat(props: ChatProps) {
   );
 }
 
-function triggerFeedback(devChatContents: StreamingStepInput[]): boolean {
+function triggerFeedback(
+  devChatContents: StreamingStepInput[],
+  loading?: boolean,
+): boolean {
+  if (loading) return false;
   if (devChatContents.length === 0) return false;
-  if (!devChatContents.some((chat) => chat.role === "function")) return false;
-  const lastMessage = devChatContents[devChatContents.length - 1];
+
+  const sinceLastUserMessage = devChatContents.slice(
+    devChatContents.findLastIndex((chat) => chat.role === "user"),
+  );
+
+  if (!sinceLastUserMessage.some((chat) => chat.role === "function"))
+    return false;
+  const lastMessage = sinceLastUserMessage[sinceLastUserMessage.length - 1];
   const parsed = parseOutput(lastMessage.content);
+
   return (
     lastMessage.role === "assistant" &&
     parsed.tellUser &&
     parsed.tellUser.trim()[parsed.tellUser.trim().length - 1] !== "?"
+  );
+}
+
+function FeedbackButtons(props: {
+  feedback: "yes" | "no" | null;
+  setFeedback: (feedback: "yes" | "no" | null) => void;
+  isVisible?: boolean;
+  setIsVisible?: (isVisible: boolean) => void;
+}) {
+  const classes = classNames(
+    "sf-flex sf-flex-row sf-place-items-center sf-align-top",
+    !props.isVisible && "sf-transition-all sf-duration-[1500ms] sf-opacity-0",
+  );
+
+  return (
+    <div className={classes}>
+      <div className="sf-flex sf-flex-col sf-place-items-center sf-gap-y-1 sf-text-md  sf-align-top">
+        <div className="sf-flex sf-flex-row sf-gap-x-4">
+          Did this response answer your question?
+        </div>
+        <div className="sf-flex sf-flex-row sf-gap-x-4 ">
+          <button
+            onClick={() => props.setFeedback("no")}
+            className={classNames(
+              "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-text-xs sf-transition sf-bg-red-500 sf-ring-red-500 ",
+              !props.feedback
+                ? "hover:sf-opacity-90 hover:sf-bg-red-600"
+                : props.feedback === "no"
+                ? " sf-ring-2 sf-ring-offset-2 "
+                : props.feedback === "yes"
+                ? "sf-opacity-50 sf-cursor-not-allowed pointer-events-none"
+                : "",
+            )}
+          >
+            <HandThumbDownIcon className="sf-h-5 sf-w-5" />
+            No
+          </button>
+          <button
+            onClick={() => props.setFeedback("yes")}
+            className={classNames(
+              "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-xs  sf-bg-green-500 sf-ring-green-500 ",
+              !props.feedback
+                ? "hover:sf-opacity-90 hover:sf-bg-green-600"
+                : props.feedback === "yes"
+                ? "sf-ring-2 sf-ring-offset-2"
+                : props.feedback === "no"
+                ? "sf-opacity-50 sf-cursor-not-allowed pointer-events-none"
+                : "",
+            )}
+          >
+            <HandThumbUpIcon className="sf-h-5 sf-w-5" />
+            Yes
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
