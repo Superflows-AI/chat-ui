@@ -17,46 +17,85 @@ import { LoadingSpinner } from "./loadingspinner";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { parseOutput } from "../lib/parser";
 
+// DELETE ME
+const fakeChatContents = [
+  { role: "user", content: "hi" },
+  { role: "user", content: "this is a function call" },
+  { role: "user", content: "this is a function call" },
+  { role: "user", content: "this is a function call" },
+  { role: "user", content: "this is a function call" },
+  { role: "user", content: "this is a function call" },
+  { role: "user", content: "this is a function call" },
+  {
+    role: "function",
+    content: JSON.stringify({
+      umbrella: {
+        responses: { data: [1, 2, 3] },
+        theHitcher: "put you in the picture",
+        tony: { harrison: "outrage" },
+      },
+    }),
+  },
+  { role: "assistant", content: "tell user: im a finished response" },
+] as StreamingStepInput[];
+
 function FeedbackButtons(props: {
   feedback: "yes" | "no" | null;
   setFeedback: (feedback: "yes" | "no" | null) => void;
 }) {
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    if (props.feedback) {
+      setIsVisible(false);
+    }
+  }, [props.feedback]);
+
+  const classes = classNames(
+    "sf-flex sf-flex-row sf-place-items-center sf-align-top",
+    !isVisible && "sf-transition-all sf-duration-[2500ms] sf-opacity-0",
+  );
+
   return (
-    <div className="sf-mt-2 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2">
-      Did this response answer your question?
-      <div className="sf-flex sf-flex-row sf-gap-x-4">
-        <button
-          onClick={() => props.setFeedback("no")}
-          className={classNames(
-            "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-sm sf-transition sf-bg-red-500 sf-ring-red-500 ",
-            !props.feedback
-              ? "hover:sf-opacity-90 hover:sf-bg-red-600"
-              : props.feedback === "no"
-              ? " sf-ring-2 sf-ring-offset-2 "
-              : props.feedback === "yes"
-              ? "sf-opacity-50 sf-cursor-not-allowed pointer-events-none"
-              : "",
-          )}
-        >
-          <HandThumbDownIcon className="sf-h-5 sf-w-5" />
-          No
-        </button>
-        <button
-          onClick={() => props.setFeedback("yes")}
-          className={classNames(
-            "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-sm  sf-bg-green-500 sf-ring-green-500 ",
-            !props.feedback
-              ? "hover:sf-opacity-90 hover:sf-bg-green-600"
-              : props.feedback === "yes"
-              ? "sf-ring-2 sf-ring-offset-2"
-              : props.feedback === "no"
-              ? "sf-opacity-50 sf-cursor-not-allowed pointer-events-none"
-              : "",
-          )}
-        >
-          <HandThumbUpIcon className="sf-h-5 sf-w-5" />
-          Yes
-        </button>
+    <div className={classes}>
+      <div className="sf-flex sf-flex-col sf-place-items-center sf-gap-y-1 sf-text-md  sf-align-top">
+        <div className="sf-flex sf-flex-row sf-gap-x-4">
+          Did this response answer your question?
+        </div>
+        <div className="sf-flex sf-flex-row sf-gap-x-4 ">
+          <button
+            onClick={() => props.setFeedback("no")}
+            className={classNames(
+              "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-text-xs sf-transition sf-bg-red-500 sf-ring-red-500 ",
+              !props.feedback
+                ? "hover:sf-opacity-90 hover:sf-bg-red-600"
+                : props.feedback === "no"
+                ? " sf-ring-2 sf-ring-offset-2 "
+                : props.feedback === "yes"
+                ? "sf-opacity-50 sf-cursor-not-allowed pointer-events-none"
+                : "",
+            )}
+          >
+            <HandThumbDownIcon className="sf-h-5 sf-w-5" />
+            No
+          </button>
+          <button
+            onClick={() => props.setFeedback("yes")}
+            className={classNames(
+              "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-xs  sf-bg-green-500 sf-ring-green-500 ",
+              !props.feedback
+                ? "hover:sf-opacity-90 hover:sf-bg-green-600"
+                : props.feedback === "yes"
+                ? "sf-ring-2 sf-ring-offset-2"
+                : props.feedback === "no"
+                ? "sf-opacity-50 sf-cursor-not-allowed pointer-events-none"
+                : "",
+            )}
+          >
+            <HandThumbUpIcon className="sf-h-5 sf-w-5" />
+            Yes
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -81,6 +120,10 @@ export default function Chat(props: ChatProps) {
       ? [{ role: "assistant", content: props.welcomeText }]
       : [],
   );
+
+  // DELETE ME
+  if (devChatContents.length < 2)
+    setDevChatContents([...devChatContents, ...fakeChatContents]);
 
   const killSwitchClicked = useRef(false);
 
@@ -345,9 +388,6 @@ export default function Chat(props: ChatProps) {
               </div>
             )}
         </div>
-        {triggerFeedback(devChatContents) && (
-          <FeedbackButtons feedback={feedback} setFeedback={setFeedback} />
-        )}
       </div>
       {/* Textbox user types into */}
       <div className="sf-flex sf-flex-col sf-pt-4">
@@ -377,7 +417,7 @@ export default function Chat(props: ChatProps) {
             }
           }}
         />
-        <div className="sf-flex sf-flex-shrink-0 sf-w-full sf-justify-between sf-px-1 sf-pb-4 sf-pt-2">
+        <div className="sf-flex sf-flex-shrink-0 sf-w-full sf-justify-between sf-px-1 sf-pt-2 sf-place-items-center">
           <button
             className={classNames(
               "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-shadow-sm sf-border",
@@ -393,11 +433,14 @@ export default function Chat(props: ChatProps) {
           >
             Cancel
           </button>
+          {triggerFeedback(devChatContents) && (
+            <FeedbackButtons feedback={feedback} setFeedback={setFeedback} />
+          )}
           <button
             ref={props.initialFocus}
             type="submit"
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
+              "sf-flex sf-flex-row sf-gap-x-1 sf-h-10 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
               loading || !userText
                 ? "sf-bg-gray-500 sf-cursor-not-allowed"
                 : `hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500`,
