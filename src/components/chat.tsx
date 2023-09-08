@@ -351,7 +351,7 @@ export default function Chat(props: ChatProps) {
             }
           }}
         />
-        <div className="sf-flex sf-flex-shrink-0 sf-w-full sf-justify-between sf-px-1 sf-pt-2 sf-place-items-center">
+        <div className="sf-flex sf-flex-shrink-0 sf-w-full sf-justify-between sf-px-1 sf-pt-2 sf-pt-1 sf-pb-1 sf-place-items-center">
           <button
             className={classNames(
               "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-shadow-sm sf-border",
@@ -379,7 +379,7 @@ export default function Chat(props: ChatProps) {
             ref={props.initialFocus}
             type="submit"
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-h-10 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
+              "sf-flex sf-flex-row sf-gap-x-1 sf-h-10 sf-place-items-center  sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
               loading || !userText
                 ? "sf-bg-gray-500 sf-cursor-not-allowed"
                 : `hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500`,
@@ -442,21 +442,21 @@ function FeedbackButtons(props: {
   setIsVisible?: (isVisible: boolean) => void;
 }) {
   const classes = classNames(
-    "sf-flex sf-flex-row sf-place-items-center sf-align-top",
+    "sf-flex sf-flex-row",
     !props.isVisible && "sf-transition-all sf-duration-[1500ms] sf-opacity-0",
   );
 
   return (
     <div className={classes}>
-      <div className="sf-flex sf-flex-col sf-place-items-center sf-gap-y-1 sf-text-md  sf-align-top">
-        <div className="sf-flex sf-flex-row sf-gap-x-4">
-          Did this response answer your question?
+      <div className="sf-flex sf-flex-col sf-place-items-center sf-gap-y-1 sm:sf-text-sm sf-text-md">
+        <div className="sf-flex sf-flex-row sf-gap-x-4 sf-px-2 sf-whitespace-nowrap ">
+          Did this answer your question?
         </div>
-        <div className="sf-flex sf-flex-row sf-gap-x-4 ">
+        <div className="sf-flex sf-flex-row sf-gap-x-2">
           <button
             onClick={() => props.setFeedback("no")}
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-text-xs sf-transition sf-bg-red-500 sf-ring-red-500 ",
+              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-text-xs sf-transition sf-bg-red-500 sf-ring-red-500",
               !props.feedback
                 ? "hover:sf-opacity-90 hover:sf-bg-red-600"
                 : props.feedback === "no"
@@ -466,13 +466,13 @@ function FeedbackButtons(props: {
                 : "",
             )}
           >
-            <HandThumbDownIcon className="sf-h-5 sf-w-5" />
+            <HandThumbDownIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
             No
           </button>
           <button
             onClick={() => props.setFeedback("yes")}
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-xs  sf-bg-green-500 sf-ring-green-500 ",
+              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-xs  sf-bg-green-500 sf-ring-green-500 ",
               !props.feedback
                 ? "hover:sf-opacity-90 hover:sf-bg-green-600"
                 : props.feedback === "yes"
@@ -482,7 +482,7 @@ function FeedbackButtons(props: {
                 : "",
             )}
           >
-            <HandThumbUpIcon className="sf-h-5 sf-w-5" />
+            <HandThumbUpIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
             Yes
           </button>
         </div>
