@@ -254,7 +254,7 @@ export default function Chat(props: ChatProps) {
           user_message_idx: devChatContents.findLastIndex(
             (chat) => chat.role === "user",
           ),
-          feedback: feedback === "yes",
+          feedback_positive: feedback === "yes",
         }),
       });
       console.log("response from feedback endpoint: ", await response.json());
@@ -354,7 +354,7 @@ export default function Chat(props: ChatProps) {
         <div className="sf-flex sf-flex-shrink-0 sf-w-full sf-justify-between sf-px-1 sf-pt-2 sf-pt-1 sf-pb-1 sf-place-items-center">
           <button
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-shadow-sm sf-border",
+              "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-shadow-sm sf-border sf-h-10",
               loading
                 ? "sf-text-gray-500 sf-bg-gray-100 hover:sf-bg-gray-200 sf-border-gray-300"
                 : "sf-invisible",
