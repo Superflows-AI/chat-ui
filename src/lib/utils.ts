@@ -21,13 +21,13 @@ export function functionNameToDisplay(name: string): string {
   );
 }
 
-export function convertToRenderable(
-  functionOutput: Record<string, any> | any[],
+export function convertToMarkdownTable(
+  data: Record<string, any> | any[],
   caption?: string,
 ): string {
-  /** Converts a function's output to a Markdown table **/
+  /** Converts data (either a function's output or confirmation data) to a Markdown table **/
 
-  functionOutput = removeUUIDs(functionOutput);
+  data = removeUUIDs(data);
 
   let output = "";
   if (caption) {
@@ -35,48 +35,44 @@ export function convertToRenderable(
   }
   // Format: {data: {...interestingData}}
   if (
-    !Array.isArray(functionOutput) &&
-    Object.keys(functionOutput).length === 1 &&
-    typeof functionOutput[Object.keys(functionOutput)[0]] === "object"
+    !Array.isArray(data) &&
+    Object.keys(data).length === 1 &&
+    typeof data[Object.keys(data)[0]] === "object"
   ) {
     if (!caption) {
       // Make the first key the caption
-      output += `### ${functionNameToDisplay(
-        Object.keys(functionOutput)[0] ?? "",
-      )}\n\n`;
+      output += `### ${functionNameToDisplay(Object.keys(data)[0] ?? "")}\n\n`;
     }
-    functionOutput = functionOutput[Object.keys(functionOutput)[0]];
+    data = data[Object.keys(data)[0]];
   }
 
   // Do this here so we get the correct caption
-  functionOutput = removeSingleKeyNodes(functionOutput);
+  data = removeSingleKeyNodes(data);
 
-  if (Array.isArray(functionOutput)) {
+  if (Array.isArray(data)) {
     // Assume all elements have the same type
-    if (typeof (functionOutput as any[])[0] !== "object") {
-      if (functionOutput.length < 7) {
+    if (typeof (data as any[])[0] !== "object") {
+      if (data.length < 7) {
         // And did those feet in ancient time,
         return (
           output +
           ("|" +
-            functionOutput.map(() => "   ").join("|") +
+            data.map(() => "   ").join("|") +
             "|\n|" +
-            functionOutput.map(() => "---").join("|") +
+            data.map(() => "---").join("|") +
             "|\n| " +
-            functionOutput.join(" | ") +
+            data.join(" | ") +
             " |\n")
         );
       } else {
         // Walk upon England's mountains green?
-        return (
-          output + "|   |\n|---|\n| " + functionOutput.join(" |\n| ") + " |\n"
-        );
+        return output + "|   |\n|---|\n| " + data.join(" |\n| ") + " |\n";
       }
     }
     // Otherwise, we have an array of arrays/objects
     let columns: { name?: string; align: "center" }[];
-    if (Array.isArray((functionOutput as any[])[0])) {
-      functionOutput = functionOutput.map((item: any) => {
+    if (Array.isArray((data as any[])[0])) {
+      data = data.map((item: any) => {
         // Format: [[{a,b,c,d}, {a,b,c,d}], [{a,b,c,d}, {a,b,c,d}]]
         return item.map((subItem: any) => {
           // .slice() cuts out the starting and end [] or {}
@@ -84,10 +80,10 @@ export function convertToRenderable(
           else return subItem;
         });
       });
-      columns = (functionOutput as any[])[0].map(() => ({ align: "center" }));
+      columns = (data as any[])[0].map(() => ({ align: "center" }));
     } else {
       // Array of objects
-      functionOutput = functionOutput.map((item: any) => {
+      data = data.map((item: any) => {
         // Format: [{a,b,c,d}, {a,b,c,d}, {a,b,c,d}, {a,b,c,d}]
         Object.entries(item).forEach(([key, value]: any) => {
           // Deal with nested objects: [{a,b:{c,d}}, {a,b:{c,d}}]
@@ -109,17 +105,21 @@ export function convertToRenderable(
         });
         return item;
       });
-      columns = Object.keys((functionOutput as object[])[0]).map((n) => ({
+      columns = Object.keys((data as object[])[0]).map((n) => ({
         name: functionNameToDisplay(n),
         align: "center",
       }));
     }
     // And was the holy Lamb of God,
-    return output + tablemark(functionOutput as any[], { columns });
+    return output + tablemark(data as any[], { columns });
   } else {
+    // If the data is empty, just return the caption with a blank table so it formats nicely
+    if (Object.keys(data).length === 0) {
+      return output + "\n|    |\n|----|\n";
+    }
     // Format: {a, b}
     output += tablemark(
-      Object.entries(functionOutput).map(([key, value]) => {
+      Object.entries(data).map(([key, value]) => {
         return {
           Name: key,
           Value: typeof value === "object" ? stringify(value) : value,
