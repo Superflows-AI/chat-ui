@@ -10,8 +10,16 @@ function Development() {
   return (
     <div className="h-screen flex items-center justify-center w-full">
       <SuperflowsButton
-        superflowsApiKey=""
-        styling={{ solidIcon: true, type: "modal" }}
+        superflowsApiKey={import.meta.env.VITE_SUPERFLOWS_API_KEY}
+        userDescription={import.meta.env.VITE_USER_DESCRIPTION}
+        userApiKey={import.meta.env.VITE_USER_API_KEY}
+        AIname={"Superflows Assistant"}
+        styling={{
+          type: "modal",
+          solidIcon: true,
+        }}
+        welcomeText={import.meta.env.VITE_WELCOME_MESSAGE}
+        suggestions={import.meta.env.VITE_SUGGESTIONS?.split(",")}
       />
     </div>
   );
