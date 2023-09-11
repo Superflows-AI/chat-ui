@@ -10,7 +10,7 @@ import {
 } from "./lib/parser";
 import type { FunctionCall } from "./lib/parser";
 
-import { convertToRenderable, functionNameToDisplay } from "./lib/utils";
+import { convertToMarkdownTable, functionNameToDisplay } from "./lib/utils";
 import "./index.css";
 
 export {
@@ -18,7 +18,7 @@ export {
   DevChatItem,
   UserChatItem,
   functionNameToDisplay,
-  convertToRenderable,
+  convertToMarkdownTable,
   parseFunctionCall,
   FunctionCall,
   getLastSectionName,

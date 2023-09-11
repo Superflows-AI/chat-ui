@@ -12,7 +12,7 @@ import { ParsedOutput, parseOutput } from "../lib/parser";
 import { Json, StreamingStepInput } from "../lib/types";
 import {
   classNames,
-  convertToRenderable,
+  convertToMarkdownTable,
   functionNameToDisplay,
 } from "../lib/utils";
 import { Graph, GraphData, extractGraphData } from "./graph";
@@ -145,7 +145,7 @@ export function FunctionVizChatItem(props: {
       // First check is for null
       if (functionJsonResponse && typeof functionJsonResponse === "object") {
         setContent(
-          convertToRenderable(
+          convertToMarkdownTable(
             functionJsonResponse,
             `${functionNameToDisplay(props.chatItem?.name ?? "")} result`,
           ),
@@ -175,7 +175,10 @@ export function FunctionVizChatItem(props: {
         "sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-100 sf-border sf-border-gray-300"
       }
     >
-      <button className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between">
+      <button
+        className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between"
+        onClick={() => setExpanded((prev) => !prev)}
+      >
         <p className="sf-text-xs sf-text-gray-600 sf-mb-1">Data received</p>
         <div className="sf-text-sm">
           Data received from{" "}
@@ -228,7 +231,7 @@ export function ConfirmationChatItem(props: {
         toConfirm.length > 1 ? "s require" : " requires"
       } confirmation:\n\n${toConfirm
         .map((action) => {
-          return `${convertToRenderable(
+          return `${convertToMarkdownTable(
             action.args,
             functionNameToDisplay(action.name),
           )}`;

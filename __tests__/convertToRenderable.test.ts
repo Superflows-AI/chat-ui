@@ -1,10 +1,10 @@
 import { describe, expect, it } from "@jest/globals";
-import { convertToRenderable } from "../src/lib/utils";
+import { convertToMarkdownTable } from "../src/lib/utils";
 
 describe("convertToRenderable", () => {
   it("should convert short array of numbers to a markdown table", () => {
     const input = [1, 2, 3, 4, 5, 6];
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     expect(output).toEqual(
       `|   |   |   |   |   |   |
 |---|---|---|---|---|---|
@@ -14,7 +14,7 @@ describe("convertToRenderable", () => {
   });
   it("should convert long array of numbers to a markdown table", () => {
     const input = [1, 2, 3, 4, 5, 6, 7];
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     expect(output).toEqual(
       `|   |
 |---|
@@ -30,7 +30,7 @@ describe("convertToRenderable", () => {
   });
   it("should convert object with 1 key and value of long array of numbers to a markdown table", () => {
     const input = { whatsthedifferencebetweenmeandyou: [1, 2, 3, 4, 5, 6, 7] };
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     expect(output).toEqual(
       `### Whatsthedifferencebetweenmeandyou
 
@@ -52,7 +52,7 @@ describe("convertToRenderable", () => {
       [4, 5, 6],
       [7, 8, 9],
     ];
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     expect(output).toEqual(
       `|   0   |   1   |   2   |
 | :---: | :---: | :---: |
@@ -67,7 +67,7 @@ describe("convertToRenderable", () => {
       { a: 1, b: 2, c: 3 },
       { a: 4, b: 5, c: 6 },
     ];
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     expect(output).toEqual(
       `|   a   |   b   |   c   |
 | :---: | :---: | :---: |
@@ -81,7 +81,7 @@ describe("convertToRenderable", () => {
       { a: 1, b: 2, c: [1, 2, 3] },
       { a: 4, b: 5, c: [4, 5, 6] },
     ];
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     expect(output).toEqual(
       `|   a   |   b   |   c   |
 | :---: | :---: | :---: |
@@ -95,7 +95,7 @@ describe("convertToRenderable", () => {
       { a: 1, b: 2, c: { fire: 1, sale: 2, aaaa: 3, theburning: 4 } },
       { a: 4, b: 5, c: { fire: 1, sale: 2, aaaa: 3, theburning: 4 } },
     ];
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     expect(output)
       .toEqual(`|   a   |   b   | c -> Fire | c -> Sale | c -> Aaaa | c -> Theburning |
 | :---: | :---: | :-------: | :-------: | :-------: | :-------------: |
@@ -140,7 +140,7 @@ describe("convertToRenderable", () => {
         },
       ],
     };
-    const out = convertToRenderable(input);
+    const out = convertToMarkdownTable(input);
     expect(out).toEqual(`### Responses
 
 | Score |                                                                        Comment                                                                         |        Updated At        | Data Source |                              Themes                              |
@@ -156,7 +156,7 @@ describe("convertToRenderable", () => {
       when: "all about you are losing theirs",
       and: "blaming it on you",
     };
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     expect(output).toEqual(
       `| Name  | Value                           |
 | :---- | :------------------------------ |
@@ -172,7 +172,7 @@ describe("convertToRenderable", () => {
       when: "all men doubt you",
       but: "keep allowance for their doubting too",
     };
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     expect(output).toEqual(
       `| Name  | Value                                 |
 | :---- | :------------------------------------ |
@@ -187,7 +187,7 @@ describe("convertToRenderable", () => {
       if: ["you ", "can ", "wait"],
       and: { not: "be", tired: "of", waiting: "." },
     };
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     const expected = `| Name           | Value          |
 | :------------- | :------------- |
 | if             | you ,can ,wait |
@@ -204,7 +204,7 @@ describe("convertToRenderable", () => {
       saying: "something about a queen",
       uuid: crypto.randomUUID(),
     };
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     expect(output).toEqual(
       `| Name   | Value                                       |
 | :----- | :------------------------------------------ |
@@ -217,7 +217,7 @@ describe("convertToRenderable", () => {
   it("removes uuid from array", () => {
     const input = "look at mother nature on the run".split(" ");
     input.push(crypto.randomUUID());
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     const expected = `|   |
 |---|
 | look |
@@ -238,7 +238,7 @@ describe("convertToRenderable", () => {
       ["out", "basement"],
       ["with", crypto.randomUUID()],
     ];
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     const expected = `|   0   |    1     |
 | :---: | :------: |
 |   i   |   was    |
@@ -254,7 +254,7 @@ describe("convertToRenderable", () => {
       { flying: "mother nature's silver seed", to: "a new home in the sun" },
       { flying: "mother nature's on the run", to: crypto.randomUUID() },
     ];
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     const expected = `|           Flying            |          To           |
 | :-------------------------: | :-------------------: |
 | mother nature's silver seed | a new home in the sun |
@@ -288,7 +288,7 @@ describe("convertToRenderable", () => {
       connect: { type: "explicit", serviceProvider: "currencycloud" },
       metadata: {},
     };
-    const output = convertToRenderable(input);
+    const output = convertToMarkdownTable(input);
     const expected = `| Name                                         | Value              |
 | :------------------------------------------- | :----------------- |
 | workflow -> code                             | client.sub-account |
