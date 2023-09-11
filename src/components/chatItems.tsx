@@ -175,10 +175,7 @@ export function FunctionVizChatItem(props: {
         "sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-100 sf-border sf-border-gray-300"
       }
     >
-      <button
-        className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between"
-        onClick={() => setExpanded((prev) => !prev)}
-      >
+      <button className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between">
         <p className="sf-text-xs sf-text-gray-600 sf-mb-1">Data received</p>
         <div className="sf-text-sm">
           Data received from{" "}
