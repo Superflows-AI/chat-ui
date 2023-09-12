@@ -3,6 +3,7 @@ import {
   ArrowPathIcon,
   HandThumbDownIcon,
   HandThumbUpIcon,
+  CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import { ChatItem } from "./chatItems";
 import {
@@ -235,31 +236,42 @@ export default function Chat(props: ChatProps) {
   const [feedbackButtonsVisible, setFeedbackButtonsVisible] =
     useState<boolean>(false);
 
+  const [negativeFeedbackText, setNegativeFeedbackText] = useState<
+    string | null
+  >(null);
+
+  const [showNegativeFeedbackTextbox, setShowNegativeFeedbackTextbox] =
+    useState(false);
+
   useEffect(() => {
-    setFeedbackButtonsVisible(triggerFeedback(devChatContents, loading));
+    setFeedbackButtonsVisible(shouldTriggerFeedback(devChatContents, loading));
   }, [devChatContents, loading]);
+
+  const feedbackBody = {
+    conversation_id: conversationId,
+    conversation_length_at_feedback: devChatContents.filter(({ role }) =>
+      ["function", "assistant", "user"].includes(role),
+    ).length,
+    feedback_positive: feedback === "yes",
+    negative_feedback_text: negativeFeedbackText,
+  };
 
   useEffect(() => {
     (async () => {
       if (feedback === null) return;
-      console.log("sending feedback");
-      const response = await fetch(new URL("/api/v1/feedback", hostname).href, {
+      await fetch(new URL("/api/v1/feedback", hostname).href, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${props.superflowsApiKey}`,
         },
-        body: JSON.stringify({
-          conversation_id: conversationId,
-          user_message_idx: devChatContents.findLastIndex(
-            (chat) => chat.role === "user",
-          ),
-          feedback_positive: feedback === "yes",
-        }),
+        body: JSON.stringify(feedbackBody),
       });
-      console.log("response from feedback endpoint: ", await response.json());
-      setFeedback(null);
-      setFeedbackButtonsVisible(false);
+      setTimeout(() => {
+        setFeedbackButtonsVisible(false);
+        setFeedback(null);
+        setNegativeFeedbackText(null);
+      }, 1000);
     })();
   }, [feedback]);
 
@@ -351,7 +363,7 @@ export default function Chat(props: ChatProps) {
             }
           }}
         />
-        <div className="sf-flex sf-flex-shrink-0 sf-w-full sf-justify-between sf-px-1 sf-pt-2 sf-pt-1 sf-pb-1 sf-place-items-center">
+        <div className="sf-flex sf-flex-shrink-0 sf-w-full sf-justify-between sf-px-1 sf-py-2 sf-place-items-center">
           <button
             className={classNames(
               "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-shadow-sm sf-border sf-h-10",
@@ -367,25 +379,35 @@ export default function Chat(props: ChatProps) {
           >
             Cancel
           </button>
-          {triggerFeedback(devChatContents, loading) && (
+          <div
+            className={
+              (!shouldTriggerFeedback(devChatContents, loading) ||
+                !feedbackButtonsVisible) &&
+              "sf-invisible"
+            }
+          >
             <FeedbackButtons
               feedback={feedback}
               setFeedback={setFeedback}
               isVisible={feedbackButtonsVisible}
-              setIsVisible={setFeedbackButtonsVisible}
+              negativeFeedbackText={negativeFeedbackText}
+              setNegativeFeedbackText={setNegativeFeedbackText}
+              showNegativeTextbox={showNegativeFeedbackTextbox}
+              setShowNegativeTextbox={setShowNegativeFeedbackTextbox}
             />
-          )}
+          </div>
           <button
             ref={props.initialFocus}
             type="submit"
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-h-10 sf-place-items-center  sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
+              "sf-flex sf-flex-row sf-gap-x-1 sf-h-10 sf-place-items-center sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
               loading || !userText
                 ? "sf-bg-gray-500 sf-cursor-not-allowed"
                 : `hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500`,
               !props.styling?.buttonColor &&
                 !(loading || !userText) &&
                 "sf-bg-purple-500",
+              showNegativeFeedbackTextbox && "sf-invisible",
             )}
             onClick={() => {
               if (!loading && userText) {
@@ -412,7 +434,7 @@ export default function Chat(props: ChatProps) {
   );
 }
 
-function triggerFeedback(
+function shouldTriggerFeedback(
   devChatContents: StreamingStepInput[],
   loading?: boolean,
 ): boolean {
@@ -422,64 +444,90 @@ function triggerFeedback(
   const sinceLastUserMessage = devChatContents.slice(
     devChatContents.findLastIndex((chat) => chat.role === "user"),
   );
-
   if (!sinceLastUserMessage.some((chat) => chat.role === "function"))
     return false;
   const lastMessage = sinceLastUserMessage[sinceLastUserMessage.length - 1];
   const parsed = parseOutput(lastMessage.content);
 
-  return (
-    lastMessage.role === "assistant" &&
-    parsed.tellUser &&
-    parsed.tellUser.trim()[parsed.tellUser.trim().length - 1] !== "?"
-  );
+  return lastMessage.role === "assistant" && parsed.tellUser.length > 0;
 }
 
 function FeedbackButtons(props: {
   feedback: "yes" | "no" | null;
   setFeedback: (feedback: "yes" | "no" | null) => void;
-  isVisible?: boolean;
-  setIsVisible?: (isVisible: boolean) => void;
+  isVisible: boolean;
+  negativeFeedbackText: string | null;
+  setNegativeFeedbackText: (text: string) => void;
+  showNegativeTextbox: boolean;
+  setShowNegativeTextbox: (show: boolean) => void;
 }) {
-  const classes = classNames(
-    "sf-flex sf-flex-row",
-    !props.isVisible && "sf-transition-all sf-duration-[1500ms] sf-opacity-0",
-  );
+  const [showThankYouMessage, setShowThankYouMessage] = useState(false);
 
   return (
-    <div className={classes}>
-      <div className="sf-flex sf-flex-col sf-place-items-center sf-gap-y-1 sm:sf-text-sm sf-text-md">
-        <div className="sf-flex sf-flex-row sf-gap-x-4 sf-px-2 sf-whitespace-nowrap ">
-          Did this answer your question?
+    <div className="sf-flex sf-flex-row sf-h-16">
+      <div
+        className={classNames(
+          "sf-my-auto sf-flex sf-flex-row sf-whitespace-nowrap",
+          !showThankYouMessage && "sf-hidden",
+        )}
+      >
+        Thanks for your feedback!
+        <CheckCircleIcon className="sf-h-5 sf-w-5 sf-ml-1 sf-mr-2 sf-text-green-500 sf-my-auto" />
+      </div>
+      <div
+        className={classNames(
+          "sf-align-center sf-flex sf-flex-row sf-my-auto",
+          (!props.showNegativeTextbox || showThankYouMessage) && "sf-hidden",
+        )}
+      >
+        <textarea
+          className={
+            "sf-h-10 sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400 focus:sf-border-red-500 focus:sf-ring-red-500"
+          }
+          placeholder={"What went wrong?"}
+          value={props.negativeFeedbackText ?? ""}
+          onChange={(e) => props.setNegativeFeedbackText(e.target.value)}
+        />
+        <button
+          type="submit"
+          className="sf-h-10 sf-place-items-center sf-rounded-md sf-px-3 sf-my-auto sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm hover:sf-bg-red-600 sf-bg-red-500"
+          onClick={() => {
+            props.setFeedback("no");
+            setShowThankYouMessage(true);
+            props.setShowNegativeTextbox(false);
+            setTimeout(() => setShowThankYouMessage(false), 5000);
+          }}
+        >
+          Done
+        </button>
+      </div>
+      <div
+        className={classNames(
+          "sf-flex sf-flex-col sf-place-items-center sf-gap-y-1 sm:sf-text-sm sf-text-md",
+          (props.showNegativeTextbox || showThankYouMessage) && "sf-hidden",
+        )}
+      >
+        <div className="sf-flex sf-flex-row sf-gap-x-4 sf-px-2 sf-whitespace-nowrap">
+          Was this response helpful?
         </div>
         <div className="sf-flex sf-flex-row sf-gap-x-2">
           <button
-            onClick={() => props.setFeedback("no")}
+            onClick={() => props.setShowNegativeTextbox(true)}
             className={classNames(
               "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-text-xs sf-transition sf-bg-red-500 sf-ring-red-500",
-              !props.feedback
-                ? "hover:sf-opacity-90 hover:sf-bg-red-600"
-                : props.feedback === "no"
-                ? " sf-ring-2 sf-ring-offset-2 "
-                : props.feedback === "yes"
-                ? "sf-opacity-50 sf-cursor-not-allowed pointer-events-none"
-                : "",
             )}
           >
             <HandThumbDownIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
             No
           </button>
           <button
-            onClick={() => props.setFeedback("yes")}
+            onClick={() => {
+              props.setFeedback("yes");
+              setShowThankYouMessage(true);
+              setTimeout(() => setShowThankYouMessage(false), 5000);
+            }}
             className={classNames(
               "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-xs  sf-bg-green-500 sf-ring-green-500 ",
-              !props.feedback
-                ? "hover:sf-opacity-90 hover:sf-bg-green-600"
-                : props.feedback === "yes"
-                ? "sf-ring-2 sf-ring-offset-2"
-                : props.feedback === "no"
-                ? "sf-opacity-50 sf-cursor-not-allowed pointer-events-none"
-                : "",
             )}
           >
             <HandThumbUpIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
