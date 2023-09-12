@@ -389,7 +389,6 @@ export default function Chat(props: ChatProps) {
             <FeedbackButtons
               feedback={feedback}
               setFeedback={setFeedback}
-              isVisible={feedbackButtonsVisible}
               negativeFeedbackText={negativeFeedbackText}
               setNegativeFeedbackText={setNegativeFeedbackText}
               showNegativeTextbox={showNegativeFeedbackTextbox}
@@ -455,13 +454,16 @@ function shouldTriggerFeedback(
 function FeedbackButtons(props: {
   feedback: "yes" | "no" | null;
   setFeedback: (feedback: "yes" | "no" | null) => void;
-  isVisible: boolean;
   negativeFeedbackText: string | null;
   setNegativeFeedbackText: (text: string) => void;
   showNegativeTextbox: boolean;
   setShowNegativeTextbox: (show: boolean) => void;
 }) {
   const [showThankYouMessage, setShowThankYouMessage] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    ref.current.focus();
+  }, [props.showNegativeTextbox]);
 
   return (
     <div className="sf-flex sf-flex-row sf-h-16">
@@ -480,17 +482,38 @@ function FeedbackButtons(props: {
           (!props.showNegativeTextbox || showThankYouMessage) && "sf-hidden",
         )}
       >
-        <textarea
-          className={
-            "sf-h-10 sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400 focus:sf-border-red-500 focus:sf-ring-red-500"
-          }
-          placeholder={"What went wrong?"}
-          value={props.negativeFeedbackText ?? ""}
-          onChange={(e) => props.setNegativeFeedbackText(e.target.value)}
-        />
+        <div className="sf-relative">
+          <input
+            ref={ref ?? null}
+            className={classNames(
+              "sf-peer sf-pt-4 sf-pb-1 sf-h-10 sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-px-4 sf-border-gray-300 sf-border focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400 focus:sf-border-purple-400 focus:sf-ring-purple-400",
+            )}
+            placeholder=""
+            value={props.negativeFeedbackText ?? ""}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                props.setFeedback("no");
+                setShowThankYouMessage(true);
+                props.setShowNegativeTextbox(false);
+                setTimeout(() => setShowThankYouMessage(false), 5000);
+              }
+            }}
+            onChange={(e) => props.setNegativeFeedbackText(e.target.value)}
+          />
+          <div
+            className={classNames(
+              "sf-absolute sf-pointer-events-none sf-text-sm sf-text-gray-400 sf-left-4 sf-top-3 peer-focus:sf-scale-75 peer-focus:sf--translate-y-5/8 sf-select-none sf-transition sf-duration-300",
+              props.negativeFeedbackText
+                ? "sf--translate-x-1/8 sf--translate-y-5/8 sf-scale-75"
+                : "peer-focus:sf--translate-x-1/8",
+            )}
+          >
+            What went wrong?
+          </div>
+        </div>
         <button
-          type="submit"
-          className="sf-h-10 sf-place-items-center sf-rounded-md sf-px-3 sf-my-auto sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm hover:sf-bg-red-600 sf-bg-red-500"
+          className="sf-h-10 sf-place-items-center sf-rounded-md sf-px-3 sf-my-auto sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm hover:sf-bg-purple-600 sf-bg-purple-500"
           onClick={() => {
             props.setFeedback("no");
             setShowThankYouMessage(true);
