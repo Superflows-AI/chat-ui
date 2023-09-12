@@ -175,7 +175,7 @@ export function FunctionVizChatItem(props: {
     <div
       className={classNames(
         "sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-200 sf-border sf-border-gray-300",
-        !expanded && "hover:sf-bg-gray-400 sf-cursor-pointer",
+        !expanded && "hover:sf-bg-gray-300 sf-cursor-pointer",
       )}
     >
       <button
