@@ -89,7 +89,7 @@ export function PlainTextChatItem(props: {
       className={classNames(
         "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full",
         props.chatItem.role === "user"
-          ? "sf-bg-white sf-text-right sf-place-items-end sf-border sf-shadow-sm"
+          ? "sf-bg-white sf-text-right sf-place-items-end sf-border "
           : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
         props.chatItem.role === "error"
           ? "sf-bg-red-200"
@@ -312,7 +312,7 @@ export function AssistantChatItem(props: {
   }, [props.chatItem.content]);
 
   return (
-    <div className="sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-shadow-sm sf-bg-gray-100 sf-text-left sf-place-items-baseline">
+    <div className="sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-shadow-sm sf-bg-gray-300 sf-text-left sf-place-items-baseline">
       <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
         {props.AIname ?? "Assistant" + " AI"}
       </p>
@@ -487,7 +487,7 @@ export function Tabs(props: {
               : "sf-text-gray-500 hover:sf-text-gray-700",
             tabIdx === 0 ? "sf-rounded-l-lg" : "",
             tabIdx === 1 ? "sf-rounded-r-lg" : "",
-            "group sf-relative sf-cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-2 sf-px-2 sf-text-center sf-text-sm sf-font-sm hover:sf-bg-gray-50 focus:sf-z-10",
+            "sf-relative sf-cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-2 sf-px-2 sf-text-center sf-text-sm sf-font-sm hover:sf-bg-gray-50 focus:sf-z-10",
           )}
           aria-current={props.tabOpen === tab ? "page" : undefined}
           onClick={() => {

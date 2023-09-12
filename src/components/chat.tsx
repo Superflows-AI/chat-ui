@@ -290,6 +290,8 @@ export default function Chat(props: ChatProps) {
             onClick={() => {
               setDevChatContents([]);
               setConversationId(null);
+              setShowNegativeFeedbackTextbox(false);
+              setNegativeFeedbackText(null);
             }}
           >
             <ArrowPathIcon className="sf-h-4 sf-w-4" /> Clear chat
@@ -353,7 +355,7 @@ export default function Chat(props: ChatProps) {
           onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              if (userText) {
+              if (userText && !showNegativeFeedbackTextbox) {
                 void callSuperflowsApi([
                   ...devChatContents,
                   { role: "user", content: userText },
@@ -465,6 +467,13 @@ function FeedbackButtons(props: {
     ref.current.focus();
   }, [props.showNegativeTextbox]);
 
+  const handleNegativeFeedbackSubmission = () => {
+    props.setFeedback("no");
+    setShowThankYouMessage(true);
+    props.setShowNegativeTextbox(false);
+    setTimeout(() => setShowThankYouMessage(false), 5000);
+  };
+
   return (
     <div className="sf-flex sf-flex-row sf-h-16">
       <div
@@ -484,7 +493,7 @@ function FeedbackButtons(props: {
       >
         <div className="sf-relative">
           <input
-            ref={ref ?? null}
+            ref={ref}
             className={classNames(
               "sf-peer sf-pt-4 sf-pb-1 sf-h-10 sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-px-4 sf-border-gray-300 sf-border focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400 focus:sf-border-purple-400 focus:sf-ring-purple-400",
             )}
@@ -493,10 +502,7 @@ function FeedbackButtons(props: {
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
-                props.setFeedback("no");
-                setShowThankYouMessage(true);
-                props.setShowNegativeTextbox(false);
-                setTimeout(() => setShowThankYouMessage(false), 5000);
+                handleNegativeFeedbackSubmission();
               }
             }}
             onChange={(e) => props.setNegativeFeedbackText(e.target.value)}
@@ -514,12 +520,7 @@ function FeedbackButtons(props: {
         </div>
         <button
           className="sf-h-10 sf-place-items-center sf-rounded-md sf-px-3 sf-my-auto sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm hover:sf-bg-purple-600 sf-bg-purple-500"
-          onClick={() => {
-            props.setFeedback("no");
-            setShowThankYouMessage(true);
-            props.setShowNegativeTextbox(false);
-            setTimeout(() => setShowThankYouMessage(false), 5000);
-          }}
+          onClick={() => handleNegativeFeedbackSubmission()}
         >
           Done
         </button>
