@@ -40,7 +40,9 @@ export default {
       // (highly recommended when packaging for distribution).
       purge: true,
     }),
-    typescript({}),
+    typescript({
+      exclude: ["src/development.tsx"]
+    }),
   ],
   external: ["react", "react-dom", "@headlessui/react", "@heroicons/react"],
 };
