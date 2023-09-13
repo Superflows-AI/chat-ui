@@ -10,12 +10,11 @@ The purpose of this library is to allow developers to easily integrate Superflow
 
 You can integrate in 3 ways:
 
-|   | Approach                                                                  | Description                                                            |
-|---|---------------------------------------------------------------------------|------------------------------------------------------------------------|
-| 1 | `SuperflowsButton` component _(recommended)_                              | Easiest & fastest                                                      |
-| 2 | `SuperflowsChat` component                                                | Most flexible & customizable                                           |
-| 3 | The modal (`SuperflowsModal`) or sidebar (`SuperflowsSidebar`) components | (#1 but you have total control over the button that opens the chatbot) |
-
+|     | Approach                                                                  | Description                                                            |
+| --- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 1   | `SuperflowsButton` component _(recommended)_                              | Easiest & fastest                                                      |
+| 2   | `SuperflowsChat` component                                                | Most flexible & customizable                                           |
+| 3   | The modal (`SuperflowsModal`) or sidebar (`SuperflowsSidebar`) components | (#1 but you have total control over the button that opens the chatbot) |
 
 ## Installation
 

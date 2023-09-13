@@ -4,8 +4,6 @@ import { ChatItem } from "./chatItems";
 import {
   ChatItemType,
   ChatProps,
-  ChatStyle,
-  Json,
   StreamingStep,
   StreamingStepInput,
 } from "../lib/types";
@@ -109,18 +107,21 @@ export default function Chat(props: ChatProps) {
       const outputMessages = [
         { role: "assistant", content: "" },
       ] as ChatItemType[];
+      let incompleteChunk = "";
 
       while (!done) {
         const { value, done: doneReading } = await reader.read();
         done = doneReading || killSwitchClicked.current;
-        const chunkValue = decoder.decode(value);
+        const chunkValue = incompleteChunk + decoder.decode(value);
+        // One server-side chunk can be split across multiple client-side chunks,
+        // so we catch errors thrown by JSON.parse() and append the next chunk
         try {
           // Can be multiple server-side chunks in one client-side chunk,
-          // separated by "data:". The .slice(5) removes the "data:" at
+          // separated by "data: ". The .slice(6) removes the "data: " at
           // the start of the string
           chunkValue
-            .slice(5)
-            .split("data:")
+            .slice(6)
+            .split("data: ")
             .forEach((chunkOfChunk) => {
               if (chunkOfChunk.length === 0) return;
               const data = JSON.parse(chunkOfChunk) as StreamingStep;
@@ -144,8 +145,15 @@ export default function Chat(props: ChatProps) {
               }
               setDevChatContents([...chat, ...outputMessages]);
             });
+          incompleteChunk = "";
         } catch (e) {
-          console.error(e);
+          console.warn(
+            "If there is a JSON parsing error below, this is likely caused by a very large API response that the AI won't be able to handle.\n\n" +
+              "We suggest filtering the API response to only include the data you need by setting the 'Include all keys in responses' and " +
+              "'Include these keys in response' fields at the bottom of the edit action modal at https://dashboard.superflows.ai\n\n",
+            e,
+          );
+          incompleteChunk += chunkValue;
         }
       }
       setLoading(false);
