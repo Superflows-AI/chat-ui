@@ -172,6 +172,7 @@ export default function Chat(props: ChatProps) {
     [
       props.userApiKey,
       props.userDescription,
+      props.mockApiResponses,
       loading,
       setLoading,
       devChatContents,
