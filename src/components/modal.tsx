@@ -54,7 +54,7 @@ export default function SuperflowsModal(props: SuperflowsModalProps) {
               )}
             >
               <div
-                className="sf-h-full sf-px-4 sf-pb-2 sf-pt-5 sm:sf-p-6 sm:sf-pb-3 sf-flex sf-flex-col sf-cursor-default"
+                className="sf-h-full sf-px-4 sm:sf-px-6 sf-pt-5 sm:sf-pt-6 sf-flex sf-flex-col sf-cursor-default"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}

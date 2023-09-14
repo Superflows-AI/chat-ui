@@ -52,18 +52,19 @@ export function ChatItem(props: {
   useEffect(scrollToBottom, [props.chatItem.content]);
 
   const chatItem = props.chatItem;
-  if (chatItem.role === "confirmation") {
+  if (chatItem.role === "debug") {
+    return <></>;
+  } else if (chatItem.role === "confirmation") {
     return <ConfirmationChatItem {...props} />;
   } else if (props.devMode || ["error", "user"].includes(chatItem.role)) {
-    return <DevChatItem {...props} />;
+    return <PlainTextChatItem {...props} />;
   } else if (chatItem.role === "function") {
     return <FunctionVizChatItem {...props} chatItem={chatItem} />;
-  } else {
-    return <UserChatItem {...props} />;
   }
+  return <AssistantChatItem {...props} />;
 }
 
-export function DevChatItem(props: {
+export function PlainTextChatItem(props: {
   chatItem: StreamingStepInput;
   AIname?: string;
   onConfirm?: (confirm: boolean) => Promise<void>;
@@ -88,7 +89,7 @@ export function DevChatItem(props: {
       className={classNames(
         "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full",
         props.chatItem.role === "user"
-          ? "sf-bg-gray-100 sf-text-right sf-place-items-end"
+          ? "sf-bg-white sf-text-right sf-place-items-end sf-border "
           : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
         props.chatItem.role === "error"
           ? "sf-bg-red-200"
@@ -164,19 +165,21 @@ export function FunctionVizChatItem(props: {
   // If this chat item is empty and the previous and next chat items are functions, then don't show anything
   if (
     ["[]", "{}"].includes(props.chatItem.content) ||
-    props.prevAndNextChatRoles.every((role) => role === "function")
+    (props.prevAndNextChatRoles &&
+      props.prevAndNextChatRoles.every((role) => role === "function"))
   ) {
     return <></>;
   }
 
   return (
     <div
-      className={
-        "sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-100 sf-border sf-border-gray-300"
-      }
+      className={classNames(
+        "sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-200 sf-border sf-border-gray-300",
+        !expanded && "hover:sf-bg-gray-300 sf-cursor-pointer",
+      )}
     >
       <button
-        className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between"
+        className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between sf-py-2 sf-px-1.5"
         onClick={() => setExpanded((prev) => !prev)}
       >
         <p className="sf-text-xs sf-text-gray-600 sf-mb-1">Data received</p>
@@ -239,18 +242,8 @@ export function ConfirmationChatItem(props: {
         .join("")}`,
     );
   }, [props.chatItem.content]);
-
-  const [saveSuccessfulFeedback, setSaveSuccessfulFeedback] =
-    useState<boolean>(false);
   // Confirmed is null if the user hasn't confirmed yet, true if the user has confirmed, and false if the user has cancelled
   const [confirmed, setConfirmed] = useState<boolean | null>(null);
-  useEffect(() => {
-    if (saveSuccessfulFeedback) {
-      setTimeout(() => {
-        setSaveSuccessfulFeedback(false);
-      }, 3000);
-    }
-  }, [saveSuccessfulFeedback]);
 
   if (!content) return <></>;
   return (
@@ -287,15 +280,6 @@ export function ConfirmationChatItem(props: {
                 Confirm
               </button>
             </div>
-            <div
-              className={classNames(
-                "sf-flex sf-flex-row sf-place-items-center sf-gap-x-1",
-                saveSuccessfulFeedback ? "sf-visible" : "sf-invisible",
-              )}
-            >
-              <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
-              <div className="sf-text-sm">Thanks for your feedback!</div>
-            </div>
           </div>
         ) : confirmed ? (
           <div className="sf-my-5 sf-w-full sf-font-semibold sf-flex sf-flex-row sf-justify-center sf-gap-x-1 sf-place-items-center">
@@ -312,7 +296,7 @@ export function ConfirmationChatItem(props: {
   );
 }
 
-export function UserChatItem(props: {
+export function AssistantChatItem(props: {
   chatItem: StreamingStepInput;
   AIname?: string;
   isLoading?: boolean;
@@ -320,28 +304,15 @@ export function UserChatItem(props: {
   const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
     parseOutput(props.chatItem.content),
   );
+
   const [expanded, setExpanded] = useState<boolean>(false);
 
   useEffect(() => {
     setAssistantChatObj(parseOutput(props.chatItem.content));
   }, [props.chatItem.content]);
 
-  if (props.chatItem.role === "debug") return <></>;
-
   return (
-    <div
-      className={classNames(
-        "sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full",
-        props.chatItem.role === "user"
-          ? "sf-bg-gray-100 sf-text-right sf-place-items-end"
-          : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
-        props.chatItem.role === "error"
-          ? "sf-bg-red-200"
-          : props.chatItem.role === "function"
-          ? "sf-bg-green-200"
-          : "",
-      )}
-    >
+    <div className="sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-shadow-sm sf-bg-gray-300 sf-text-left sf-place-items-baseline">
       <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
         {props.AIname ?? "Assistant" + " AI"}
       </p>
@@ -516,7 +487,7 @@ export function Tabs(props: {
               : "sf-text-gray-500 hover:sf-text-gray-700",
             tabIdx === 0 ? "sf-rounded-l-lg" : "",
             tabIdx === 1 ? "sf-rounded-r-lg" : "",
-            "group sf-relative cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-2 sf-px-2 sf-text-center sf-text-sm sf-font-sm hover:sf-bg-gray-50 focus:sf-z-10",
+            "sf-relative sf-cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-2 sf-px-2 sf-text-center sf-text-sm sf-font-sm hover:sf-bg-gray-50 focus:sf-z-10",
           )}
           aria-current={props.tabOpen === tab ? "page" : undefined}
           onClick={() => {

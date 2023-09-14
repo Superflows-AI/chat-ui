@@ -1,5 +1,10 @@
 import * as React from "react";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowPathIcon,
+  HandThumbDownIcon,
+  HandThumbUpIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/24/outline";
 import { ChatItem } from "./chatItems";
 import {
   ChatItemType,
@@ -11,6 +16,7 @@ import { AutoGrowingTextArea } from "./autoGrowingTextarea";
 import { classNames } from "../lib/utils";
 import { LoadingSpinner } from "./loadingspinner";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { parseOutput } from "../lib/parser";
 
 export default function Chat(props: ChatProps) {
   const [userText, setUserText] = useState<string>("");
@@ -59,7 +65,10 @@ export default function Chat(props: ChatProps) {
           Authorization: `Bearer ${props.superflowsApiKey}`,
         },
         body: JSON.stringify({
-          user_input: chat[chat.length - 1].content,
+          user_input:
+            chat[chat.length - 1].role === "user"
+              ? chat[chat.length - 1].content
+              : "",
           conversation_id: conversationId,
           user_api_key: props.userApiKey,
           user_description: props.userDescription,
@@ -163,6 +172,7 @@ export default function Chat(props: ChatProps) {
     [
       props.userApiKey,
       props.userDescription,
+      props.mockApiResponses,
       loading,
       setLoading,
       devChatContents,
@@ -196,10 +206,7 @@ export default function Chat(props: ChatProps) {
         const newChat = [...devChatContents, ...json.outs];
         setDevChatContents(newChat);
         if (confirm) {
-          // TODO: This adds an empty message to the DB and GPT chat history.
-          //  This is hacky, since all we actually want to do is restart Angela with the existing
-          //  chat history. We should refactor this to do that instead.
-          await callSuperflowsApi([...newChat, { role: "user", content: "" }]);
+          await callSuperflowsApi(newChat);
         }
       } else {
         // Handle errors here - add them to chat
@@ -225,6 +232,50 @@ export default function Chat(props: ChatProps) {
       props.mockApiResponses,
     ],
   );
+
+  const [feedback, setFeedback] = useState<"yes" | "no" | null>(null);
+  const [feedbackButtonsVisible, setFeedbackButtonsVisible] =
+    useState<boolean>(false);
+
+  const [negativeFeedbackText, setNegativeFeedbackText] = useState<
+    string | null
+  >(null);
+
+  const [showNegativeFeedbackTextbox, setShowNegativeFeedbackTextbox] =
+    useState(false);
+
+  useEffect(() => {
+    setFeedbackButtonsVisible(shouldTriggerFeedback(devChatContents, loading));
+  }, [devChatContents, loading]);
+
+  const feedbackBody = {
+    conversation_id: conversationId,
+    conversation_length_at_feedback: devChatContents.filter(({ role }) =>
+      ["function", "assistant", "user"].includes(role),
+    ).length,
+    feedback_positive: feedback === "yes",
+    negative_feedback_text: negativeFeedbackText,
+  };
+
+  useEffect(() => {
+    (async () => {
+      if (feedback === null) return;
+      await fetch(new URL("/api/v1/feedback", hostname).href, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${props.superflowsApiKey}`,
+        },
+        body: JSON.stringify(feedbackBody),
+      });
+      setTimeout(() => {
+        setFeedbackButtonsVisible(false);
+        setFeedback(null);
+        setNegativeFeedbackText(null);
+      }, 1000);
+    })();
+  }, [feedback]);
+
   return (
     <div className="sf-flex sf-min-h-0 sf-h-full sf-w-full sf-flex-1 sf-flex-col">
       <div
@@ -240,6 +291,8 @@ export default function Chat(props: ChatProps) {
             onClick={() => {
               setDevChatContents([]);
               setConversationId(null);
+              setShowNegativeFeedbackTextbox(false);
+              setNegativeFeedbackText(null);
             }}
           >
             <ArrowPathIcon className="sf-h-4 sf-w-4" /> Clear chat
@@ -303,7 +356,7 @@ export default function Chat(props: ChatProps) {
           onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              if (userText) {
+              if (userText && !showNegativeFeedbackTextbox) {
                 void callSuperflowsApi([
                   ...devChatContents,
                   { role: "user", content: userText },
@@ -313,10 +366,10 @@ export default function Chat(props: ChatProps) {
             }
           }}
         />
-        <div className="sf-flex sf-flex-shrink-0 sf-w-full sf-justify-between sf-px-1 sf-pb-4 sf-pt-2">
+        <div className="sf-flex sf-flex-shrink-0 sf-w-full sf-justify-between sf-px-1 sf-py-2 sf-place-items-center">
           <button
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-shadow-sm sf-border",
+              "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-shadow-sm sf-border sf-h-10",
               loading
                 ? "sf-text-gray-500 sf-bg-gray-100 hover:sf-bg-gray-200 sf-border-gray-300"
                 : "sf-invisible",
@@ -329,17 +382,34 @@ export default function Chat(props: ChatProps) {
           >
             Cancel
           </button>
+          <div
+            className={
+              (!shouldTriggerFeedback(devChatContents, loading) ||
+                !feedbackButtonsVisible) &&
+              "sf-invisible"
+            }
+          >
+            <FeedbackButtons
+              feedback={feedback}
+              setFeedback={setFeedback}
+              negativeFeedbackText={negativeFeedbackText}
+              setNegativeFeedbackText={setNegativeFeedbackText}
+              showNegativeTextbox={showNegativeFeedbackTextbox}
+              setShowNegativeTextbox={setShowNegativeFeedbackTextbox}
+            />
+          </div>
           <button
             ref={props.initialFocus}
             type="submit"
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
+              "sf-flex sf-flex-row sf-gap-x-1 sf-h-10 sf-place-items-center sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
               loading || !userText
                 ? "sf-bg-gray-500 sf-cursor-not-allowed"
                 : `hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500`,
               !props.styling?.buttonColor &&
                 !(loading || !userText) &&
                 "sf-bg-purple-500",
+              showNegativeFeedbackTextbox && "sf-invisible",
             )}
             onClick={() => {
               if (!loading && userText) {
@@ -359,6 +429,134 @@ export default function Chat(props: ChatProps) {
           >
             {loading && <LoadingSpinner classes="sf-h-4 sf-w-4" />}
             Submit
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function shouldTriggerFeedback(
+  devChatContents: StreamingStepInput[],
+  loading?: boolean,
+): boolean {
+  if (loading) return false;
+  if (devChatContents.length === 0) return false;
+
+  const sinceLastUserMessage = devChatContents.slice(
+    devChatContents.findLastIndex((chat) => chat.role === "user"),
+  );
+  if (!sinceLastUserMessage.some((chat) => chat.role === "function"))
+    return false;
+  const lastMessage = sinceLastUserMessage[sinceLastUserMessage.length - 1];
+  const parsed = parseOutput(lastMessage.content);
+
+  return lastMessage.role === "assistant" && parsed.tellUser.length > 0;
+}
+
+function FeedbackButtons(props: {
+  feedback: "yes" | "no" | null;
+  setFeedback: (feedback: "yes" | "no" | null) => void;
+  negativeFeedbackText: string | null;
+  setNegativeFeedbackText: (text: string) => void;
+  showNegativeTextbox: boolean;
+  setShowNegativeTextbox: (show: boolean) => void;
+}) {
+  const [showThankYouMessage, setShowThankYouMessage] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    ref.current.focus();
+  }, [props.showNegativeTextbox]);
+
+  const handleNegativeFeedbackSubmission = () => {
+    props.setFeedback("no");
+    setShowThankYouMessage(true);
+    props.setShowNegativeTextbox(false);
+    setTimeout(() => setShowThankYouMessage(false), 5000);
+  };
+
+  return (
+    <div className="sf-flex sf-flex-row sf-h-16">
+      <div
+        className={classNames(
+          "sf-my-auto sf-flex sf-flex-row sf-whitespace-nowrap",
+          !showThankYouMessage && "sf-hidden",
+        )}
+      >
+        Thanks for your feedback!
+        <CheckCircleIcon className="sf-h-5 sf-w-5 sf-ml-1 sf-mr-2 sf-text-green-500 sf-my-auto" />
+      </div>
+      <div
+        className={classNames(
+          "sf-align-center sf-flex sf-flex-row sf-my-auto",
+          (!props.showNegativeTextbox || showThankYouMessage) && "sf-hidden",
+        )}
+      >
+        <div className="sf-relative">
+          <input
+            ref={ref}
+            className={classNames(
+              "sf-peer sf-pt-4 sf-pb-1 sf-h-10 sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-px-4 sf-border-gray-300 sf-border focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400 focus:sf-border-purple-400 focus:sf-ring-purple-400",
+            )}
+            placeholder=""
+            value={props.negativeFeedbackText ?? ""}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleNegativeFeedbackSubmission();
+              }
+            }}
+            onChange={(e) => props.setNegativeFeedbackText(e.target.value)}
+          />
+          <div
+            className={classNames(
+              "sf-absolute sf-pointer-events-none sf-text-sm sf-text-gray-400 sf-left-4 sf-top-3 peer-focus:sf-scale-75 peer-focus:sf--translate-y-5/8 sf-select-none sf-transition sf-duration-300",
+              props.negativeFeedbackText
+                ? "sf--translate-x-1/8 sf--translate-y-5/8 sf-scale-75"
+                : "peer-focus:sf--translate-x-1/8",
+            )}
+          >
+            What went wrong?
+          </div>
+        </div>
+        <button
+          className="sf-h-10 sf-place-items-center sf-rounded-md sf-px-3 sf-my-auto sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm hover:sf-bg-purple-600 sf-bg-purple-500"
+          onClick={() => handleNegativeFeedbackSubmission()}
+        >
+          Done
+        </button>
+      </div>
+      <div
+        className={classNames(
+          "sf-flex sf-flex-col sf-place-items-center sf-gap-y-1 sm:sf-text-sm sf-text-md",
+          (props.showNegativeTextbox || showThankYouMessage) && "sf-hidden",
+        )}
+      >
+        <div className="sf-flex sf-flex-row sf-gap-x-4 sf-px-2 sf-whitespace-nowrap">
+          Was this response helpful?
+        </div>
+        <div className="sf-flex sf-flex-row sf-gap-x-2">
+          <button
+            onClick={() => props.setShowNegativeTextbox(true)}
+            className={classNames(
+              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-text-xs sf-transition sf-bg-red-500 sf-ring-red-500",
+            )}
+          >
+            <HandThumbDownIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
+            No
+          </button>
+          <button
+            onClick={() => {
+              props.setFeedback("yes");
+              setShowThankYouMessage(true);
+              setTimeout(() => setShowThankYouMessage(false), 5000);
+            }}
+            className={classNames(
+              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-xs  sf-bg-green-500 sf-ring-green-500 ",
+            )}
+          >
+            <HandThumbUpIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
+            Yes
           </button>
         </div>
       </div>

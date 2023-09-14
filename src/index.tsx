@@ -2,7 +2,7 @@ import SuperflowsButton from "./components/superflowsButton";
 import SuperflowsSidebar from "./components/sidebar";
 import SuperflowsModal from "./components/modal";
 import SuperflowsChat from "./components/chat";
-import { DevChatItem, UserChatItem } from "./components/chatItems";
+import { PlainTextChatItem, AssistantChatItem } from "./components/chatItems";
 import {
   getLastSectionName,
   parseFunctionCall,
@@ -15,8 +15,8 @@ import "./index.css";
 
 export {
   SuperflowsButton,
-  DevChatItem,
-  UserChatItem,
+  PlainTextChatItem,
+  AssistantChatItem,
   functionNameToDisplay,
   convertToMarkdownTable,
   parseFunctionCall,
