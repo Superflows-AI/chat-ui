@@ -451,7 +451,27 @@ function shouldTriggerFeedback(
   const lastMessage = sinceLastUserMessage[sinceLastUserMessage.length - 1];
   const parsed = parseOutput(lastMessage.content);
 
-  return lastMessage.role === "assistant" && parsed.tellUser.length > 0;
+  // Were all function messages errors?
+  const allErrors = sinceLastUserMessage.every(
+    (chat) => chat.role === "function" && functionMessageIsError(chat.content),
+  );
+
+  return (
+    lastMessage.role === "assistant" && parsed.tellUser.length > 0 && !allErrors
+  );
+}
+
+function functionMessageIsError(messageContent: string): boolean {
+  return (
+    messageContent.includes("ERROR") ||
+    // Below text is added on backend when a function returns an error
+    messageContent.includes("The function returned a ") ||
+    // Below is present when a 404 is returned from an API
+    (messageContent.includes("404") &&
+      messageContent.toLowerCase().includes("not found")) ||
+    // If there's no response body, this is sent
+    messageContent.includes("Action failed")
+  );
 }
 
 function FeedbackButtons(props: {
