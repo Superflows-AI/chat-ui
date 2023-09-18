@@ -452,12 +452,12 @@ function shouldTriggerFeedback(
   const parsed = parseOutput(lastMessage.content);
 
   // Were all function messages errors?
-  const allErrors = sinceLastUserMessage.every(
-    (chat) => chat.role === "function" && functionMessageIsError(chat.content),
-  );
+  const noErrors = sinceLastUserMessage
+    .filter((chat) => chat.role === "function")
+    .every((chat) => !functionMessageIsError(chat.content));
 
   return (
-    lastMessage.role === "assistant" && parsed.tellUser.length > 0 && !allErrors
+    lastMessage.role === "assistant" && parsed.tellUser.length > 0 && noErrors
   );
 }
 
