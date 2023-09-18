@@ -52,12 +52,12 @@ export function ChatItem(props: {
   useEffect(scrollToBottom, [props.chatItem.content]);
 
   const chatItem = props.chatItem;
-  if (chatItem.role === "debug") {
-    return <></>;
-  } else if (chatItem.role === "confirmation") {
+  if (chatItem.role === "confirmation") {
     return <ConfirmationChatItem {...props} />;
   } else if (props.devMode || ["error", "user"].includes(chatItem.role)) {
     return <PlainTextChatItem {...props} />;
+  } else if (chatItem.role === "debug") {
+    return <></>;
   } else if (chatItem.role === "function") {
     return <FunctionVizChatItem {...props} chatItem={chatItem} />;
   }
@@ -174,7 +174,7 @@ export function FunctionVizChatItem(props: {
   return (
     <div
       className={classNames(
-        "sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-200 sf-border sf-border-gray-300",
+        "sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-100 sf-border sf-border-gray-300",
         !expanded && "hover:sf-bg-gray-300 sf-cursor-pointer",
       )}
     >
@@ -312,7 +312,7 @@ export function AssistantChatItem(props: {
   }, [props.chatItem.content]);
 
   return (
-    <div className="sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-shadow-sm sf-bg-gray-300 sf-text-left sf-place-items-baseline">
+    <div className="sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-shadow-sm sf-bg-gray-200 sf-text-left sf-place-items-baseline">
       <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
         {props.AIname ?? "Assistant" + " AI"}
       </p>
