@@ -55,8 +55,8 @@ export default function Home() {
             userApiKey={process.env.NEXT_PUBLIC_USER_API_KEY}
             AIname={"Superflows Assistant"}
             styling={{
-              type: "sidebar",
-              slideoverSide: "right",
+              type: "modal",
+              // slideoverSide: "right",
               // buttonColor: "green",
               // modalClasses: "bg-gray-50",
               // slideoverSide: "right",
