@@ -342,7 +342,7 @@ export default function Chat(props: ChatProps) {
       <div className="sf-flex sf-flex-col sf-pt-4">
         <AutoGrowingTextArea
           className={classNames(
-            "sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400",
+            "sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border sf-border-solid focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400",
             userText.length > 300 ? "sf-overflow-auto-y" : "sf-overflow-hidden",
             props.styling?.buttonColor
               ? `focus:sf-border-gray-500 focus:sf-ring-gray-500`
