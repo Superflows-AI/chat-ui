@@ -250,12 +250,12 @@ export function ConfirmationChatItem(props: {
   return (
     <div
       className={classNames(
-        "sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-100 sf-border sf-border-gray-300",
-        !expanded && "hover:sf-bg-gray-300 sf-cursor-pointer",
+        "sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-border sf-border-gray-300 sf-bg-blue-100 ",
+        !expanded && "hover:sf-bg-blue-200 sf-cursor-pointer",
       )}
     >
       <button
-        className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between sf-py-2 sf-px-1.5 sf-bg-blue-100"
+        className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between sf-py-2 sf-px-1.5"
         onClick={() => setExpanded((prev) => !prev)}
       >
         <p className="sf-text-xs sf-text-gray-600 sf-mb-1">Confirmation</p>
