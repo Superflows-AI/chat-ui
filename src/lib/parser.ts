@@ -64,6 +64,7 @@ export function parseOutput(gptString: string): ParsedOutput {
     }));
 
   const commands: FunctionCall[] = [];
+  const unparsedCommands: string[] = [];
   if (sectionInfo[3].inString) {
     const commandsText = sectionInfo[3].sectionText;
     commandsText
@@ -75,7 +76,17 @@ export function parseOutput(gptString: string): ParsedOutput {
       .forEach((line: string) => {
         try {
           commands.push(parseFunctionCall(line));
-        } catch (e) {}
+        } catch (e) {
+          // In case the output has the "tell user" section under
+          // "commands".
+          if (
+            !line.startsWith("//") &&
+            !line.startsWith("#") &&
+            line.trim().toLowerCase() !== "none" &&
+            !line.toLowerCase().includes("no command")
+          )
+            unparsedCommands.push(line.replace("tell user:", ""));
+        }
       });
   }
 
@@ -87,6 +98,14 @@ export function parseOutput(gptString: string): ParsedOutput {
   if (sectionInfo.every((section) => !section.inString)) {
     // When the response is not in the expected format, for example if the user says "hi"
     tellUser = gptString;
+  } else if (
+    commands.length === 0 &&
+    unparsedCommands.length > 0 &&
+    sectionInfo[2].sectionText === ""
+  ) {
+    // Sometimes the output is just "commands" followed
+    // by a message for the user.
+    tellUser = unparsedCommands.join("\n");
   } else {
     // Otherwise set to the "Tell user:" section
     tellUser = sectionInfo[2].sectionText;
