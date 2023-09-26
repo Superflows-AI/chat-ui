@@ -226,9 +226,9 @@ export function ConfirmationChatItem(props: {
   if (props.chatItem.role !== "confirmation")
     throw new Error("Not a confirmation chat item");
   const [content, setContent] = useState(props.chatItem.content);
+  const toConfirm = JSON.parse(props.chatItem.content) as ToConfirm[];
 
   useEffect(() => {
-    const toConfirm = JSON.parse(props.chatItem.content) as ToConfirm[];
     setContent(
       `The following action${
         toConfirm.length > 1 ? "s require" : " requires"
@@ -244,54 +244,87 @@ export function ConfirmationChatItem(props: {
   }, [props.chatItem.content]);
   // Confirmed is null if the user hasn't confirmed yet, true if the user has confirmed, and false if the user has cancelled
   const [confirmed, setConfirmed] = useState<boolean | null>(null);
+  const [expanded, setExpanded] = useState<boolean>(true);
 
   if (!content) return <></>;
   return (
     <div
-      className={
-        "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-bg-blue-100 sf-text-left sf-place-items-baseline"
-      }
+      className={classNames(
+        "sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-100 sf-border sf-border-gray-300",
+        !expanded && "hover:sf-bg-gray-300 sf-cursor-pointer",
+      )}
     >
-      <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
-        Confirmation required
-      </p>
-      <StyledMarkdown>{content}</StyledMarkdown>
-      {props.onConfirm &&
-        (confirmed === null ? (
-          <div className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2">
-            Are you sure you want to continue?
-            <div className="sf-flex sf-flex-row sf-gap-x-8">
-              <button
-                onClick={() => {
-                  setConfirmed(false);
-                  void props.onConfirm!(false);
-                }}
-                className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-700 sf-px-4 sf-border sf-border-gray-400 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-gray-100 sf-ring-gray-500 hover:sf-bg-gray-200`}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setConfirmed(true);
-                  void props.onConfirm!(true);
-                }}
-                className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-blue-500 sf-ring-blue-500 hover:sf-bg-blue-600`}
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        ) : confirmed ? (
-          <div className="sf-my-5 sf-w-full sf-font-semibold sf-flex sf-flex-row sf-justify-center sf-gap-x-1 sf-place-items-center">
-            <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
-            Confirmed
-          </div>
+      <button
+        className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between sf-py-2 sf-px-1.5 sf-bg-blue-100"
+        onClick={() => setExpanded((prev) => !prev)}
+      >
+        <p className="sf-text-xs sf-text-gray-600 sf-mb-1">Confirmation</p>
+        <div className="sf-text-sm sf-w-1/2 sf-overflow-hidden sf-overflow-ellipsis sf-whitespace-nowrap">
+          Confirmation of{" "}
+          <b className="font-medium">
+            {toConfirm
+              .map((action) => functionNameToDisplay(action.name))
+              .join(" & ")}
+          </b>
+        </div>
+        {expanded ? (
+          <MinusIcon className={"sf-w-5 sf-h-5 sf-mr-6"} />
         ) : (
-          <div className="sf-my-5 sf-w-full sf-flex sf-flex-row sf-font-semibold sf-justify-center sf-gap-x-2 sf-place-items-center">
-            <XCircleIcon className="sf-h-5 sf-w-5 sf-text-red-500" />
-            Cancelled
-          </div>
-        ))}
+          <PlusIcon className={"sf-w-5 sf-h-5 sf-mr-6"} />
+        )}
+      </button>
+
+      {expanded && (
+        <div
+          className={
+            "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-bg-blue-100 sf-text-left sf-place-items-baseline"
+          }
+        >
+          <StyledMarkdown>{content}</StyledMarkdown>
+          {props.onConfirm &&
+            (confirmed === null ? (
+              <div className="sf-my-5 sf-w-full sf-flex sf-flex-col sf-place-items-center sf-gap-y-2">
+                Are you sure you want to continue?
+                <div className="sf-flex sf-flex-row sf-gap-x-8">
+                  <button
+                    onClick={() => {
+                      setConfirmed(false);
+                      setTimeout(() => {
+                        setExpanded(false);
+                      }, 1000);
+                      void props.onConfirm!(false);
+                    }}
+                    className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-700 sf-px-4 sf-border sf-border-gray-400 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-gray-100 sf-ring-gray-500 hover:sf-bg-gray-200`}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setConfirmed(true);
+                      setTimeout(() => {
+                        setExpanded(false);
+                      }, 1000);
+                      void props.onConfirm!(true);
+                    }}
+                    className={`sf-flex sf-flex-row sf-gap-x-1.5 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-base hover:sf-opacity-90 sf-transition focus:sf-ring-2 focus:sf-ring-offset-2 sf-bg-blue-500 sf-ring-blue-500 hover:sf-bg-blue-600`}
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            ) : confirmed ? (
+              <div className="sf-my-5 sf-w-full sf-font-semibold sf-flex sf-flex-row sf-justify-center sf-gap-x-1 sf-place-items-center">
+                <CheckCircleIcon className="sf-h-5 sf-w-5 sf-text-green-500" />
+                Confirmed
+              </div>
+            ) : (
+              <div className="sf-my-5 sf-w-full sf-flex sf-flex-row sf-font-semibold sf-justify-center sf-gap-x-2 sf-place-items-center">
+                <XCircleIcon className="sf-h-5 sf-w-5 sf-text-red-500" />
+                Cancelled
+              </div>
+            ))}
+        </div>
+      )}
     </div>
   );
 }
