@@ -451,13 +451,18 @@ function shouldTriggerFeedback(
   const lastMessage = sinceLastUserMessage[sinceLastUserMessage.length - 1];
   const parsed = parseOutput(lastMessage.content);
 
-  // Were all function messages errors?
-  const noErrors = sinceLastUserMessage
+  const lastFunctionMessage = sinceLastUserMessage
     .filter((chat) => chat.role === "function")
-    .every((chat) => !functionMessageIsError(chat.content));
+    .reverse()[0];
+
+  const lastFunctionMessageIsError = lastFunctionMessage
+    ? functionMessageIsError(lastFunctionMessage.content)
+    : false;
 
   return (
-    lastMessage.role === "assistant" && parsed.tellUser.length > 0 && noErrors
+    lastMessage.role === "assistant" &&
+    parsed.tellUser.length > 0 &&
+    !lastFunctionMessageIsError
   );
 }
 
