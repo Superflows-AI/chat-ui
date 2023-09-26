@@ -98,6 +98,17 @@ describe("Parse output", () => {
     expect(output.commands).toStrictEqual([]);
     expect(output.completed).toBe(true);
   });
+
+  it("tell user as command", () => {
+    const output = parseOutput("Commands: Tell user: i did a nice command");
+    expect(output).toBeDefined();
+    expect(output.reasoning).toBe("");
+    expect(output.plan).toBe("");
+    expect(output.tellUser).toBe("i did a nice command");
+    expect(output.commands).toStrictEqual([]);
+    expect(output.completed).toBe(true);
+  });
+
   it("long output, parsing commands properly", () => {
     const gptOut =
       "Reasoning:\n" +
