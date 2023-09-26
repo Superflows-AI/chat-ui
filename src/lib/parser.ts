@@ -79,7 +79,13 @@ export function parseOutput(gptString: string): ParsedOutput {
         } catch (e) {
           // In case the output has the "tell user" section under
           // "commands".
-          unparsedCommands.push(line.replace("tell user:", ""));
+          if (
+            !line.startsWith("//") &&
+            !line.startsWith("#") &&
+            line.trim().toLowerCase() !== "none" &&
+            !line.toLowerCase().includes("no command")
+          )
+            unparsedCommands.push(line.replace("tell user:", ""));
         }
       });
   }
