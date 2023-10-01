@@ -280,20 +280,19 @@ describe("parseFunctionCall", () => {
     };
     expect(output).toEqual(expectedOutput);
   });
-  // TODO: This fails may cause an issue in the future
-  // it("string has escaped quote in it", () => {
-  //   const str = `set_coordinates(x=3.14, placeName="The Moon,\\" sun ", y=0.98)`;
-  //   const output = parseFunctionCall(str);
-  //   const expectedOutput = {
-  //     name: "set_coordinates",
-  //     args: {
-  //       x: 3.14,
-  //       y: 0.98,
-  //       placeName: 'The Moon," sun ',
-  //     },
-  //   };
-  //   expect(output).toEqual(expectedOutput);
-  // });
+  it("string has escaped quote in it", () => {
+    const str = `set_coordinates(x=3.14, placeName="The Moon,\\" sun ", y=0.98)`;
+    const output = parseFunctionCall(str);
+    const expectedOutput = {
+      name: "set_coordinates",
+      args: {
+        x: 3.14,
+        y: 0.98,
+        placeName: 'The Moon," sun ',
+      },
+    };
+    expect(output).toEqual(expectedOutput);
+  });
   it("returns function with no arguments when none are provided", () => {
     const str = `do_something()`;
     const output = parseFunctionCall(str);
@@ -349,5 +348,29 @@ describe("parseFunctionCall", () => {
       },
     };
     expect(output).toEqual(expectedOutput);
+  });
+  it("parse escaped quotes properly", () => {
+    const out = parseFunctionCall(
+      `search_filings(query="formType:\\"S-4\\" AND NOT formType:(\\"4/A\\" OR \\"S-4 POS\\")", ticker="AAPL")`,
+    );
+    expect(out).toStrictEqual({
+      name: "search_filings",
+      args: {
+        query: 'formType:"S-4" AND NOT formType:("4/A" OR "S-4 POS")',
+        ticker: "AAPL",
+      },
+    });
+  });
+  it("parse escaped quotes properly - single quotes", () => {
+    const out = parseFunctionCall(
+      `search_filings(query='formType:"S-4" AND NOT formType:("4/A" OR "S-4 POS")', ticker="AAPL")`,
+    );
+    expect(out).toStrictEqual({
+      name: "search_filings",
+      args: {
+        query: 'formType:"S-4" AND NOT formType:("4/A" OR "S-4 POS")',
+        ticker: "AAPL",
+      },
+    });
   });
 });

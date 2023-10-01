@@ -133,8 +133,8 @@ export function getLastSectionName(gptString: string): string {
 }
 
 export function parseFunctionCall(text: string): FunctionCall {
-  const functionCallRegex = /(\w+)\(([^)]*)\)/;
-  const argumentRegex = /([^,\s]+?)=({.*?}|'.*?'|".*?"|\[.*?\]|[^,]*)/g;
+  const functionCallRegex = /(\w+)\((.*)\)/;
+  const argumentRegex = /([^,\s]+?)=({.*?}|'.*?'|".*?([^\\])"|\[.*?\]|[^,]*)/g;
 
   const functionCallMatch = text.match(functionCallRegex);
   if (!functionCallMatch) {
@@ -159,12 +159,20 @@ export function parseFunctionCall(text: string): FunctionCall {
     // console.log(regex.test(text));  // true
     // console.log(regex.test(text));  // false
     if (/^\d+(\.\d+)?$/.test(argMatch[2])) {
+      // Number
       value = parseFloat(argMatch[2]);
     } else if (/^["'](.*)["']$/.test(argMatch[2])) {
-      value = argMatch[2].slice(1, -1);
+      // String
+      try {
+        value = JSON.parse(makeDoubleExternalQuotes(argMatch[2]));
+      } catch (e) {
+        value = argMatch[2];
+      }
     } else if (/^(true|false)$/.test(argMatch[2])) {
+      // Boolean
       value = argMatch[2] === "true";
     } else if (/\{.*?}/g.test(argMatch[2]) || /\[(.*?)\]/g.test(argMatch[2])) {
+      // Object/array
       const objText = extractObjText(argMatch[2], argsText);
       try {
         value = JSON.parse(objText.replaceAll(/'/g, '"'));
@@ -172,6 +180,7 @@ export function parseFunctionCall(text: string): FunctionCall {
         value = argMatch[2];
       }
     } else {
+      // Otherwise (not well-supported)
       value = argMatch[2];
     }
     // @ts-ignore
@@ -206,4 +215,13 @@ export function extractObjText(matchText: string, argsText: string): string {
     chatIdx++;
   }
   return textToMatch.slice(0, chatIdx);
+}
+
+function makeDoubleExternalQuotes(text: string) {
+  // If wrapped in single quotes, convert to double quotes
+  if (text[0] === "'" && text[text.length - 1] === "'") {
+    // Converting from single to double quotes requires escaping all double quotes
+    return `"${text.slice(1, -1).replaceAll('"', '\\"')}"`;
+  }
+  return text;
 }
