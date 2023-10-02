@@ -188,6 +188,60 @@ describe("Parse output", () => {
       completed: true,
     });
   });
+  it("incomplete commands should not be tell user. Function ends in fullstop", () => {
+    const output = parseOutput(
+      "Reasoning: Some reasoning\n" +
+        "\n" +
+        "Plan:\n" +
+        "- Inform the user about the retrieved information.\n" +
+        "\n" +
+        "Commands: function_call(arg1=1, arg2=2.",
+    );
+    expect(output).toBeDefined();
+    expect(output.reasoning).toBe("Some reasoning");
+    expect(output.plan).toBe(
+      "- Inform the user about the retrieved information.",
+    );
+    expect(output.tellUser).toBe("");
+    expect(output.commands).toStrictEqual([]);
+    expect(output.completed).toBe(true);
+  });
+  it("incomplete commands should not be tell user. Function has no brackets yet", () => {
+    const output = parseOutput(
+      "Reasoning: Some reasoning\n" +
+        "\n" +
+        "Plan:\n" +
+        "- Inform the user about the retrieved information.\n" +
+        "\n" +
+        "Commands: function_ca",
+    );
+    expect(output).toBeDefined();
+    expect(output.reasoning).toBe("Some reasoning");
+    expect(output.plan).toBe(
+      "- Inform the user about the retrieved information.",
+    );
+    expect(output.tellUser).toBe("");
+    expect(output.commands).toStrictEqual([]);
+    expect(output.completed).toBe(true);
+  });
+  it("tell user mistakenly put under commands", () => {
+    const output = parseOutput(
+      "Reasoning: Some reasoning\n" +
+        "\n" +
+        "Plan:\n" +
+        "- Inform the user about the retrieved information.\n" +
+        "\n" +
+        "Commands: I have completed my job.",
+    );
+    expect(output).toBeDefined();
+    expect(output.reasoning).toBe("Some reasoning");
+    expect(output.plan).toBe(
+      "- Inform the user about the retrieved information.",
+    );
+    expect(output.tellUser).toBe("I have completed my job.");
+    expect(output.commands).toStrictEqual([]);
+    expect(output.completed).toBe(true);
+  });
 });
 
 describe("parseFunctionCall", () => {
