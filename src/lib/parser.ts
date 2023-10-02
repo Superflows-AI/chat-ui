@@ -133,7 +133,20 @@ export function getLastSectionName(gptString: string): string {
 }
 
 export function parseFunctionCall(text: string): FunctionCall {
+  // Below regex captures the function name and arguments
+  // (\w+) matches the function name (any non whitespace characters)
+  // \( matches the opening bracket
+  // (.*) matches everything inside the brackets
+  // \) matches the closing bracket
   const functionCallRegex = /(\w+)\((.*)\)/;
+  // Below regex captures the arguments inside the function call brackets, one by one
+  // ([^,\s]+?) matches the argument name
+  // ({.*?}|'.*?'|".*?([^\\])"|\[.*?\]|[^,]*) matches the argument value
+  //   {.*?} matches an object
+  //   '.*?' matches a string wrapped in single quotes
+  //   ".*?([^\\])" matches a string wrapped in double quotes
+  //   \[.*?\] matches an array
+  //   [^,]* matches anything that is not a comma (e.g. string without quotes/number/boolean)
   const argumentRegex = /([^,\s]+?)=({.*?}|'.*?'|".*?([^\\])"|\[.*?\]|[^,]*)/g;
 
   const functionCallMatch = text.match(functionCallRegex);
