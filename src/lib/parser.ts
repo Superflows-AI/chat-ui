@@ -83,7 +83,9 @@ export function parseOutput(gptString: string): ParsedOutput {
             !line.startsWith("//") &&
             !line.startsWith("#") &&
             line.trim().toLowerCase() !== "none" &&
-            !line.toLowerCase().includes("no command")
+            !line.toLowerCase().includes("no command") &&
+            [".", "?", "!"].includes(line[line.length - 1]) &&
+            !["(", ")", "_"].some((char) => line.includes(char))
           )
             unparsedCommands.push(line.replace("tell user:", ""));
         }
