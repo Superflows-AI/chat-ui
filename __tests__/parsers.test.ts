@@ -1,5 +1,9 @@
 import { describe, it, expect } from "@jest/globals";
-import { parseFunctionCall, parseOutput } from "../src/lib/parser";
+import {
+  makeDoubleExternalQuotes,
+  parseFunctionCall,
+  parseOutput,
+} from "../src/lib/parser";
 
 describe("Parse output", () => {
   it("should not error", () => {
@@ -466,5 +470,12 @@ describe("parseFunctionCall", () => {
         ticker: "AAPL",
       },
     });
+  });
+});
+
+describe("makeDoubleExternalQuotes", () => {
+  it("single quotes with escaped double quotes", () => {
+    const out = makeDoubleExternalQuotes(`'hello \\"world\\"'`);
+    expect(out).toBe(`"hello \\"world\\""`);
   });
 });
