@@ -232,11 +232,12 @@ export function extractObjText(matchText: string, argsText: string): string {
   return textToMatch.slice(0, chatIdx);
 }
 
-function makeDoubleExternalQuotes(text: string) {
+export function makeDoubleExternalQuotes(text: string): string {
   // If wrapped in single quotes, convert to double quotes
   if (text[0] === "'" && text[text.length - 1] === "'") {
-    // Converting from single to double quotes requires escaping all double quotes
-    return `"${text.slice(1, -1).replaceAll('"', '\\"')}"`;
+    // Converting from single to double quotes requires escaping all
+    // double quotes, unless they are already escaped
+    return `"${text.slice(1, -1).replaceAll(/(?<!\\)"/g, '\\"')}"`;
   }
   return text;
 }
