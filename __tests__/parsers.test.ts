@@ -242,6 +242,26 @@ describe("Parse output", () => {
     expect(output.commands).toStrictEqual([]);
     expect(output.completed).toBe(true);
   });
+  it("tell user mistakenly put under commands but tell user already exists", () => {
+    const output = parseOutput(
+      "Reasoning: Some reasoning\n" +
+        "\n" +
+        "Tell user: There's something i'd like to tell you\n" +
+        "\n" +
+        "Plan:\n" +
+        "- Inform the user about the retrieved information.\n" +
+        "\n" +
+        "Commands: I have completed my job.",
+    );
+    expect(output).toBeDefined();
+    expect(output.reasoning).toBe("Some reasoning");
+    expect(output.plan).toBe(
+      "- Inform the user about the retrieved information.",
+    );
+    expect(output.tellUser).toBe("There's something i'd like to tell you");
+    expect(output.commands).toStrictEqual([]);
+    expect(output.completed).toBe(true);
+  });
 });
 
 describe("parseFunctionCall", () => {
