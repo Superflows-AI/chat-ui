@@ -13,7 +13,7 @@ import {
   StreamingStepInput,
 } from "../lib/types";
 import { AutoGrowingTextArea } from "./autoGrowingTextarea";
-import { classNames } from "../lib/utils";
+import { addTrailingSlash, classNames } from "../lib/utils";
 import { LoadingSpinner } from "./loadingspinner";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { parseOutput } from "../lib/parser";
@@ -40,7 +40,8 @@ export default function Chat(props: ChatProps) {
 
   const killSwitchClicked = useRef(false);
 
-  const hostname = props.superflowsUrl ?? "https://dashboard.superflows.ai";
+  const hostname =
+    addTrailingSlash(props.superflowsUrl) ?? "https://dashboard.superflows.ai/";
 
   useEffect(() => {
     if (props.initialMessage) {
@@ -58,7 +59,7 @@ export default function Chat(props: ChatProps) {
       if (loading || alreadyRunning.current) return;
       alreadyRunning.current = true;
       setLoading(true);
-      const response = await fetch(new URL("/api/v1/answers", hostname).href, {
+      const response = await fetch(new URL("api/v1/answers", hostname).href, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -184,7 +185,7 @@ export default function Chat(props: ChatProps) {
   const onConfirm = useCallback(
     async (confirm: boolean): Promise<void> => {
       setLoading(true);
-      const response = await fetch(new URL("/api/v1/confirm", hostname).href, {
+      const response = await fetch(new URL("api/v1/confirm", hostname).href, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -260,7 +261,7 @@ export default function Chat(props: ChatProps) {
   useEffect(() => {
     (async () => {
       if (feedback === null) return;
-      await fetch(new URL("/api/v1/feedback", hostname).href, {
+      await fetch(new URL("api/v1/feedback", hostname).href, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -238,3 +238,7 @@ function specialCaseDeNesting(obj: Record<string, any>): any[] | null {
     return specialCaseDeNesting(value);
   }
 }
+
+export function addTrailingSlash(string: string): string {
+  return string.endsWith("/") ? string : string + "/";
+}
