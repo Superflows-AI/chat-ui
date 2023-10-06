@@ -40,8 +40,9 @@ export default function Chat(props: ChatProps) {
 
   const killSwitchClicked = useRef(false);
 
-  const hostname =
-    addTrailingSlash(props.superflowsUrl) ?? "https://dashboard.superflows.ai/";
+  const hostname = addTrailingSlash(
+    props.superflowsUrl ?? "https://dashboard.superflows.ai/",
+  );
 
   useEffect(() => {
     if (props.initialMessage) {
