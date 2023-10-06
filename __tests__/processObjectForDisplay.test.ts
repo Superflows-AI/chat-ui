@@ -1,33 +1,33 @@
 import { describe, expect, it } from "@jest/globals";
-import { removeSingleKeyNodes } from "../src/lib/utils";
+import { processObjectForDisplay } from "../src/lib/utils";
 
 describe("remove single key nodes", () => {
   it("Handles empty object", () => {
     const data = {};
     const expected = {};
 
-    expect(removeSingleKeyNodes(data)).toEqual(expected);
+    expect(processObjectForDisplay(data)).toEqual(expected);
   });
 
   it("array returns same array", () => {
     const data = [1, 2, 3];
     const expected = [1, 2, 3];
 
-    const output = removeSingleKeyNodes(data);
+    const output = processObjectForDisplay(data);
     expect(output).toEqual(expected);
   });
 
   it("special case single array", () => {
     const data = { oldGregg: [1, 2, 3] };
     const expected = [1, 2, 3];
-    const output = removeSingleKeyNodes(data);
+    const output = processObjectForDisplay(data);
     expect(output).toEqual(expected);
   });
   it("nested special case", () => {
     const data = { root: { branch: { leaf: [1, 2, 3] } } };
     const expected = [1, 2, 3];
 
-    expect(removeSingleKeyNodes(data)).toEqual(expected);
+    expect(processObjectForDisplay(data)).toEqual(expected);
   });
   it("more complex nested special case", () => {
     const data = {
@@ -44,7 +44,7 @@ describe("remove single key nodes", () => {
       { nice: 2, nested: { boy: 3 } },
     ];
 
-    const output = removeSingleKeyNodes(data);
+    const output = processObjectForDisplay(data);
     expect(output).toEqual(expected);
   });
 
@@ -53,7 +53,7 @@ describe("remove single key nodes", () => {
       { a: 1, b: 2, c: 3 },
       { a: 4, b: 5, c: 6 },
     ];
-    const output = removeSingleKeyNodes(data);
+    const output = processObjectForDisplay(data);
     expect(output).toEqual(data);
   });
 
@@ -71,7 +71,7 @@ describe("remove single key nodes", () => {
       "umbrella -> theHitcher": "put you in the picture",
       "umbrella -> tony -> harrison": "outrage",
     };
-    const output = removeSingleKeyNodes(data);
+    const output = processObjectForDisplay(data);
     expect(output).toEqual(expected);
   });
 
@@ -90,7 +90,7 @@ describe("remove single key nodes", () => {
       "outer -> middle2": "value2",
     };
 
-    expect(removeSingleKeyNodes(data)).toEqual(expected);
+    expect(processObjectForDisplay(data)).toEqual(expected);
   });
 
   it("Does not lose data for deeply nested structures", () => {
@@ -132,7 +132,7 @@ describe("remove single key nodes", () => {
       ],
     };
 
-    expect(removeSingleKeyNodes(data)).toEqual(expected);
+    expect(processObjectForDisplay(data)).toEqual(expected);
   });
 
   it("doesnt mutate original data", () => {
@@ -152,8 +152,24 @@ describe("remove single key nodes", () => {
 
     const originalData = JSON.parse(JSON.stringify(data));
 
-    const result = removeSingleKeyNodes(data);
+    const result = processObjectForDisplay(data);
     expect(data).toEqual(originalData);
     expect(result).not.toBe(data);
+  });
+
+  it("Array of single key not changed", () => {
+    const data = [
+      { make: "Alfa Romeo" },
+      { make: "Ferrari" },
+      { make: "Dodge" },
+      { make: "Subaru" },
+      { make: "Toyota" },
+      { make: "Volkswagen" },
+      { make: "Volvo" },
+      { make: "Audi" },
+    ];
+
+    const result = processObjectForDisplay(data);
+    expect(result).toEqual(data);
   });
 });

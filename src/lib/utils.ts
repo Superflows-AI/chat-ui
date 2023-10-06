@@ -47,7 +47,7 @@ export function convertToMarkdownTable(
   }
 
   // Do this here so we get the correct caption
-  data = removeSingleKeyNodes(data);
+  data = processObjectForDisplay(data);
 
   if (Array.isArray(data)) {
     // Assume all elements have the same type
@@ -163,12 +163,15 @@ export function removeUUIDs(
   }
 }
 
-export function removeSingleKeyNodes(
+export function processObjectForDisplay(
   data: Record<string, any> | any[],
   fieldName: string[] = [],
 ): Record<string, any> | any[] {
-  // Recursively removes nodes with a single key where the value of the node
-  // is an object
+  /**
+   * Processes an arbitrary object for display in a table
+   * Returns a flattened form of the object, with nested keys separated by " -> "
+   * also recursively removes nodes with a single key where the value of the node
+   */
 
   // Handle special case where parent object is e.g. {a: [1,2,3]}, should return [1,2,3]
   if (!Array.isArray(data)) {
@@ -181,7 +184,11 @@ export function removeSingleKeyNodes(
   if (Array.isArray(data)) {
     const result: any[] = [];
     data.forEach((item) => {
-      result.push(removeSingleKeyNodes(item, fieldName));
+      if (typeof item === "object" && Object.keys(item).length > 1) {
+        result.push(processObjectForDisplay(item, fieldName));
+      } else {
+        result.push(item);
+      }
     });
     return result;
   }
