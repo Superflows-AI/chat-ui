@@ -100,7 +100,7 @@ export function convertToMarkdownTable(
           } else if (Array.isArray(value)) {
             item[key] = stringify(value);
           } else if (typeof value === "string") {
-            item[key] = value.replaceAll("\n", "&#10;");
+            item[key] = value.trim().replaceAll("\n", "&#10;");
           } else item[key] = value;
         });
         return item;
@@ -122,7 +122,12 @@ export function convertToMarkdownTable(
       Object.entries(data).map(([key, value]) => {
         return {
           Name: key,
-          Value: typeof value === "object" ? stringify(value) : value,
+          Value:
+            typeof value === "object"
+              ? stringify(value)
+              : typeof value === "string"
+              ? value.trim().replaceAll("\n", "&#10;")
+              : value,
         };
       }),
     );
