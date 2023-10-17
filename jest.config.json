@@ -3,5 +3,6 @@
   "testEnvironment": "node",
   "extensionsToTreatAsEsm": [".ts"],
   "transform": {},
+  "modulePathIgnorePatterns": ["<rootDir>/examples/"],
   "transformIgnorePatterns": []
 }
