@@ -140,7 +140,9 @@ export function parseFunctionCall(text: string): FunctionCall {
   // \( matches the opening bracket
   // (.*) matches everything inside the brackets
   // \) matches the closing bracket
-  const functionCallRegex = /(\w+)\((.*)\)/;
+  // |(\w+) matches the function name if the brackets were forgotten
+  //  (common on fine-tuned 3.5)
+  const functionCallRegex = /^((\w+)\((.*)\)|(\w+))$/;
   // Below regex captures the arguments inside the function call brackets, one by one
   // ([^,\s]+?) matches the argument name
   // ({.*?}|'.*?'|".*?([^\\])"|\[.*?\]|[^,]*) matches the argument value
@@ -156,8 +158,8 @@ export function parseFunctionCall(text: string): FunctionCall {
     throw new Error("Invalid function call format: " + text);
   }
 
-  const name = functionCallMatch[1];
-  const argsText = functionCallMatch[2];
+  const name = functionCallMatch[2] || functionCallMatch[4];
+  const argsText = functionCallMatch[3] ?? "";
   let argMatch;
   const args = {};
 
