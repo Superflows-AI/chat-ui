@@ -225,8 +225,11 @@ describe("Parse output", () => {
       "- Inform the user about the retrieved information.",
     );
     expect(output.tellUser).toBe("");
-    expect(output.commands).toStrictEqual([]);
-    expect(output.completed).toBe(true);
+    expect(output.commands).toStrictEqual([{
+      name: "function_ca",
+      args: {},
+    }]);
+    expect(output.completed).toBe(false);
   });
   it("tell user mistakenly put under commands", () => {
     const output = parseOutput(
@@ -469,6 +472,13 @@ describe("parseFunctionCall", () => {
         query: 'formType:"S-4" AND NOT formType:("4/A" OR "S-4 POS")',
         ticker: "AAPL",
       },
+    });
+  });
+  it("parse okay when brackets forgotten", () => {
+    const out = parseFunctionCall(`list_users`);
+    expect(out).toStrictEqual({
+      name: "list_users",
+      args: {},
     });
   });
 });
