@@ -17,6 +17,7 @@ import { addTrailingSlash, classNames } from "../lib/utils";
 import { LoadingSpinner } from "./loadingspinner";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { parseOutput } from "../lib/parser";
+import { FollowUpSuggestions } from "./followUpSuggestions";
 
 export default function Chat(props: ChatProps) {
   const [userText, setUserText] = useState<string>("");
@@ -37,6 +38,7 @@ export default function Chat(props: ChatProps) {
       ? [{ role: "assistant", content: props.welcomeText }]
       : [],
   );
+  const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
 
   const killSwitchClicked = useRef(false);
 
@@ -57,6 +59,7 @@ export default function Chat(props: ChatProps) {
     async (chat: StreamingStepInput[]) => {
       // Below adds a message so the loading spinner comes up while we're waiting
       setDevChatContents([...chat, { role: "assistant", content: "" }]);
+      setFollowUpSuggestions([]);
       if (loading || alreadyRunning.current) return;
       alreadyRunning.current = true;
       setLoading(true);
@@ -119,6 +122,7 @@ export default function Chat(props: ChatProps) {
         { role: "assistant", content: "" },
       ] as ChatItemType[];
       let incompleteChunk = "";
+      let localConverationId = conversationId;
 
       while (!done) {
         const { value, done: doneReading } = await reader.read();
@@ -136,7 +140,10 @@ export default function Chat(props: ChatProps) {
             .forEach((chunkOfChunk) => {
               if (chunkOfChunk.length === 0) return;
               const data = JSON.parse(chunkOfChunk) as StreamingStep;
-              if (conversationId === null) setConversationId(data.id);
+              if (conversationId === null) {
+                setConversationId(data.id);
+                localConverationId = data.id;
+              }
               if (
                 // Different message role from the last message
                 data.role !== outputMessages[outputMessages.length - 1]?.role ||
@@ -170,6 +177,29 @@ export default function Chat(props: ChatProps) {
       setLoading(false);
       alreadyRunning.current = false;
       killSwitchClicked.current = false;
+
+      // If not an assistant message (confirmation, error etc) don't give follow-up suggestions
+      if (outputMessages[outputMessages.length - 1].role !== "assistant")
+        return;
+      // Get follow-up suggestions
+      const followUpResponse = await fetch(
+        new URL("api/v1/follow-ups", hostname).href,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${props.superflowsApiKey}`,
+          },
+          body: JSON.stringify({
+            conversation_id: localConverationId,
+            user_description: props.userDescription,
+          }),
+        },
+      );
+      const followUpJson = (await followUpResponse.json()) as {
+        suggestions: string[];
+      };
+      setFollowUpSuggestions(followUpJson.suggestions);
     },
     [
       props.userApiKey,
@@ -179,6 +209,7 @@ export default function Chat(props: ChatProps) {
       setLoading,
       devChatContents,
       setDevChatContents,
+      setFollowUpSuggestions,
       killSwitchClicked.current,
       alreadyRunning.current,
     ],
@@ -281,7 +312,10 @@ export default function Chat(props: ChatProps) {
   return (
     <div className="sf-flex sf-min-h-0 sf-h-full sf-w-full sf-flex-1 sf-flex-col">
       <div
-        className="sf-relative sf-overflow-y-auto sf-h-full sf-flex sf-flex-col sf-flex-1 sf-pb-1"
+        className={classNames(
+          "sf-relative sf-overflow-y-auto sf-h-full sf-flex sf-flex-col sf-flex-1 sf-pb-1",
+          loading ? "sf-scroll-auto" : "sf-scroll-smooth",
+        )}
         id={"sf-scrollable-chat-contents"}
       >
         {/* Show clear chat button only when there is chat to clear */}
@@ -325,12 +359,18 @@ export default function Chat(props: ChatProps) {
             props.suggestions.length > 0 && (
               <div className="sf-py-4 sf-px-1.5">
                 <h2 className="sf-ml-2 sf-font-medium">Suggestions</h2>
-                <div className="sf-mt-1 sf-flex sf-flex-col sf-gap-y-2 sf-place-items-baseline">
+                <div className="sf-mt-1 sf-flex sf-flex-col sf-gap-y-1 sf-place-items-baseline">
                   {props.suggestions.map((text) => (
                     <button
                       key={text}
-                      className="sf-text-left sf-px-2 sf-py-1 sf-rounded-md sf-border sf-bg-white sf-text-little sf-text-gray-800 sf-shadow hover:sf-shadow-md"
-                      onClick={() => setUserText(text)}
+                      className="sf-text-left sf-px-2 sf-py-1 sf-rounded-md sf-border sf-bg-white sf-text-little sf-text-gray-800 sf-shadow hover:sf-border-gray-400 sf-transition-all"
+                      onClick={() => {
+                        setUserText("");
+                        void callSuperflowsApi([
+                          ...devChatContents,
+                          { role: "user", content: text.trim() },
+                        ]);
+                      }}
                     >
                       {text}
                     </button>
@@ -338,10 +378,21 @@ export default function Chat(props: ChatProps) {
                 </div>
               </div>
             )}
+          <FollowUpSuggestions
+            devChatContents={devChatContents}
+            followUpSuggestions={followUpSuggestions}
+            onClick={(text) => {
+              setUserText("");
+              void callSuperflowsApi([
+                ...devChatContents,
+                { role: "user", content: text.trim() },
+              ]);
+            }}
+          />
         </div>
       </div>
       {/* Textbox user types into */}
-      <div className="sf-flex sf-flex-col sf-pt-4">
+      <div className="sf-flex sf-flex-col sf-mt-4">
         <AutoGrowingTextArea
           className={classNames(
             "sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border sf-border-solid focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400",
