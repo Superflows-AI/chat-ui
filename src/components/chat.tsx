@@ -17,7 +17,7 @@ import { addTrailingSlash, classNames } from "../lib/utils";
 import { LoadingSpinner } from "./loadingspinner";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { parseOutput } from "../lib/parser";
-import { FollowUpSuggestions } from "./followUpSuggestions";
+import FollowUpSuggestions from "./followUpSuggestions";
 
 export default function Chat(props: ChatProps) {
   const [userText, setUserText] = useState<string>("");
@@ -313,7 +313,7 @@ export default function Chat(props: ChatProps) {
     <div className="sf-flex sf-min-h-0 sf-h-full sf-w-full sf-flex-1 sf-flex-col">
       <div
         className={classNames(
-          "sf-relative sf-overflow-y-auto sf-h-full sf-flex sf-flex-col sf-flex-1 sf-pb-1",
+          "sf-relative sf-overflow-y-auto sf-h-full sf-flex sf-flex-col sf-flex-1 sf-pb-4",
           loading ? "sf-scroll-auto" : "sf-scroll-smooth",
         )}
         id={"sf-scrollable-chat-contents"}
@@ -378,21 +378,23 @@ export default function Chat(props: ChatProps) {
                 </div>
               </div>
             )}
-          <FollowUpSuggestions
-            devChatContents={devChatContents}
-            followUpSuggestions={followUpSuggestions}
-            onClick={(text) => {
-              setUserText("");
-              void callSuperflowsApi([
-                ...devChatContents,
-                { role: "user", content: text.trim() },
-              ]);
-            }}
-          />
+          {devChatContents.length > 1 && followUpSuggestions.length > 0 && (
+            <FollowUpSuggestions
+              devChatContents={devChatContents}
+              followUpSuggestions={followUpSuggestions}
+              onClick={(text) => {
+                setUserText("");
+                void callSuperflowsApi([
+                  ...devChatContents,
+                  { role: "user", content: text.trim() },
+                ]);
+              }}
+            />
+          )}
         </div>
       </div>
       {/* Textbox user types into */}
-      <div className="sf-flex sf-flex-col sf-mt-4">
+      <div className="sf-flex sf-flex-col">
         <AutoGrowingTextArea
           className={classNames(
             "sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border sf-border-solid focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400",
@@ -437,9 +439,10 @@ export default function Chat(props: ChatProps) {
           </button>
           <div
             className={
-              (!shouldTriggerFeedback(devChatContents, loading) ||
-                !feedbackButtonsVisible) &&
-              "sf-invisible"
+              !shouldTriggerFeedback(devChatContents, loading) ||
+              !feedbackButtonsVisible
+                ? "sf-invisible"
+                : ""
             }
           >
             <FeedbackButtons

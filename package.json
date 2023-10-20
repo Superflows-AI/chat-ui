@@ -1,6 +1,6 @@
 {
   "name": "@superflows/chat-ui-react",
-  "version": "1.2.14",
+  "version": "1.2.15-11",
   "main": "dist/index.js",
   "devDependencies": {
     "@heroicons/react": "^2.0.18",

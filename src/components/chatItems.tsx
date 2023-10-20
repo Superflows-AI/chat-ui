@@ -48,7 +48,7 @@ export function ChatItem(props: {
   AIname?: string;
   onConfirm?: (confirm: boolean) => Promise<void>;
   isLoading?: boolean;
-  prevAndNextChatRoles?: ChatItemRole[];
+  prevAndNextChatRoles?: (ChatItemRole | undefined)[];
 }) {
   useEffect(scrollToBottom, [props.chatItem.content]);
 
@@ -334,6 +334,7 @@ export function AssistantChatItem(props: {
   chatItem: StreamingStepInput;
   AIname?: string;
   isLoading?: boolean;
+  prevAndNextChatRoles?: ChatItemRole[];
 }) {
   const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
     parseOutput(props.chatItem.content),
@@ -344,6 +345,10 @@ export function AssistantChatItem(props: {
   useEffect(() => {
     setAssistantChatObj(parseOutput(props.chatItem.content));
   }, [props.chatItem.content]);
+
+  if (props.prevAndNextChatRoles[1] && !props.chatItem.content) {
+    return <></>;
+  }
 
   return (
     <div className="sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-shadow-sm sf-bg-gray-200 sf-text-left sf-place-items-baseline">
