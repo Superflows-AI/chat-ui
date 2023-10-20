@@ -2,6 +2,7 @@ import SuperflowsButton from "./components/superflowsButton";
 import SuperflowsSidebar from "./components/sidebar";
 import SuperflowsModal from "./components/modal";
 import SuperflowsChat from "./components/chat";
+import FollowUpSuggestions from "./components/followUpSuggestions";
 import { PlainTextChatItem, AssistantChatItem } from "./components/chatItems";
 import {
   getLastSectionName,
@@ -23,6 +24,7 @@ export {
   FunctionCall,
   getLastSectionName,
   parseOutput,
+  FollowUpSuggestions,
   SuperflowsSidebar,
   SuperflowsModal,
   SuperflowsChat,
