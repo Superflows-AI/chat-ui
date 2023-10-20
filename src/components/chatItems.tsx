@@ -14,6 +14,7 @@ import {
   classNames,
   convertToMarkdownTable,
   functionNameToDisplay,
+  scrollToBottom,
 } from "../lib/utils";
 import { Graph, GraphData, extractGraphData } from "./graph";
 import { LoadingSpinner } from "./loadingspinner";
@@ -539,14 +540,4 @@ export function Tabs(props: {
       ))}
     </nav>
   );
-}
-
-function scrollToBottom() {
-  if (typeof window !== "undefined") {
-    const ele = document.getElementById("sf-scrollable-chat-contents");
-    // If the element exists, and it's near the bottom, scroll to the bottom
-    if (ele && ele.scrollHeight - ele.scrollTop >= 50) {
-      ele.scrollTop = ele.scrollHeight;
-    }
-  }
 }

@@ -254,3 +254,13 @@ function specialCaseDeNesting(obj: Record<string, any>): any[] | null {
 export function addTrailingSlash(string: string): string {
   return string.endsWith("/") ? string : string + "/";
 }
+
+export function scrollToBottom(behavior: "smooth" | "auto" = "auto"): void {
+  if (typeof window !== "undefined") {
+    const ele = document.getElementById("sf-scrollable-chat-contents");
+    // If the element exists, and it's near the bottom, scroll to the bottom
+    if (ele && ele.scrollHeight - ele.scrollTop >= 50) {
+      ele.scrollTo({ top: ele.scrollHeight, behavior });
+    }
+  }
+}
