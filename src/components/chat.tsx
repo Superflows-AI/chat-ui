@@ -336,6 +336,20 @@ export default function Chat(props: ChatProps) {
         )}
         <div className="sf-mt-6 sf-flex-1 sf-px-1 sf-shrink-0 sf-flex sf-flex-col sf-justify-end sf-gap-y-2">
           {devChatContents.map((chatItem: StreamingStepInput, idx: number) => {
+            const chat = devChatContents.slice(0, idx);
+            const lastUserIdx = chat.findLastIndex(
+              (chat) => chat.role === "user",
+            );
+            const precedingFunctionMessagesWithUrls = chat
+              .slice(lastUserIdx + 1)
+              .filter(
+                (chat) => chat.role === "function" && chat.urls,
+              ) as Extract<StreamingStepInput, { role: "function" }>[];
+            // Remove repeated urls
+            const uniqueUrls = precedingFunctionMessagesWithUrls
+              .map((m) => m.urls)
+              .flat()
+              .filter((url, idx, self) => self.indexOf(url) === idx);
             return (
               <ChatItem
                 key={idx.toString()}
@@ -350,6 +364,12 @@ export default function Chat(props: ChatProps) {
                   devChatContents[idx + 1]?.role,
                 ]}
                 devMode={props.devMode}
+                precedingUrls={
+                  // If the message is the most recent or followed by a user message, we should show the url
+                  [undefined, "user"].includes(devChatContents[idx + 1]?.role)
+                    ? uniqueUrls
+                    : []
+                }
               />
             );
           })}
