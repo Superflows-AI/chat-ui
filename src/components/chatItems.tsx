@@ -466,7 +466,7 @@ export function AssistantChatItem(props: {
                 </div>
               </div>
             )}
-          {props.precedingUrls.length > 0 && (
+          {!props.isLoading && props.precedingUrls.length > 0 && (
             <>
               <div className="sf-h-px sf-bg-gray-300 sf-w-full sf-my-1" />
               <div className="sf-flex sf-flex-row sf-gap-x-1 sf-flex-wrap sf-justify-end sf-text-gray-700 sf-px-3 sf--mb-1 sf-text-xs">
@@ -479,7 +479,9 @@ export function AssistantChatItem(props: {
                       target={"_blank"}
                       rel={"noreferrer noopener"}
                     >
-                      {`${idx + 1}.`} {url.name || url.url}
+                      {`${idx + 1}.`}{" "}
+                      {url.name ||
+                        url.url.replace(/https?:\/\//, "").split("/")[0]}
                     </a>
                     {idx + 1 < props.precedingUrls.length && ","}
                   </div>
