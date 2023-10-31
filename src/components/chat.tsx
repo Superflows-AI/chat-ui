@@ -18,6 +18,7 @@ import { LoadingSpinner } from "./loadingspinner";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { parseOutput } from "../lib/parser";
 import FollowUpSuggestions from "./followUpSuggestions";
+import useMessageCache from "../lib/useMessageCache";
 
 export default function Chat(props: ChatProps) {
   const [userText, setUserText] = useState<string>("");
@@ -44,36 +45,8 @@ export default function Chat(props: ChatProps) {
     props.superflowsUrl ?? "https://dashboard.superflows.ai/"
   );
 
-  function isExpired(date: Date) {
-    const timeToExpireMins = 0.1;
-
-    const expirationDate = new Date(Date.now() - timeToExpireMins * 60 * 1000);
-    return date < expirationDate;
-  }
-
-  const getMessagesFromCache = () => {
-    const cachedConversationString = localStorage.getItem("conversationCache");
-
-    if (!cachedConversationString) return;
-
-    const cachedConversation: {
-      conversationId: number;
-      messages: StreamingStepInput[];
-      updated: Date;
-    } = JSON.parse(cachedConversationString);
-    cachedConversation.updated = new Date(cachedConversation.updated);
-
-    if (!cachedConversation) return;
-
-    console.log(!isExpired(cachedConversation.updated));
-    if (
-      !isExpired(cachedConversation.updated) &&
-      cachedConversation?.messages.length
-    ) {
-      setConversationId(cachedConversation.conversationId);
-      setDevChatContents(cachedConversation.messages);
-    }
-  };
+  const { clearMessageCache, updateDevChatContents, getMessagesFromCache } =
+    useMessageCache(setConversationId, setDevChatContents);
 
   useEffect(() => {
     getMessagesFromCache();
@@ -107,14 +80,6 @@ export default function Chat(props: ChatProps) {
       "conversationCache",
       JSON.stringify(cachedConversation)
     );
-  };
-
-  const updateDevChatContents = (
-    conversationId: number | null,
-    messages: StreamingStepInput[]
-  ) => {
-    setDevChatContents(messages);
-    updateMessagesCache(conversationId, messages);
   };
 
   const callSuperflowsApi = useCallback(
@@ -313,7 +278,6 @@ export default function Chat(props: ChatProps) {
       } else {
         // Handle errors here - add them to chat
         console.error(json.error);
-        // todo: do we need prevState here?
         updateDevChatContents(conversationId, [
           ...devChatContents,
           {
@@ -321,13 +285,6 @@ export default function Chat(props: ChatProps) {
             content: json.error,
           },
         ]);
-        // setDevChatContents((prevState) => [
-        //   ...prevState,
-        //   {
-        //     role: "error",
-        //     content: json.error,
-        //   },
-        // ]);
       }
 
       setLoading(false);
@@ -402,7 +359,7 @@ export default function Chat(props: ChatProps) {
               "sf-absolute sf-top-2 sf-right-2 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-px-2 sf-py-1 sf-rounded-md sf-bg-white sf-border focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500 sf-transition sf-border-gray-300 hover:sf-border-gray-400 sf-text-gray-500 hover:sf-text-gray-600"
             }
             onClick={() => {
-              // todo: is this need to be updated?
+              clearMessageCache();
               setDevChatContents([]);
               setConversationId(null);
               setShowNegativeFeedbackTextbox(false);
