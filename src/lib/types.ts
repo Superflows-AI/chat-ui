@@ -57,8 +57,12 @@ export type ChatGPTMessage =
 type NonSystemGPTMessage = Exclude<ChatGPTMessage, { role: "system" }>;
 
 export type StreamingStepInput =
-  | NonSystemGPTMessage
-  | { role: "error" | "debug" | "confirmation"; content: string };
+  | (NonSystemGPTMessage & { created?: Date })
+  | {
+      role: "error" | "debug" | "confirmation";
+      content: string;
+      created?: Date;
+    };
 export type StreamingStep = StreamingStepInput & { id: number };
 
 export type SuperflowsModalProps = PrebuiltComponentProps & {
