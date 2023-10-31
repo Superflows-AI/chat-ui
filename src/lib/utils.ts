@@ -259,7 +259,7 @@ export function scrollToBottom(behavior: "smooth" | "auto" = "auto"): void {
   if (typeof window !== "undefined") {
     const ele = document.getElementById("sf-scrollable-chat-contents");
     // If the element exists, and it's near the bottom, scroll to the bottom
-    if (ele && ele.scrollHeight - ele.scrollTop >= 50) {
+    if (ele && ele.scrollHeight - ele.scrollTop - ele.offsetHeight <= 100) {
       ele.scrollTo({ top: ele.scrollHeight, behavior });
     }
   }

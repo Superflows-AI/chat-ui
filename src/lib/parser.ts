@@ -74,6 +74,8 @@ export function parseOutput(gptString: string): ParsedOutput {
         (line: string) => !line.startsWith("# ") && line.trim().length > 0,
       )
       .forEach((line: string) => {
+        // If "Commands: None" is present, don't add it to the commands array
+        if (line === "None") return;
         try {
           commands.push(parseFunctionCall(line));
         } catch (e) {

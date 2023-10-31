@@ -93,43 +93,53 @@ export default function Chat(props: ChatProps) {
       if (loading || alreadyRunning.current) return;
       alreadyRunning.current = true;
       setLoading(true);
-      const response = await fetch(new URL("api/v1/answers", hostname).href, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${props.superflowsApiKey}`,
-        },
-        body: JSON.stringify({
-          user_input:
-            chat[chat.length - 1].role === "user"
-              ? chat[chat.length - 1].content
-              : "",
-          conversation_id: conversationId,
-          user_api_key: props.userApiKey,
-          user_description: props.userDescription,
-          mock_api_responses: props.mockApiResponses ?? false,
-          stream: true,
-        }),
-      });
 
-      if (!response.ok) {
-        let responseJson: { error: string };
-        if (response.status === 404) {
-          responseJson = {
-            error: `${response.status}: ${response.statusText}. Check the hostname used is correct ${response.url}`,
-          };
-        } else {
-          try {
-            responseJson = (await response.json()) as {
-              error: string;
-            };
-          } catch (e) {
+      let firstTry = true,
+        retry = false;
+      let response, responseJson: { error: string };
+      while (firstTry || retry) {
+        firstTry = false;
+        response = await fetch(new URL("api/v1/answers", hostname).href, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${props.superflowsApiKey}`,
+          },
+          body: JSON.stringify({
+            user_input:
+              chat[chat.length - 1].role === "user"
+                ? chat[chat.length - 1].content
+                : "",
+            conversation_id: conversationId,
+            user_api_key: props.userApiKey,
+            user_description: props.userDescription,
+            mock_api_responses: props.mockApiResponses ?? false,
+            stream: true,
+          }),
+        });
+
+        if (!response.ok) {
+          if (response.status === 404) {
             responseJson = {
-              error: `${response.status}: ${response.statusText}`,
+              error: `${response.status}: ${response.statusText}. Check the hostname used is correct ${response.url}`,
             };
+          } else {
+            try {
+              responseJson = (await response.json()) as {
+                error: string;
+              };
+            } catch (e) {
+              responseJson = {
+                error: `${response.status}: ${response.statusText}`,
+              };
+              // Only retry once when response is 500 with no body (rare Vercel edge function bug)
+              retry =
+                !retry && response.status === 500 && response.statusText === "";
+            }
           }
         }
-
+      }
+      if (!response.ok) {
         console.error(responseJson.error);
         updateDevChatContents(null, [
           ...chat,
@@ -371,6 +381,20 @@ export default function Chat(props: ChatProps) {
         )}
         <div className="sf-mt-6 sf-flex-1 sf-px-1 sf-shrink-0 sf-flex sf-flex-col sf-justify-end sf-gap-y-2">
           {devChatContents.map((chatItem: StreamingStepInput, idx: number) => {
+            const chat = devChatContents.slice(0, idx);
+            const lastUserIdx = chat.findLastIndex(
+              (chat) => chat.role === "user",
+            );
+            const precedingFunctionMessagesWithUrls = chat
+              .slice(lastUserIdx + 1)
+              .filter(
+                (chat) => chat.role === "function" && chat.urls,
+              ) as Extract<StreamingStepInput, { role: "function" }>[];
+            // Remove repeated urls
+            const uniqueUrls = precedingFunctionMessagesWithUrls
+              .map((m) => m.urls)
+              .flat()
+              .filter((url, idx, self) => self.indexOf(url) === idx);
             return (
               <ChatItem
                 key={idx.toString()}
@@ -385,6 +409,12 @@ export default function Chat(props: ChatProps) {
                   devChatContents[idx + 1]?.role,
                 ]}
                 devMode={props.devMode}
+                precedingUrls={
+                  // If the message is the most recent or followed by a user message, we should show the url
+                  [undefined, "user"].includes(devChatContents[idx + 1]?.role)
+                    ? uniqueUrls
+                    : []
+                }
               />
             );
           })}

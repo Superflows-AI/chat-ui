@@ -49,6 +49,7 @@ export function ChatItem(props: {
   onConfirm?: (confirm: boolean) => Promise<void>;
   isLoading?: boolean;
   prevAndNextChatRoles?: (ChatItemRole | undefined)[];
+  precedingUrls?: { name: string; url: string }[];
 }) {
   useEffect(scrollToBottom, [props.chatItem.content]);
 
@@ -176,7 +177,7 @@ export function FunctionVizChatItem(props: {
     <div
       className={classNames(
         "sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-100 sf-border sf-border-gray-300",
-        !expanded && "hover:sf-bg-gray-300 sf-cursor-pointer",
+        !expanded && "hover:sf-bg-gray-200 sf-cursor-pointer",
       )}
     >
       <button
@@ -214,6 +215,28 @@ export function FunctionVizChatItem(props: {
                 {content}
               </div>
             ))}
+          {props.chatItem.urls && props.chatItem.urls.length > 0 && (
+            <div className="sf-w-full">
+              <div className="sf-h-px sf-bg-gray-300 sf-w-full sf-my-1" />
+              <div className="sf-flex sf-flex-row sf-gap-x-1 sf-flex-wrap sf-justify-end sf-text-gray-700 sf-px-3 sf-mb-0.5 sf-text-xs">
+                More info:
+                {props.chatItem.urls.map((url, idx) => (
+                  <div key={idx} className="sf-flex sf-flex-row">
+                    <a
+                      href={url.url}
+                      className="sf-text-blue-500 hover:sf-underline visited:sf-text-purple-500"
+                      target={"_blank"}
+                      rel={"noreferrer noopener"}
+                    >
+                      {props.chatItem.urls.length > 1 && `${idx + 1}.`}{" "}
+                      {url.name || url.url}
+                    </a>
+                    {idx + 1 < props.chatItem.urls.length && ","}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
@@ -335,6 +358,7 @@ export function AssistantChatItem(props: {
   AIname?: string;
   isLoading?: boolean;
   prevAndNextChatRoles?: ChatItemRole[];
+  precedingUrls?: { name: string; url: string }[];
 }) {
   const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
     parseOutput(props.chatItem.content),
@@ -442,6 +466,29 @@ export function AssistantChatItem(props: {
                 </div>
               </div>
             )}
+          {!props.isLoading && props.precedingUrls.length > 0 && (
+            <>
+              <div className="sf-h-px sf-bg-gray-300 sf-w-full sf-my-1" />
+              <div className="sf-flex sf-flex-row sf-gap-x-1 sf-flex-wrap sf-justify-end sf-text-gray-700 sf-px-3 sf--mb-1 sf-text-xs">
+                More info:
+                {props.precedingUrls.map((url, idx) => (
+                  <div key={idx} className="sf-flex sf-flex-row">
+                    <a
+                      href={url.url}
+                      className="sf-text-blue-500 hover:sf-underline visited:sf-text-purple-500"
+                      target={"_blank"}
+                      rel={"noreferrer noopener"}
+                    >
+                      {`${idx + 1}.`}{" "}
+                      {url.name ||
+                        url.url.replace(/https?:\/\//, "").split("/")[0]}
+                    </a>
+                    {idx + 1 < props.precedingUrls.length && ","}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       }
     </div>
