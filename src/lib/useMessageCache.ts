@@ -2,13 +2,15 @@ import { StreamingStepInput } from "./types";
 
 function useMessageCache(
   setConversationId: React.Dispatch<React.SetStateAction<number>>,
-  setDevChatContents: React.Dispatch<React.SetStateAction<StreamingStepInput[]>>
+  setDevChatContents: React.Dispatch<
+    React.SetStateAction<StreamingStepInput[]>
+  >,
 ) {
   const TIME_TO_EXPIRE_MINS = 15;
 
   function isExpired(date: Date) {
     const expirationDate = new Date(
-      Date.now() - TIME_TO_EXPIRE_MINS * 60 * 1000
+      Date.now() - TIME_TO_EXPIRE_MINS * 60 * 1000,
     );
     return date < expirationDate;
   }
@@ -39,7 +41,7 @@ function useMessageCache(
 
   const updateMessagesCache = (
     conversationId: number | null,
-    messages: StreamingStepInput[]
+    messages: StreamingStepInput[],
   ) => {
     if (!conversationId) {
       return;
@@ -57,7 +59,7 @@ function useMessageCache(
 
     localStorage.setItem(
       "conversationCache",
-      JSON.stringify(cachedConversation)
+      JSON.stringify(cachedConversation),
     );
   };
 
@@ -67,7 +69,7 @@ function useMessageCache(
 
   const updateDevChatContents = (
     conversationId: number | null,
-    messages: StreamingStepInput[]
+    messages: StreamingStepInput[],
   ) => {
     setDevChatContents(messages);
     updateMessagesCache(conversationId, messages);

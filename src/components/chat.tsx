@@ -35,14 +35,16 @@ export default function Chat(props: ChatProps) {
 
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [devChatContents, setDevChatContents] = useState<StreamingStepInput[]>(
-    props.welcomeText ? [{ role: "assistant", content: props.welcomeText }] : []
+    props.welcomeText
+      ? [{ role: "assistant", content: props.welcomeText }]
+      : [],
   );
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
 
   const killSwitchClicked = useRef(false);
 
   const hostname = addTrailingSlash(
-    props.superflowsUrl ?? "https://dashboard.superflows.ai/"
+    props.superflowsUrl ?? "https://dashboard.superflows.ai/",
   );
 
   const { clearMessageCache, updateDevChatContents, getMessagesFromCache } =
@@ -57,30 +59,6 @@ export default function Chat(props: ChatProps) {
       ]);
     }
   }, []);
-
-  const updateMessagesCache = (
-    conversationId: number | null,
-    messages: StreamingStepInput[]
-  ) => {
-    if (!conversationId) {
-      return;
-    }
-
-    const cachedConversation: {
-      conversationId: number;
-      messages: StreamingStepInput[];
-      updated: Date;
-    } = {
-      conversationId: conversationId,
-      messages: messages,
-      updated: new Date(),
-    };
-
-    localStorage.setItem(
-      "conversationCache",
-      JSON.stringify(cachedConversation)
-    );
-  };
 
   const callSuperflowsApi = useCallback(
     async (chat: StreamingStepInput[]) => {
@@ -212,7 +190,7 @@ export default function Chat(props: ChatProps) {
             "If there is a JSON parsing error below, this is likely caused by a very large API response that the AI won't be able to handle.\n\n" +
               "We suggest filtering the API response to only include the data you need by setting the 'Include all keys in responses' and " +
               "'Include these keys in response' fields at the bottom of the edit action modal at https://dashboard.superflows.ai\n\n",
-            e
+            e,
           );
           incompleteChunk += chunkValue;
         }
@@ -237,7 +215,7 @@ export default function Chat(props: ChatProps) {
             conversation_id: localConverationId,
             user_description: props.userDescription,
           }),
-        }
+        },
       );
       const followUpJson = (await followUpResponse.json()) as {
         suggestions: string[];
@@ -256,7 +234,7 @@ export default function Chat(props: ChatProps) {
       setFollowUpSuggestions,
       killSwitchClicked.current,
       alreadyRunning.current,
-    ]
+    ],
   );
   const onConfirm = useCallback(
     async (confirm: boolean): Promise<void> => {
@@ -307,7 +285,7 @@ export default function Chat(props: ChatProps) {
       setLoading,
       props.userApiKey,
       props.mockApiResponses,
-    ]
+    ],
   );
 
   const [feedback, setFeedback] = useState<"yes" | "no" | null>(null);
@@ -328,7 +306,7 @@ export default function Chat(props: ChatProps) {
   const feedbackBody = {
     conversation_id: conversationId,
     conversation_length_at_feedback: devChatContents.filter(({ role }) =>
-      ["function", "assistant", "user"].includes(role)
+      ["function", "assistant", "user"].includes(role),
     ).length,
     feedback_positive: feedback === "yes",
     negative_feedback_text: negativeFeedbackText,
@@ -358,7 +336,7 @@ export default function Chat(props: ChatProps) {
       <div
         className={classNames(
           "sf-relative sf-overflow-y-auto sf-h-full sf-flex sf-flex-col sf-flex-1 sf-pb-4",
-          loading ? "sf-scroll-auto" : "sf-scroll-smooth"
+          loading ? "sf-scroll-auto" : "sf-scroll-smooth",
         )}
         id={"sf-scrollable-chat-contents"}
       >
@@ -466,7 +444,7 @@ export default function Chat(props: ChatProps) {
             userText.length > 300 ? "sf-overflow-auto-y" : "sf-overflow-hidden",
             props.styling?.buttonColor
               ? `focus:sf-border-gray-500 focus:sf-ring-gray-500`
-              : "focus:sf-border-purple-300 focus:sf-ring-purple-300"
+              : "focus:sf-border-purple-300 focus:sf-ring-purple-300",
           )}
           placeholder={"Send a message"}
           value={userText}
@@ -492,7 +470,7 @@ export default function Chat(props: ChatProps) {
               "sf-flex sf-flex-row sf-gap-x-1 sf-place-items-center sf-ml-4 sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-shadow-sm sf-border sf-h-10",
               loading
                 ? "sf-text-gray-500 sf-bg-gray-100 hover:sf-bg-gray-200 sf-border-gray-300"
-                : "sf-invisible"
+                : "sf-invisible",
             )}
             onClick={() => {
               killSwitchClicked.current = true;
@@ -530,7 +508,7 @@ export default function Chat(props: ChatProps) {
               !props.styling?.buttonColor &&
                 !(loading || !userText) &&
                 "sf-bg-purple-500",
-              showNegativeFeedbackTextbox && "sf-invisible"
+              showNegativeFeedbackTextbox && "sf-invisible",
             )}
             onClick={() => {
               if (!loading && userText) {
@@ -559,13 +537,13 @@ export default function Chat(props: ChatProps) {
 
 function shouldTriggerFeedback(
   devChatContents: StreamingStepInput[],
-  loading?: boolean
+  loading?: boolean,
 ): boolean {
   if (loading) return false;
   if (devChatContents.length === 0) return false;
 
   const sinceLastUserMessage = devChatContents.slice(
-    devChatContents.findLastIndex((chat) => chat.role === "user")
+    devChatContents.findLastIndex((chat) => chat.role === "user"),
   );
   if (!sinceLastUserMessage.some((chat) => chat.role === "function"))
     return false;
@@ -626,7 +604,7 @@ function FeedbackButtons(props: {
       <div
         className={classNames(
           "sf-my-auto sf-flex sf-flex-row sf-whitespace-nowrap",
-          !showThankYouMessage && "sf-hidden"
+          !showThankYouMessage && "sf-hidden",
         )}
       >
         Thanks for your feedback!
@@ -635,14 +613,14 @@ function FeedbackButtons(props: {
       <div
         className={classNames(
           "sf-align-center sf-flex sf-flex-row sf-my-auto",
-          (!props.showNegativeTextbox || showThankYouMessage) && "sf-hidden"
+          (!props.showNegativeTextbox || showThankYouMessage) && "sf-hidden",
         )}
       >
         <div className="sf-relative">
           <input
             ref={ref}
             className={classNames(
-              "sf-peer sf-pt-4 sf-pb-1 sf-h-10 sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-px-4 sf-border-gray-300 sf-border focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400 focus:sf-border-purple-400 focus:sf-ring-purple-400"
+              "sf-peer sf-pt-4 sf-pb-1 sf-h-10 sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-px-4 sf-border-gray-300 sf-border focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400 focus:sf-border-purple-400 focus:sf-ring-purple-400",
             )}
             placeholder=""
             value={props.negativeFeedbackText ?? ""}
@@ -659,7 +637,7 @@ function FeedbackButtons(props: {
               "sf-absolute sf-pointer-events-none sf-text-sm sf-text-gray-400 sf-left-4 sf-top-3 peer-focus:sf-scale-75 peer-focus:sf--translate-y-5/8 sf-select-none sf-transition sf-duration-300",
               props.negativeFeedbackText
                 ? "sf--translate-x-1/8 sf--translate-y-5/8 sf-scale-75"
-                : "peer-focus:sf--translate-x-1/8"
+                : "peer-focus:sf--translate-x-1/8",
             )}
           >
             What went wrong?
@@ -675,7 +653,7 @@ function FeedbackButtons(props: {
       <div
         className={classNames(
           "sf-flex sf-flex-col sf-place-items-center sf-gap-y-1 sm:sf-text-sm sf-text-md",
-          (props.showNegativeTextbox || showThankYouMessage) && "sf-hidden"
+          (props.showNegativeTextbox || showThankYouMessage) && "sf-hidden",
         )}
       >
         <div className="sf-flex sf-flex-row sf-gap-x-4 sf-px-2 sf-whitespace-nowrap">
@@ -685,7 +663,7 @@ function FeedbackButtons(props: {
           <button
             onClick={() => props.setShowNegativeTextbox(true)}
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-text-xs sf-transition sf-bg-red-500 sf-ring-red-500"
+              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-text-xs sf-transition sf-bg-red-500 sf-ring-red-500",
             )}
           >
             <HandThumbDownIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
@@ -698,7 +676,7 @@ function FeedbackButtons(props: {
               setTimeout(() => setShowThankYouMessage(false), 5000);
             }}
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-xs  sf-bg-green-500 sf-ring-green-500 "
+              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-xs  sf-bg-green-500 sf-ring-green-500 ",
             )}
           >
             <HandThumbUpIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
