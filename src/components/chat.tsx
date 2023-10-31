@@ -34,9 +34,7 @@ export default function Chat(props: ChatProps) {
 
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [devChatContents, setDevChatContents] = useState<StreamingStepInput[]>(
-    props.welcomeText
-      ? [{ role: "assistant", content: props.welcomeText, created: new Date() }]
-      : []
+    props.welcomeText ? [{ role: "assistant", content: props.welcomeText }] : []
   );
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
 
@@ -46,37 +44,34 @@ export default function Chat(props: ChatProps) {
     props.superflowsUrl ?? "https://dashboard.superflows.ai/"
   );
 
+  function isExpired(date: Date) {
+    const timeToExpireMins = 0.1;
+
+    const expirationDate = new Date(Date.now() - timeToExpireMins * 60 * 1000);
+    return date < expirationDate;
+  }
+
   const getMessagesFromCache = () => {
-    const cachedConversationString = localStorage.getItem("conversation");
+    const cachedConversationString = localStorage.getItem("conversationCache");
 
     if (!cachedConversationString) return;
 
-    const cachedConversation: Record<
-      string,
-      (StreamingStepInput & { created: Date })[]
-    > = JSON.parse(cachedConversationString);
+    const cachedConversation: {
+      conversationId: number;
+      messages: StreamingStepInput[];
+      updated: Date;
+    } = JSON.parse(cachedConversationString);
+    cachedConversation.updated = new Date(cachedConversation.updated);
 
-    const cachedConversationId = Object.keys(cachedConversation)?.[0];
+    if (!cachedConversation) return;
 
-    const cachedConversationIdInt = parseInt(cachedConversationId);
-
-    if (!cachedConversationId) return;
-
-    if (cachedConversation[cachedConversationId]?.length) {
-      // delete old messages
-      const recentMessages = cachedConversation[cachedConversationId].filter(
-        (message) => !isExpired(message.created)
-      );
-
-      const recentMessagesMapped: StreamingStepInput[] = recentMessages.map(
-        (message): StreamingStepInput => {
-          // @ts-ignore
-          return { role: message.role, content: message.content };
-        }
-      );
-
-      setConversationId(cachedConversationIdInt);
-      setDevChatContents(recentMessagesMapped);
+    console.log(!isExpired(cachedConversation.updated));
+    if (
+      !isExpired(cachedConversation.updated) &&
+      cachedConversation?.messages.length
+    ) {
+      setConversationId(cachedConversation.conversationId);
+      setDevChatContents(cachedConversation.messages);
     }
   };
 
@@ -90,15 +85,6 @@ export default function Chat(props: ChatProps) {
     }
   }, []);
 
-  function isExpired(date: Date) {
-    const timeToExpireMins = 15;
-
-    const fifteenMinutesAgo = new Date(
-      Date.now() - timeToExpireMins * 60 * 1000
-    );
-    return date < fifteenMinutesAgo;
-  }
-
   const updateMessagesCache = (
     conversationId: number | null,
     messages: StreamingStepInput[]
@@ -107,15 +93,20 @@ export default function Chat(props: ChatProps) {
       return;
     }
 
-    const recentMessages = messages.filter(
-      (message) => !isExpired(message.created)
-    );
-
-    const cachedConversation: Record<string, StreamingStepInput[]> = {
-      [conversationId]: recentMessages,
+    const cachedConversation: {
+      conversationId: number;
+      messages: StreamingStepInput[];
+      updated: Date;
+    } = {
+      conversationId: conversationId,
+      messages: messages,
+      updated: new Date(),
     };
 
-    localStorage.setItem("conversation", JSON.stringify(cachedConversation));
+    localStorage.setItem(
+      "conversationCache",
+      JSON.stringify(cachedConversation)
+    );
   };
 
   const updateDevChatContents = (
@@ -229,7 +220,7 @@ export default function Chat(props: ChatProps) {
                 if (data.content.includes("<<[NEW-MESSAGE]>>"))
                   data.content = data.content.replace("<<[NEW-MESSAGE]>>", "");
                 // Add new message
-                outputMessages.push({ ...data, created: new Date() });
+                outputMessages.push({ ...data });
               } else {
                 // Append message data to preceding message
                 outputMessages[outputMessages.length - 1].content +=
@@ -314,12 +305,7 @@ export default function Chat(props: ChatProps) {
         error: string;
       };
       if (response.status === 200) {
-        const newChat = [
-          ...devChatContents,
-          ...json.outs.map((val) => {
-            return { ...val, created: new Date() };
-          }),
-        ];
+        const newChat = [...devChatContents, ...json.outs];
         updateDevChatContents(conversationId, newChat);
         if (confirm) {
           await callSuperflowsApi(newChat);

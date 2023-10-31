@@ -57,11 +57,10 @@ export type ChatGPTMessage =
 type NonSystemGPTMessage = Exclude<ChatGPTMessage, { role: "system" }>;
 
 export type StreamingStepInput =
-  | (NonSystemGPTMessage & { created?: Date })
+  | NonSystemGPTMessage
   | {
       role: "error" | "debug" | "confirmation";
       content: string;
-      created?: Date;
     };
 export type StreamingStep = StreamingStepInput & { id: number };
 
