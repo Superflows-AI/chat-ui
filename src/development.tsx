@@ -10,9 +10,7 @@ function Development() {
   return (
     <div className="h-screen flex items-center justify-center w-full">
       <SuperflowsButton
-        // todo: remove
-        superflowsApiKey={"sfk-f4edfd81-63ad-44df-81eb-9c6f359c241f"}
-        // superflowsApiKey={import.meta.env.VITE_SUPERFLOWS_API_KEY}
+        superflowsApiKey={import.meta.env.VITE_SUPERFLOWS_API_KEY}
         superflowsUrl={import.meta.env.VITE_SUPERFLOWS_URL}
         userDescription={import.meta.env.VITE_USER_DESCRIPTION}
         userApiKey={import.meta.env.VITE_USER_API_KEY}
