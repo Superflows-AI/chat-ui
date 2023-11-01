@@ -1,6 +1,7 @@
 import { StreamingStepInput } from "./types";
+import React from "react";
 
-function useMessageCache(
+export default function useMessageCache(
   setConversationId: React.Dispatch<React.SetStateAction<number>>,
   setDevChatContents: React.Dispatch<
     React.SetStateAction<StreamingStepInput[]>
@@ -29,7 +30,6 @@ function useMessageCache(
 
     if (!cachedConversation) return;
 
-    console.log(!isExpired(cachedConversation.updated));
     if (
       !isExpired(cachedConversation.updated) &&
       cachedConversation?.messages.length
@@ -77,5 +77,3 @@ function useMessageCache(
 
   return { clearMessageCache, updateDevChatContents, getMessagesFromCache };
 }
-
-export default useMessageCache;
