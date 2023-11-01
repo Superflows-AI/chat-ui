@@ -185,7 +185,7 @@ export function FunctionVizChatItem(props: {
         onClick={() => setExpanded((prev) => !prev)}
       >
         <p className="sf-text-xs sf-text-gray-600 sf-mb-1">Data received</p>
-        <div className="sf-text-sm">
+        <div className="sf-text-sm sf-text-black">
           Data received from{" "}
           <b className="font-medium">
             {functionNameToDisplay(props.chatItem?.name ?? "")}
