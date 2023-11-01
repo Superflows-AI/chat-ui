@@ -18,6 +18,7 @@ import { LoadingSpinner } from "./loadingspinner";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { parseOutput } from "../lib/parser";
 import FollowUpSuggestions from "./followUpSuggestions";
+import useMessageCache from "../lib/useMessageCache";
 
 export default function Chat(props: ChatProps) {
   const [userText, setUserText] = useState<string>("");
@@ -46,7 +47,11 @@ export default function Chat(props: ChatProps) {
     props.superflowsUrl ?? "https://dashboard.superflows.ai/",
   );
 
+  const { clearMessageCache, updateDevChatContents, getMessagesFromCache } =
+    useMessageCache(setConversationId, setDevChatContents);
+
   useEffect(() => {
+    getMessagesFromCache();
     if (props.initialMessage) {
       callSuperflowsApi([
         ...devChatContents,
@@ -58,7 +63,10 @@ export default function Chat(props: ChatProps) {
   const callSuperflowsApi = useCallback(
     async (chat: StreamingStepInput[]) => {
       // Below adds a message so the loading spinner comes up while we're waiting
-      setDevChatContents([...chat, { role: "assistant", content: "" }]);
+      updateDevChatContents(conversationId, [
+        ...chat,
+        { role: "assistant", content: "" },
+      ]);
       setFollowUpSuggestions([]);
       if (loading || alreadyRunning.current) return;
       alreadyRunning.current = true;
@@ -111,7 +119,7 @@ export default function Chat(props: ChatProps) {
       }
       if (!response.ok) {
         console.error(responseJson.error);
-        setDevChatContents([
+        updateDevChatContents(null, [
           ...chat,
           {
             role: "error",
@@ -171,7 +179,10 @@ export default function Chat(props: ChatProps) {
                 outputMessages[outputMessages.length - 1].content +=
                   data.content;
               }
-              setDevChatContents([...chat, ...outputMessages]);
+              updateDevChatContents(localConverationId, [
+                ...chat,
+                ...outputMessages,
+              ]);
             });
           incompleteChunk = "";
         } catch (e) {
@@ -218,7 +229,8 @@ export default function Chat(props: ChatProps) {
       loading,
       setLoading,
       devChatContents,
-      setDevChatContents,
+      updateDevChatContents,
+      conversationId,
       setFollowUpSuggestions,
       killSwitchClicked.current,
       alreadyRunning.current,
@@ -247,15 +259,15 @@ export default function Chat(props: ChatProps) {
       };
       if (response.status === 200) {
         const newChat = [...devChatContents, ...json.outs];
-        setDevChatContents(newChat);
+        updateDevChatContents(conversationId, newChat);
         if (confirm) {
           await callSuperflowsApi(newChat);
         }
       } else {
         // Handle errors here - add them to chat
         console.error(json.error);
-        setDevChatContents((prevState) => [
-          ...prevState,
+        updateDevChatContents(conversationId, [
+          ...devChatContents,
           {
             role: "error",
             content: json.error,
@@ -267,7 +279,7 @@ export default function Chat(props: ChatProps) {
     },
     [
       devChatContents,
-      setDevChatContents,
+      updateDevChatContents,
       callSuperflowsApi,
       conversationId,
       setLoading,
@@ -335,6 +347,7 @@ export default function Chat(props: ChatProps) {
               "sf-ml-auto sf-sticky sf-top-2 sf-right-2 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-px-2 sf-py-1 sf-rounded-md sf-bg-white sf-border focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500 sf-transition sf-border-gray-300 hover:sf-border-gray-400 sf-text-gray-500 hover:sf-text-gray-600"
             }
             onClick={() => {
+              clearMessageCache();
               setDevChatContents([]);
               setConversationId(null);
               setShowNegativeFeedbackTextbox(false);
