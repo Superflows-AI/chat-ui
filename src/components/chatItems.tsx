@@ -50,6 +50,7 @@ export function ChatItem(props: {
   isLoading?: boolean;
   prevAndNextChatRoles?: (ChatItemRole | undefined)[];
   precedingUrls?: { name: string; url: string }[];
+  showThoughts?: boolean;
 }) {
   useEffect(scrollToBottom, [props.chatItem.content]);
 
@@ -359,6 +360,7 @@ export function AssistantChatItem(props: {
   isLoading?: boolean;
   prevAndNextChatRoles?: ChatItemRole[];
   precedingUrls?: { name: string; url: string }[];
+  showThoughts?: boolean;
 }) {
   const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
     parseOutput(props.chatItem.content),
@@ -370,7 +372,12 @@ export function AssistantChatItem(props: {
     setAssistantChatObj(parseOutput(props.chatItem.content));
   }, [props.chatItem.content]);
 
-  if (props.prevAndNextChatRoles[1] && !props.chatItem.content) {
+  // If there's a message that follows this one and there's no content shown
+  if (
+    props.prevAndNextChatRoles[1] &&
+    !assistantChatObj.tellUser &&
+    (!assistantChatObj.reasoning || !props.showThoughts)
+  ) {
     return <></>;
   }
 
@@ -381,7 +388,7 @@ export function AssistantChatItem(props: {
       </p>
       {
         <div className="sf-w-full">
-          {assistantChatObj.reasoning && (
+          {assistantChatObj.reasoning && props.showThoughts && (
             <div className="sf-bg-yellow-100 sf-rounded-md sf-px-4 sf-py-2 sf-border sf-border-yellow-300 sf-w-full">
               <button
                 className={classNames(
@@ -421,8 +428,16 @@ export function AssistantChatItem(props: {
             </div>
           )}
           {props.isLoading &&
+            // No content
             (!props.chatItem.content ||
+              // Not showing thoughts & thinking
+              (!props.showThoughts &&
+                assistantChatObj.reasoning &&
+                !assistantChatObj.plan &&
+                !assistantChatObj.tellUser) ||
+              // Planning
               (assistantChatObj.plan && !assistantChatObj.tellUser) ||
+              // Taking actions
               props.chatItem.content.includes("Commands:")) && (
               <div
                 className={classNames(
@@ -433,7 +448,11 @@ export function AssistantChatItem(props: {
                 <div
                   className={classNames(
                     "sf-px-8 sf-py-1 sf-rounded sf-border sf-flex sf-flex-col sf-place-items-center",
-                    !props.chatItem.content &&
+                    (!props.chatItem.content ||
+                      (!props.showThoughts &&
+                        !assistantChatObj.plan &&
+                        !assistantChatObj.tellUser &&
+                        !props.chatItem.content.includes("Commands:"))) &&
                       "sf-border-orange-300 sf-bg-orange-200 sf-text-orange-700",
                     assistantChatObj.plan &&
                       !assistantChatObj.tellUser &&
@@ -443,7 +462,11 @@ export function AssistantChatItem(props: {
                   )}
                 >
                   <div className="sf-flex sf-flex-row sf-place-items-center sf-gap-x-1">
-                    {!props.chatItem.content ? (
+                    {!props.chatItem.content ||
+                    (!props.showThoughts &&
+                      !assistantChatObj.plan &&
+                      !assistantChatObj.tellUser &&
+                      !props.chatItem.content.includes("Commands:")) ? (
                       <>
                         <LightBulbSolidIcon className="sf-w-4 sf-h-4" />
                         Thinking...

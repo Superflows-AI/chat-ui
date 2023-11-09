@@ -96,4 +96,5 @@ export interface ChatProps {
   initialMessage?: string;
   welcomeText?: string;
   initialFocus?: Ref<any>;
+  showThoughts?: boolean;
 }

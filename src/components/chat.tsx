@@ -393,6 +393,7 @@ export default function Chat(props: ChatProps) {
                     ? uniqueUrls
                     : []
                 }
+                showThoughts={props.showThoughts}
               />
             );
           })}
