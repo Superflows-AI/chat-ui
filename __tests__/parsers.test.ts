@@ -312,6 +312,15 @@ describe("Parse output", () => {
     expect(output.commands).toStrictEqual([]);
     expect(output.completed).toBe(true);
   });
+  it("When writing 'Reasoning:', it shouldn't count as Tell user", () => {
+    const output = parseOutput("Reason");
+    expect(output).toBeDefined();
+    expect(output.reasoning).toBe("");
+    expect(output.plan).toBe("");
+    expect(output.tellUser).toBe("");
+    expect(output.commands).toStrictEqual([]);
+    expect(output.completed).toBe(true);
+  });
 });
 
 describe("parseFunctionCall", () => {

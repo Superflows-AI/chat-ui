@@ -19,6 +19,7 @@ function Development() {
           type: "modal",
           solidIcon: true,
         }}
+        devMode={false}
         welcomeText={import.meta.env.VITE_WELCOME_MESSAGE}
         suggestions={import.meta.env.VITE_SUGGESTIONS?.split(",")}
       />

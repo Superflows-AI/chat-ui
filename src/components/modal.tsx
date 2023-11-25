@@ -49,7 +49,7 @@ export default function SuperflowsModal(props: SuperflowsModalProps) {
             <Dialog.Overlay
               as={"div"}
               className={classNames(
-                "sf-relative sf-h-[90vh] sf-bg-gray-50 sf-max-w-5xl sf-transform sf-rounded-lg sf-text-left sf-shadow-xl sf-transition-all sm:sf-my-8 sm:sf-w-full",
+                "sf-relative sf-h-[90vh] sf-bg-[#fdfdfe] sf-max-w-5xl sf-transform sf-rounded-lg sf-text-left sf-shadow-xl sf-transition-all sm:sf-my-8 sm:sf-w-full",
                 props.styling?.modalClasses ?? "",
               )}
             >
