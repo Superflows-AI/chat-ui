@@ -117,113 +117,104 @@ export function Graph(props: GraphData) {
   }
 
   return (
-    <>
-      {/*<div className="sf-w-full sf-text-center">*/}
-      {/*  <h2 className="sf-font-medium sf-text-xl">{props.graphTitle}</h2>*/}
-      {/*</div>*/}
-      <ResponsiveContainer
-        width="80%"
-        aspect={2}
-        className="sf-mx-auto sf-mt-2"
-      >
-        {props.type === "bar" ? (
-          <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="x" tick={{ fontSize: 12 }} />
-            <YAxis
-              dataKey="y"
-              label={{
-                value: props.yLabel || "",
-                angle: props.yLabel.length > 5 ? -90 : 0,
-                position: "insideLeft",
-                dy: (props.yLabel || "").length * 3,
-              }}
-            />
-            <Tooltip
-              formatter={(value, name, vals) => [
-                value + props.yLabel.split(" ")[1],
-                props.yLabel.split(" ")[0],
-              ]}
-              content={(vals) => {
-                const payload =
-                  vals.payload.length > 0 ? vals.payload[0].payload : {};
-                const splitYLabel = props.yLabel.split(" ");
-                const unit = splitYLabel.length > 1 ? splitYLabel[1] : "";
-                return (
-                  <div className="sf-bg-white sf-p-3 sf-border sf-flex sf-flex-col">
-                    <h3 className="sf-font-medium">{payload.x}</h3>
-                    <div className="sf-flex sf-flex-row sf-gap-x-1">
-                      {splitYLabel[0]
-                        ? splitYLabel[0].replaceAll("_", " ")
-                        : splitYLabel[0]}
-                      :
-                      <div className="sf-text-center sf-text-[#0369a1]">
-                        {payload.y + unit}
-                      </div>
+    <ResponsiveContainer width="80%" aspect={2} className="sf-mx-auto sf-mt-2">
+      {props.type === "bar" ? (
+        <BarChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="x" tick={{ fontSize: 12 }} />
+          <YAxis
+            dataKey="y"
+            label={{
+              value: props.yLabel || "",
+              angle: props.yLabel.length > 5 ? -90 : 0,
+              position: "insideLeft",
+              dy: (props.yLabel || "").length * 3,
+            }}
+          />
+          <Tooltip
+            formatter={(value, name, vals) => [
+              value + props.yLabel.split(" ")[1],
+              props.yLabel.split(" ")[0],
+            ]}
+            content={(vals) => {
+              const payload =
+                vals.payload.length > 0 ? vals.payload[0].payload : {};
+              const splitYLabel = props.yLabel.split(" ");
+              const unit = splitYLabel.length > 1 ? splitYLabel[1] : "";
+              return (
+                <div className="sf-bg-white sf-p-3 sf-border sf-flex sf-flex-col">
+                  <h3 className="sf-font-medium">{payload.x}</h3>
+                  <div className="sf-flex sf-flex-row sf-gap-x-1">
+                    {splitYLabel[0]
+                      ? splitYLabel[0].replaceAll("_", " ")
+                      : splitYLabel[0]}
+                    :
+                    <div className="sf-text-center sf-text-[#0369a1]">
+                      {payload.y + unit}
                     </div>
-                    {nonXYLabels.map((label) => (
-                      <div
-                        key={label}
-                        className="sf-flex sf-flex-row sf-gap-x-1 sf-text-gray-500"
-                      >
-                        {capitaliseFirstLetter(
-                          label ? label.replaceAll("_", " ") : label,
-                        )}
-                        : {payload[label]}
-                      </div>
-                    ))}
                   </div>
-                );
-              }}
+                  {nonXYLabels.map((label) => (
+                    <div
+                      key={label}
+                      className="sf-flex sf-flex-row sf-gap-x-1 sf-text-gray-500"
+                    >
+                      {capitaliseFirstLetter(
+                        label ? label.replaceAll("_", " ") : label,
+                      )}
+                      : {payload[label]}
+                    </div>
+                  ))}
+                </div>
+              );
+            }}
+          />
+          <title>{props.graphTitle}</title>
+          <Bar dataKey="y" fill="#0369a1" />
+        </BarChart>
+      ) : (
+        <LineChart data={data}>
+          <XAxis
+            dataKey="x"
+            tick={{ fontSize: 12 }}
+            type={xIsNumber ? "number" : "category"}
+            angle={0}
+            domain={
+              xIsNumber
+                ? [`dataMin - ${offset}`, `dataMax + ${offset}`]
+                : undefined
+            }
+            tickFormatter={
+              props.xIsdate
+                ? (x) =>
+                    DateTime.fromSeconds(x * secondsToDay).toLocaleString(
+                      xRange < 1 / 24
+                        ? DateTime.TIME_24_WITH_SECONDS
+                        : xRange < 1
+                        ? DateTime.TIME_24_SIMPLE
+                        : DateTime.DATE_SHORT,
+                    )
+                : undefined
+            }
+          >
+            <Label
+              value={props.xLabel || ""}
+              offset={-2}
+              position="insideBottom"
             />
-            <title>{props.graphTitle}</title>
-            <Bar dataKey="y" fill="#0369a1" />
-          </BarChart>
-        ) : (
-          <LineChart data={data}>
-            <XAxis
-              dataKey="x"
-              tick={{ fontSize: 12 }}
-              type={xIsNumber ? "number" : "category"}
-              angle={0}
-              domain={
-                xIsNumber
-                  ? [`dataMin - ${offset}`, `dataMax + ${offset}`]
-                  : undefined
-              }
-              tickFormatter={
-                props.xIsdate
-                  ? (x) =>
-                      DateTime.fromSeconds(x * secondsToDay).toLocaleString(
-                        xRange < 1 / 24
-                          ? DateTime.TIME_24_WITH_SECONDS
-                          : xRange < 1
-                          ? DateTime.TIME_24_SIMPLE
-                          : DateTime.DATE_SHORT,
-                      )
-                  : undefined
-              }
-            >
-              <Label
-                value={props.xLabel || ""}
-                offset={-2}
-                position="insideBottom"
-              />
-            </XAxis>
-            <YAxis allowDecimals={false}>
-              <Label
-                value={props.yLabel || ""}
-                angle={-90}
-                style={{ textAnchor: "middle" }}
-                position="insideLeft"
-              />
-            </YAxis>
-            <title>{props.graphTitle}</title>
-            <Line dataKey="y" />
-          </LineChart>
-        )}
-      </ResponsiveContainer>
-    </>
+          </XAxis>
+          <YAxis allowDecimals={false}>
+            <Label
+              value={props.yLabel || ""}
+              angle={-90}
+              style={{ textAnchor: "middle" }}
+              position="insideLeft"
+            />
+          </YAxis>
+          <title>{props.graphTitle}</title>
+          <Line dataKey="y" />
+        </LineChart>
+      )}
+    </ResponsiveContainer>
   );
 }
 

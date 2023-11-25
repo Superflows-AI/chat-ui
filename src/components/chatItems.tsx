@@ -314,14 +314,15 @@ export function GraphVizChatItem(props: {
           )}
         </button>
         {expanded && <Graph {...props.chatItem.content} />}
-        <div className="sf-absolute sf-bottom-1 sf-right-3">
-          <div className="sf-relative">
-            <button className="sf-peer hover:sf-bg-sky-100 sf-text-gray-700 hover:sf-text-sky-700 sf-p-1 sf-rounded-full sf-border sf-border-transparent hover:sf-border-sky-200 active:sf-bg-sky-200">
-              <ShareIcon className="sf-w-5 sf-h-5" />
-            </button>
-            <div className="popup sf--right-3.5 sf--top-9 sf-w-fit">Share</div>
-          </div>
-        </div>
+        {/* TODO: Make graph sharing work */}
+        {/*<div className="sf-absolute sf-bottom-1 sf-right-3">*/}
+        {/*  <div className="sf-relative">*/}
+        {/*    <button className="sf-peer hover:sf-bg-sky-100 sf-text-gray-700 hover:sf-text-sky-700 sf-p-1 sf-rounded-full sf-border sf-border-transparent hover:sf-border-sky-200 active:sf-bg-sky-200">*/}
+        {/*      <ShareIcon className="sf-w-5 sf-h-5" />*/}
+        {/*    </button>*/}
+        {/*    <div className="popup sf--right-3.5 sf--top-9 sf-w-fit">Share</div>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
       </div>
     </div>
   );
@@ -465,7 +466,7 @@ export function AssistantChatItem(props: {
       {(!props.prevAndNextChatRoles[0] ||
         props.prevAndNextChatRoles[0] === "user") && (
         <p className=" sf-font-semibold sf-px-1.5 sf-mb-0.5">
-          {props.AIname ?? "Assistant" + " AI"}
+          {(props.AIname ?? "Assistant") + " AI"}
         </p>
       )}
       {
@@ -525,7 +526,7 @@ export function AssistantChatItem(props: {
             </div>
           )}
           {props.isLoading &&
-            // No content
+            // No content - below strings are first few strings of output
             (["", "Reason", "Reasoning", "Reasoning:", "Reasoning:\n"].includes(
               props.chatItem.content,
             ) ||
