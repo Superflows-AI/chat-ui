@@ -169,7 +169,6 @@ export default function Chat(props: ChatProps) {
                 // Includes explicit new message tag
                 data.content.includes("<<[NEW-MESSAGE]>>")
               ) {
-                console.log("data.content", data.content);
                 if (
                   data.role === "assistant" &&
                   data.content.includes("<<[NEW-MESSAGE]>>")
@@ -215,10 +214,7 @@ export default function Chat(props: ChatProps) {
             Authorization: `Bearer ${props.superflowsApiKey}`,
           },
           body: JSON.stringify({
-            // TODO: uncomment
-            // conversation_id: localConverationId,
-            conversation_id: devChatContents.filter((m) => m.role === "user")
-              .length,
+            conversation_id: localConverationId,
             user_description: props.userDescription,
           }),
         },
@@ -491,8 +487,7 @@ export default function Chat(props: ChatProps) {
           >
             Cancel
           </button>
-          {/*<div className={!feedbackButtonsVisible ? "sf-invisible" : ""}>*/}
-          <div className={"sf-invisible"}>
+          <div className={!feedbackButtonsVisible ? "sf-invisible" : ""}>
             <FeedbackButtons
               feedback={feedback}
               setFeedback={setFeedback}
