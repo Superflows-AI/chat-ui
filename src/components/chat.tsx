@@ -13,7 +13,7 @@ import {
   StreamingStepInput,
 } from "../lib/types";
 import { AutoGrowingTextArea } from "./autoGrowingTextarea";
-import { addTrailingSlash, classNames } from "../lib/utils";
+import { addTrailingSlash, classNames, scrollToBottom } from "../lib/utils";
 import { LoadingSpinner } from "./loadingspinner";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { parseOutput } from "../lib/parser";
@@ -30,8 +30,6 @@ export default function Chat(props: ChatProps) {
   const alreadyRunning = useRef(false);
 
   // TODO: Grab suggestions from DB if none are provided
-  // Get suggestions from past conversations
-  // const [suggestions, setSuggestions] = useState<string[]>(props.suggestions ?? []);
 
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [devChatContents, setDevChatContents] = useState<StreamingStepInput[]>(
@@ -58,6 +56,7 @@ export default function Chat(props: ChatProps) {
         { role: "user", content: props.initialMessage },
       ]);
     }
+    scrollToBottom(scrollRef, "instant", true);
   }, []);
 
   const callSuperflowsApi = useCallback(
@@ -170,7 +169,11 @@ export default function Chat(props: ChatProps) {
                 // Includes explicit new message tag
                 data.content.includes("<<[NEW-MESSAGE]>>")
               ) {
-                if (data.content.includes("<<[NEW-MESSAGE]>>"))
+                console.log("data.content", data.content);
+                if (
+                  data.role === "assistant" &&
+                  data.content.includes("<<[NEW-MESSAGE]>>")
+                )
                   data.content = data.content.replace("<<[NEW-MESSAGE]>>", "");
                 // Add new message
                 outputMessages.push({ ...data });
@@ -212,7 +215,10 @@ export default function Chat(props: ChatProps) {
             Authorization: `Bearer ${props.superflowsApiKey}`,
           },
           body: JSON.stringify({
-            conversation_id: localConverationId,
+            // TODO: uncomment
+            // conversation_id: localConverationId,
+            conversation_id: devChatContents.filter((m) => m.role === "user")
+              .length,
             user_description: props.userDescription,
           }),
         },
@@ -330,12 +336,14 @@ export default function Chat(props: ChatProps) {
       }, 1000);
     })();
   }, [feedback]);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="sf-flex sf-min-h-0 sf-h-full sf-w-full sf-flex-1 sf-flex-col">
       <div
+        ref={scrollRef}
         className={classNames(
-          "sf-relative sf-overflow-y-auto sf-h-full sf-flex sf-flex-col sf-flex-1 sf-pb-4",
+          "sf-relative sf-overflow-y-auto sf-overflow-x-hidden sf-h-full sf-flex sf-flex-col sf-flex-1 sf-pb-4",
           loading ? "sf-scroll-auto" : "sf-scroll-smooth",
         )}
         id={"sf-scrollable-chat-contents"}
@@ -344,7 +352,7 @@ export default function Chat(props: ChatProps) {
         {devChatContents.length > 0 && (
           <button
             className={
-              "sf-ml-auto sf-sticky sf-top-2 sf-right-2 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-px-2 sf-py-1 sf-rounded-md sf-bg-white sf-border focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500 sf-transition sf-border-gray-300 hover:sf-border-gray-400 sf-text-gray-500 hover:sf-text-gray-600"
+              "sf-z-40 sf-ml-auto sf-sticky sf-top-2 sf-right-2 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-px-2 sf-py-1 sf-rounded-md sf-bg-white sf-border focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500 sf-transition sf-border-gray-300 hover:sf-border-gray-400 sf-text-gray-500 hover:sf-text-gray-600"
             }
             onClick={() => {
               clearMessageCache();
@@ -357,7 +365,7 @@ export default function Chat(props: ChatProps) {
             <ArrowPathIcon className="sf-h-4 sf-w-4" /> Clear chat
           </button>
         )}
-        <div className="sf-mt-6 sf-flex-1 sf-px-1 sf-shrink-0 sf-flex sf-flex-col sf-justify-end sf-gap-y-2">
+        <div className="sf-mt-6 sf-flex-1 sf-px-1 sf-shrink-0 sf-flex sf-flex-col sf-justify-end">
           {devChatContents.map((chatItem: StreamingStepInput, idx: number) => {
             const chat = devChatContents.slice(0, idx);
             const lastUserIdx = chat.findLastIndex(
@@ -394,6 +402,7 @@ export default function Chat(props: ChatProps) {
                     : []
                 }
                 showThoughts={props.showThoughts}
+                scrollRef={scrollRef}
               />
             );
           })}
@@ -433,6 +442,7 @@ export default function Chat(props: ChatProps) {
                   { role: "user", content: text.trim() },
                 ]);
               }}
+              scrollRef={scrollRef}
             />
           )}
         </div>
@@ -481,14 +491,8 @@ export default function Chat(props: ChatProps) {
           >
             Cancel
           </button>
-          <div
-            className={
-              !shouldTriggerFeedback(devChatContents, loading) ||
-              !feedbackButtonsVisible
-                ? "sf-invisible"
-                : ""
-            }
-          >
+          {/*<div className={!feedbackButtonsVisible ? "sf-invisible" : ""}>*/}
+          <div className={"sf-invisible"}>
             <FeedbackButtons
               feedback={feedback}
               setFeedback={setFeedback}
@@ -549,11 +553,12 @@ function shouldTriggerFeedback(
   if (!sinceLastUserMessage.some((chat) => chat.role === "function"))
     return false;
   const lastMessage = sinceLastUserMessage[sinceLastUserMessage.length - 1];
+  if (lastMessage.role !== "assistant") return false;
   const parsed = parseOutput(lastMessage.content);
 
   const lastFunctionMessage = sinceLastUserMessage
     .filter((chat) => chat.role === "function")
-    .reverse()[0];
+    .reverse()[0] as Exclude<StreamingStepInput, { role: "graph" }>;
 
   const lastFunctionMessageIsError = lastFunctionMessage
     ? functionMessageIsError(lastFunctionMessage.content)

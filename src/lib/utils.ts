@@ -1,5 +1,6 @@
 import tablemark from "tablemark";
 import { validate } from "uuid";
+import { MutableRefObject } from "react";
 
 export function classNames(
   ...classes: (string | undefined | null | boolean)[]
@@ -255,11 +256,21 @@ export function addTrailingSlash(string: string): string {
   return string.endsWith("/") ? string : string + "/";
 }
 
-export function scrollToBottom(behavior: "smooth" | "auto" = "auto"): void {
-  if (typeof window !== "undefined") {
-    const ele = document.getElementById("sf-scrollable-chat-contents");
-    // If the element exists, and it's near the bottom, scroll to the bottom
-    if (ele && ele.scrollHeight - ele.scrollTop - ele.offsetHeight <= 100) {
+export function scrollToBottom(
+  scrollRef: MutableRefObject<HTMLDivElement>,
+  behavior: "smooth" | "instant" | "auto" = "auto",
+  force: boolean = false,
+  threshold: number = 150,
+): void {
+  if (scrollRef && scrollRef?.current) {
+    const ele = scrollRef.current;
+    // If the element exists, and it's near the bottom (or force=true), scroll to the bottom
+    if (
+      ele &&
+      (ele.scrollHeight - ele.scrollTop - ele.offsetHeight <= threshold ||
+        force)
+    ) {
+      console.log("Scroll to bottom");
       ele.scrollTo({ top: ele.scrollHeight, behavior });
     }
   }

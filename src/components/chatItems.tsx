@@ -3,20 +3,29 @@ import {
   LightBulbIcon,
   MinusIcon,
   PlusIcon,
+  ShareIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import React, { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ParsedOutput, parseOutput } from "../lib/parser";
-import { Json, StreamingStepInput } from "../lib/types";
+import {
+  AssistantMessage,
+  ChatGPTMessage,
+  GraphData,
+  GraphMessage,
+  Json,
+  StreamingStepInput,
+  UserMessage,
+} from "../lib/types";
 import {
   classNames,
   convertToMarkdownTable,
   functionNameToDisplay,
   scrollToBottom,
 } from "../lib/utils";
-import { Graph, GraphData, extractGraphData } from "./graph";
+import { Graph, extractGraphData } from "./graph";
 import { LoadingSpinner } from "./loadingspinner";
 import {
   BoltIcon,
@@ -40,7 +49,8 @@ type ChatItemRole =
   | "function"
   | "error"
   | "confirmation"
-  | "debug";
+  | "debug"
+  | "graph";
 
 export function ChatItem(props: {
   chatItem: StreamingStepInput;
@@ -51,24 +61,58 @@ export function ChatItem(props: {
   prevAndNextChatRoles?: (ChatItemRole | undefined)[];
   precedingUrls?: { name: string; url: string }[];
   showThoughts?: boolean;
+  scrollRef: React.MutableRefObject<HTMLDivElement | null>;
 }) {
-  useEffect(scrollToBottom, [props.chatItem.content]);
+  useEffect(() => {
+    setTimeout(() => {
+      scrollToBottom(
+        props.scrollRef,
+        "auto",
+        false,
+        props.chatItem.role === "graph" ? 400 : 200,
+      );
+    }, 100);
+  }, [props.chatItem, props.chatItem.content]);
 
   const chatItem = props.chatItem;
   if (chatItem.role === "confirmation") {
     return <ConfirmationChatItem {...props} />;
-  } else if (props.devMode || ["error", "user"].includes(chatItem.role)) {
-    return <PlainTextChatItem {...props} />;
+  } else if (chatItem.role === "graph") {
+    return <GraphVizChatItem {...props} chatItem={chatItem} />;
+  } else if (chatItem.role === "user") {
+    return <UserChatItem {...props} chatItem={chatItem} />;
+  } else if (props.devMode || chatItem.role === "error") {
+    return <PlainTextChatItem {...props} chatItem={chatItem} />;
+  } else if (chatItem.role === "assistant") {
+    return <AssistantChatItem {...props} chatItem={chatItem} />;
   } else if (chatItem.role === "debug") {
     return <></>;
   } else if (chatItem.role === "function") {
     return <FunctionVizChatItem {...props} chatItem={chatItem} />;
   }
-  return <AssistantChatItem {...props} />;
+  return <></>;
+}
+
+export function UserChatItem(props: {
+  chatItem: UserMessage;
+  prevAndNextChatRoles?: ChatItemRole[];
+}) {
+  return (
+    <div
+      className={classNames(
+        "sf-my-2 sf-py-3 sf-mx-1.5 sf-flex sf-flex-col sf-w-full sf-border-y sf-border-gray-200 first:sf-border-t-0",
+      )}
+    >
+      <p className="sf-font-semibold sf-mb-1 sf-px-1.5">You</p>
+      <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap">
+        {props.chatItem.content}
+      </div>
+    </div>
+  );
 }
 
 export function PlainTextChatItem(props: {
-  chatItem: StreamingStepInput;
+  chatItem: Exclude<StreamingStepInput, { role: "graph" }>;
   AIname?: string;
   onConfirm?: (confirm: boolean) => Promise<void>;
 }) {
@@ -90,16 +134,15 @@ export function PlainTextChatItem(props: {
   return (
     <div
       className={classNames(
-        "sf-py-4 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full",
-        props.chatItem.role === "user"
-          ? "sf-bg-white sf-text-right sf-place-items-end sf-border "
-          : "sf-bg-gray-200 sf-text-left sf-place-items-baseline",
-        props.chatItem.role === "error"
+        "sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-mt-2 sf-border sf-border-gray-400",
+        props.chatItem.role === "assistant"
+          ? "sf-bg-gray-200"
+          : props.chatItem.role === "error"
           ? "sf-bg-red-200"
           : props.chatItem.role === "debug"
-          ? "sf-bg-green-100"
+          ? "sf-bg-blue-100"
           : props.chatItem.role === "function"
-          ? "sf-bg-green-200"
+          ? "sf-bg-green-100"
           : "",
       )}
     >
@@ -144,16 +187,11 @@ export function FunctionVizChatItem(props: {
     try {
       const functionJsonResponse = JSON.parse(props.chatItem.content) as Json;
       setIsJson(true);
-      setGraphedData(extractGraphData(functionJsonResponse));
+      setGraphedData(extractGraphData(functionJsonResponse, "line"));
 
       // First check is for null
       if (functionJsonResponse && typeof functionJsonResponse === "object") {
-        setContent(
-          convertToMarkdownTable(
-            functionJsonResponse,
-            `${functionNameToDisplay(props.chatItem?.name ?? "")} result`,
-          ),
-        );
+        setContent(convertToMarkdownTable(functionJsonResponse));
       }
     } catch {
       let dataToShow = props.chatItem.content.slice(0, 100);
@@ -175,71 +213,116 @@ export function FunctionVizChatItem(props: {
   }
 
   return (
-    <div
-      className={classNames(
-        "sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-100 sf-border sf-border-gray-300",
-        !expanded && "hover:sf-bg-gray-200 sf-cursor-pointer",
-      )}
-    >
-      <button
-        className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between sf-py-2 sf-px-1.5"
-        onClick={() => setExpanded((prev) => !prev)}
-      >
-        <p className="sf-text-xs sf-text-gray-600 sf-mb-1">Data received</p>
-        <div className="sf-text-sm sf-text-black">
-          Data received from{" "}
-          <b className="font-medium">
-            {functionNameToDisplay(props.chatItem?.name ?? "")}
-          </b>
-        </div>
-        {expanded ? (
-          <MinusIcon className={"sf-w-5 sf-h-5 sf-mr-6"} />
-        ) : (
-          <PlusIcon className={"sf-w-5 sf-h-5 sf-mr-6"} />
+    <div className="sf-w-full sf-flex sf-flex-row sf-justify-center sf-my-1">
+      <div
+        className={classNames(
+          "sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-50 sf-border sf-border-gray-200",
+          expanded
+            ? "sf-mx-8 md:sf-mx-12 lg:sf-mx-16 xl:sf-mx-20"
+            : "hover:sf-bg-gray-100 sf-cursor-pointer sf-mx-8 md:sf-mx-20 lg:sf-mx-28 xl:sf-mx-40",
         )}
-      </button>
-      {expanded && (
-        <>
-          {graphedData && (
-            <div className="-sf-py-4">
-              <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />{" "}
-            </div>
+      >
+        <button
+          className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between sf-py-1 sf-px-1.5"
+          onClick={() => setExpanded((prev) => !prev)}
+        >
+          <p className="sf-text-xs sf-text-gray-600 sf-mb-1">Data received</p>
+          <div className="sf-text-sm sf-text-gray-800">
+            <b className="font-medium">
+              {functionNameToDisplay(props.chatItem?.name ?? "")}
+            </b>
+          </div>
+          {expanded ? (
+            <MinusIcon className={"sf-w-5 sf-h-5 sf-mr-6"} />
+          ) : (
+            <PlusIcon className={"sf-w-5 sf-h-5 sf-mr-6"} />
           )}
+        </button>
+        {expanded && (
+          <>
+            {graphedData && (
+              <div className="-sf-py-4">
+                <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />{" "}
+              </div>
+            )}
 
-          {content &&
-            (tabOpen === "graph" ? (
-              <Graph {...graphedData} />
-            ) : isJson ? (
-              <StyledMarkdown>{content}</StyledMarkdown>
-            ) : (
-              <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-break-words">
-                {content}
+            {content &&
+              (tabOpen === "graph" ? (
+                <Graph {...graphedData} />
+              ) : isJson ? (
+                <StyledMarkdown>{content}</StyledMarkdown>
+              ) : (
+                <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-break-words">
+                  {content}
+                </div>
+              ))}
+            {props.chatItem.urls && props.chatItem.urls.length > 0 && (
+              <div className="sf-w-full sf-border-t sf-mt-2 sf-mb-1">
+                <div className="sf-mt-1 sf-flex sf-flex-row sf-gap-x-1 sf-flex-wrap sf-justify-end sf-text-gray-700 sf-px-3 sf-text-xs">
+                  More info:
+                  {props.chatItem.urls.map((url, idx) => (
+                    <div key={idx} className="sf-flex sf-flex-row">
+                      <a
+                        href={url.url}
+                        className="sf-text-blue-500 hover:sf-underline visited:sf-text-purple-500"
+                        target={"_blank"}
+                        rel={"noreferrer noopener"}
+                      >
+                        {props.chatItem.urls.length > 1 && `${idx + 1}.`}{" "}
+                        {url.name || url.url}
+                      </a>
+                      {idx + 1 < props.chatItem.urls.length && ","}
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          {props.chatItem.urls && props.chatItem.urls.length > 0 && (
-            <div className="sf-w-full">
-              <div className="sf-h-px sf-bg-gray-300 sf-w-full sf-my-1" />
-              <div className="sf-flex sf-flex-row sf-gap-x-1 sf-flex-wrap sf-justify-end sf-text-gray-700 sf-px-3 sf-mb-0.5 sf-text-xs">
-                More info:
-                {props.chatItem.urls.map((url, idx) => (
-                  <div key={idx} className="sf-flex sf-flex-row">
-                    <a
-                      href={url.url}
-                      className="sf-text-blue-500 hover:sf-underline visited:sf-text-purple-500"
-                      target={"_blank"}
-                      rel={"noreferrer noopener"}
-                    >
-                      {props.chatItem.urls.length > 1 && `${idx + 1}.`}{" "}
-                      {url.name || url.url}
-                    </a>
-                    {idx + 1 < props.chatItem.urls.length && ","}
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function GraphVizChatItem(props: {
+  chatItem: GraphMessage;
+  prevAndNextChatRoles?: ChatItemRole[];
+}) {
+  const [expanded, setExpanded] = useState<boolean>(true);
+
+  return (
+    <div className="sf-w-full sf-flex sf-flex-row sf-justify-center sf-my-1">
+      <div
+        className={classNames(
+          "sf-relative sf-rounded sf-flex sf-flex-col sf-mx-8 md:sf-mx-20 lg:sf-mx-28 xl:sf-mx-40 sf-w-full sf-text-left sf-place-items-baseline sf-bg-sky-50 sf-border sf-border-gray-200",
+          !expanded && "hover:sf-bg-sky-100 sf-cursor-pointer",
+        )}
+      >
+        <button
+          className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between sf-py-2 sf-px-1.5"
+          onClick={() => setExpanded((prev) => !prev)}
+        >
+          <p className="sf-text-xs sf-text-sky-600 sf-mb-1">Plot</p>
+          <div className="sf-text-sm sf-text-black">
+            Graph of{" "}
+            <b className="font-medium">{props.chatItem.content.graphTitle}</b>
+          </div>
+          {expanded ? (
+            <MinusIcon className={"sf-w-5 sf-h-5 sf-mr-6"} />
+          ) : (
+            <PlusIcon className={"sf-w-5 sf-h-5 sf-mr-6"} />
           )}
-        </>
-      )}
+        </button>
+        {expanded && <Graph {...props.chatItem.content} />}
+        <div className="sf-absolute sf-bottom-1 sf-right-3">
+          <div className="sf-relative">
+            <button className="sf-peer hover:sf-bg-sky-100 sf-text-gray-700 hover:sf-text-sky-700 sf-p-1 sf-rounded-full sf-border sf-border-transparent hover:sf-border-sky-200 active:sf-bg-sky-200">
+              <ShareIcon className="sf-w-5 sf-h-5" />
+            </button>
+            <div className="popup sf--right-3.5 sf--top-9 sf-w-fit">Share</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -355,7 +438,7 @@ export function ConfirmationChatItem(props: {
 }
 
 export function AssistantChatItem(props: {
-  chatItem: StreamingStepInput;
+  chatItem: AssistantMessage;
   AIname?: string;
   isLoading?: boolean;
   prevAndNextChatRoles?: ChatItemRole[];
@@ -372,20 +455,19 @@ export function AssistantChatItem(props: {
     setAssistantChatObj(parseOutput(props.chatItem.content));
   }, [props.chatItem.content]);
 
-  // If there's a message that follows this one and there's no content shown
-  if (
-    props.prevAndNextChatRoles[1] &&
-    !assistantChatObj.tellUser &&
-    (!assistantChatObj.reasoning || !props.showThoughts)
-  ) {
-    return <></>;
-  }
-
   return (
-    <div className="sf-py-2 sf-px-1.5 sf-rounded sf-flex sf-flex-col sf-w-full sf-shadow-sm sf-bg-gray-200 sf-text-left sf-place-items-baseline">
-      <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
-        {props.AIname ?? "Assistant" + " AI"}
-      </p>
+    <div
+      className={classNames(
+        "sf-px-1.5 sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline",
+        assistantChatObj.tellUser && "sf-py-1.5",
+      )}
+    >
+      {(!props.prevAndNextChatRoles[0] ||
+        props.prevAndNextChatRoles[0] === "user") && (
+        <p className=" sf-font-semibold sf-px-1.5 sf-mb-0.5">
+          {props.AIname ?? "Assistant" + " AI"}
+        </p>
+      )}
       {
         <div className="sf-w-full">
           {assistantChatObj.reasoning && props.showThoughts && (
@@ -423,13 +505,30 @@ export function AssistantChatItem(props: {
             </div>
           )}
           {assistantChatObj.tellUser && (
-            <div className="sf-px-2 sf-mt-2.5 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-words sf-w-full">
-              {assistantChatObj.tellUser}
+            <div className="sf-px-2 sf-mt-1.5 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-break-words sf-w-full">
+              {assistantChatObj.tellUser
+                .match(/(\[[^\]]+]\([^)]+\)|[^[]+|\[)/g)
+                .map((text) => (
+                  <>
+                    {text.match(/^(\[[^\]]+]\([^)]+\))$/g) ? (
+                      <a
+                        className="sf-inline sf-text-sky-500 visited:sf-text-purple-500 hover:sf-underline sf-cursor-pointer"
+                        href={/\(([^)]+)\)$/g.exec(text)[1]}
+                      >
+                        {/^\[([^\]]+)]/g.exec(text)[1]}
+                      </a>
+                    ) : (
+                      text
+                    )}
+                  </>
+                ))}
             </div>
           )}
           {props.isLoading &&
             // No content
-            (!props.chatItem.content ||
+            (["", "Reason", "Reasoning", "Reasoning:", "Reasoning:\n"].includes(
+              props.chatItem.content,
+            ) ||
               // Not showing thoughts & thinking
               (!props.showThoughts &&
                 assistantChatObj.reasoning &&
@@ -490,9 +589,8 @@ export function AssistantChatItem(props: {
               </div>
             )}
           {!props.isLoading && props.precedingUrls.length > 0 && (
-            <>
-              <div className="sf-h-px sf-bg-gray-300 sf-w-full sf-my-1" />
-              <div className="sf-flex sf-flex-row sf-gap-x-1 sf-flex-wrap sf-justify-end sf-text-gray-700 sf-px-3 sf--mb-1 sf-text-xs">
+            <div className="sf-flex sf-justify-end sf-text-gray-800 sf-px-3 sf-mt-2.5 sf-text-xs">
+              <div className="sf-border sf-border-gray-300 sf-bg-gray-100 sf-rounded-md sf-px-1.5 sf-flex sf-flex-row sf-gap-x-1 sf-flex-wrap">
                 More info:
                 {props.precedingUrls.map((url, idx) => (
                   <div key={idx} className="sf-flex sf-flex-row">
@@ -510,7 +608,7 @@ export function AssistantChatItem(props: {
                   </div>
                 ))}
               </div>
-            </>
+            </div>
           )}
         </div>
       }

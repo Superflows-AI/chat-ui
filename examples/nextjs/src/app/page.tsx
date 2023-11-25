@@ -51,6 +51,7 @@ export default function Home() {
         >
           <SuperflowsButton
             superflowsApiKey={process.env.NEXT_PUBLIC_SUPERFLOWS_API_KEY ?? ""}
+            superflowsUrl={process.env.NEXT_PUBLIC_SUPERFLOWS_URL ?? ""}
             userDescription={process.env.NEXT_PUBLIC_USER_DESCRIPTION}
             userApiKey={process.env.NEXT_PUBLIC_USER_API_KEY}
             AIname={"Superflows Assistant"}

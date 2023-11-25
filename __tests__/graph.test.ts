@@ -1,11 +1,11 @@
 import { describe, expect, it } from "@jest/globals";
 import {
-  GraphData,
   checkStringMatch,
   extractGraphData,
   findFirstArray,
   possibleYlabels,
 } from "../src/components/graph";
+import { GraphData } from "../src/lib/types";
 
 describe("checkStringMatch", () => {
   it("basic match", () => {
@@ -103,6 +103,7 @@ describe("extractGraphData", () => {
   it("basic match", () => {
     const data = { numberOfCustomers: [1, 2, 3] };
     const expected: GraphData = {
+      type: "line",
       data: [
         { x: 0, y: 1 },
         { x: 1, y: 2 },
@@ -110,7 +111,7 @@ describe("extractGraphData", () => {
       ],
       graphTitle: "numberOfCustomers",
     };
-    expect(extractGraphData(data)).toEqual(expected);
+    expect(extractGraphData(data, "line")).toEqual(expected);
   });
   it("match array of objects", () => {
     const data = {
@@ -120,6 +121,7 @@ describe("extractGraphData", () => {
       ],
     };
     const expected: GraphData = {
+      type: "line",
       data: [
         { x: 1, y: 2 },
         { x: 2, y: 3 },
@@ -129,7 +131,7 @@ describe("extractGraphData", () => {
       graphTitle: "numberOfCustomers",
       xIsdate: false,
     };
-    expect(extractGraphData(data)).toEqual(expected);
+    expect(extractGraphData(data, "line")).toEqual(expected);
   });
   it("match array of objects date", () => {
     const data = {
@@ -138,19 +140,21 @@ describe("extractGraphData", () => {
         { date: "2023-08-23", value: 3 },
       ],
     };
-    expect(extractGraphData(data)?.xIsdate).toEqual(true);
-    expect(extractGraphData(data)?.data[0].y).toEqual(2);
-    expect(extractGraphData(data)?.data[1].y).toEqual(3);
+    expect(extractGraphData(data, "line")?.xIsdate).toEqual(true);
+    expect(extractGraphData(data, "line")?.data[0].y).toEqual(2);
+    expect(extractGraphData(data, "line")?.data[1].y).toEqual(3);
 
-    expect(extractGraphData(data)?.data[0].x).toBeGreaterThan(19590);
-    expect(extractGraphData(data)?.data[0].x).toBeLessThan(19590 + 365 * 100); // test will fail in 100 years time
-    expect(extractGraphData(data)?.data[1].x).toBeGreaterThan(
-      extractGraphData(data)?.data[0].x as number,
+    expect(extractGraphData(data, "line")?.data[0].x).toBeGreaterThan(19590);
+    expect(extractGraphData(data, "line")?.data[0].x).toBeLessThan(
+      19590 + 365 * 100,
+    ); // test will fail in 100 years time
+    expect(extractGraphData(data, "line")?.data[1].x).toBeGreaterThan(
+      extractGraphData(data, "line")?.data[0].x as number,
     );
   });
   it("no arrays", () => {
     const data = { numberOfCustomers: 100 };
-    expect(extractGraphData(data)).toEqual(null);
+    expect(extractGraphData(data, "line")).toEqual(null);
   });
   it("Only y axis match", () => {
     const data = {
@@ -160,6 +164,7 @@ describe("extractGraphData", () => {
       ],
     };
     const expected: GraphData = {
+      type: "line",
       data: [
         { x: 0, y: 2 },
         { x: 1, y: 3 },
@@ -167,7 +172,7 @@ describe("extractGraphData", () => {
       yLabel: "score",
       graphTitle: "numberOfCustomers",
     };
-    const res = extractGraphData(data);
+    const res = extractGraphData(data, "line");
     expect(res).toEqual(expected);
   });
 
@@ -178,7 +183,7 @@ describe("extractGraphData", () => {
         { date: 2, year: 3 },
       ],
     };
-    expect(extractGraphData(data)).toEqual(null);
+    expect(extractGraphData(data, "line")).toEqual(null);
   });
   it("multiple y axis match and x axis match", () => {
     const data = {
@@ -189,6 +194,7 @@ describe("extractGraphData", () => {
     };
     // This might be a bad test because the order of keys in a json is not guaranteed
     const expected: GraphData = {
+      type: "line",
       data: [
         { x: 1, y: 100 },
         { x: 2, y: 105 },
@@ -199,6 +205,6 @@ describe("extractGraphData", () => {
       xIsdate: false,
     };
 
-    expect(extractGraphData(data)).toEqual(expected);
+    expect(extractGraphData(data, "line")).toEqual(expected);
   });
 });

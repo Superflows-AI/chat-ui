@@ -48,6 +48,16 @@ const sections = [
 ];
 
 export function parseOutput(gptString: string): ParsedOutput {
+  // The output usually starts with "Reasoning", compose of 2 tokens
+  if (["Reason", "Reasoning"].includes(gptString)) {
+    return {
+      reasoning: "",
+      plan: "",
+      tellUser: "",
+      commands: [],
+      completed: true,
+    };
+  }
   const sectionInfo = sections
     .map((section) => ({
       ...section,

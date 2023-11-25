@@ -42,11 +42,14 @@ interface HeaderStyle {
   headerTextColor?: string;
 }
 
+export type AssistantMessage = { role: "assistant"; content: string };
+export type UserMessage = { role: "user"; content: string };
+type SystemMessage = { role: "system"; content: string };
+
 export type ChatGPTMessage =
-  | {
-      role: "system" | "user" | "assistant";
-      content: string;
-    }
+  | SystemMessage
+  | AssistantMessage
+  | UserMessage
   | {
       role: "function";
       content: string;
@@ -57,13 +60,29 @@ export type ChatGPTMessage =
 
 type NonSystemGPTMessage = Exclude<ChatGPTMessage, { role: "system" }>;
 
+export type GraphMessage = {
+  role: "graph";
+  content: GraphData;
+};
 export type StreamingStepInput =
   | NonSystemGPTMessage
   | {
       role: "error" | "debug" | "confirmation";
       content: string;
-    };
+    }
+  | GraphMessage;
 export type StreamingStep = StreamingStepInput & { id: number };
+
+export type SupportedGraphTypes = "line" | "bar";
+
+export interface GraphData {
+  type: SupportedGraphTypes;
+  data: { x: number | string; y: number }[];
+  xLabel?: string;
+  yLabel?: string;
+  graphTitle?: string | number;
+  xIsdate?: boolean;
+}
 
 export type SuperflowsModalProps = PrebuiltComponentProps & {
   styling?: ModalStyle;
