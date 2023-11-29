@@ -98,12 +98,12 @@ type PrebuiltComponentProps = ButtonProps & {
 };
 
 export interface ButtonProps extends Omit<ChatProps, "initialFocus"> {
-  AIname?: string;
   styling?: SuperflowsStyle;
   buttonStyling?: string; // TODO: weird mismatch in type between this and styling
 }
 
 export interface ChatProps {
+  AIname?: string;
   superflowsApiKey: string;
   superflowsUrl?: string;
   userApiKey?: string;
