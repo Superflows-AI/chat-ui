@@ -381,6 +381,7 @@ export default function Chat(props: ChatProps) {
               <ChatItem
                 key={idx.toString()}
                 chatItem={chatItem}
+                AIname={props.AIname}
                 // Below ensures that loading spinner is only shown on the message currently streaming in
                 isLoading={loading && idx === devChatContents.length - 1}
                 onConfirm={onConfirm}
