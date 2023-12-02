@@ -115,32 +115,80 @@ export function Graph(props: GraphData) {
       nonXYLabels.push(key);
     }
   }
+  const yLabel = props.yLabel || "";
+  const yUnitReg = /\((.*)\)$/.exec(yLabel);
+  const yUnit = yUnitReg ? yUnitReg[1] : undefined;
+
+  if (props.type === "value") {
+    return (
+      <div
+        className={
+          "sf-w-full sf-flex sf-flex-col sf-place-items-center sf-justify-center"
+        }
+      >
+        <div
+          className={
+            "sf-px-2 sf-py-7 sf-my-2 sf-rounded-lg sf-border-2 sf-border-gray-500 sf-bg-white"
+          }
+        >
+          <div className="sf-flex sf-flex-row">
+            {yUnit && (
+              <div className="sf-text-center sf-font-medium sf-text-transparent sf-text-2xl sf-mb">
+                {yUnit}
+              </div>
+            )}
+            <div className="sf-text-center sf-text-gray-950 sf-font-medium sf-text-5xl sf-mb">
+              {Math.round(props.data[0].y * 100) / 100}
+            </div>
+            {yUnit && (
+              <div className="sf-text-center sf-text-gray-800 sf-font-medium sf-text-2xl sf-mb">
+                {yUnit}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <ResponsiveContainer width="80%" aspect={2} className="sf-mx-auto sf-mt-2">
       {props.type === "bar" ? (
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="x" tick={{ fontSize: 12 }} />
+          <XAxis
+            dataKey="x"
+            tick={{ fontSize: 12 }}
+            label={
+              props.xLabel
+                ? {
+                    value: props.xLabel,
+                    fontSize: 15,
+                    dy: 10,
+                  }
+                : {}
+            }
+          />
           <YAxis
             dataKey="y"
             label={{
-              value: props.yLabel || "",
-              angle: props.yLabel.length > 5 ? -90 : 0,
+              value: yLabel,
+              angle: yLabel.length > 5 ? -90 : 0,
               position: "insideLeft",
-              dy: (props.yLabel || "").length * 3,
+              dy: yLabel.length * 3,
+              dx: -4,
             }}
+            tick={{ fontSize: 12 }}
           />
           <Tooltip
             formatter={(value, name, vals) => [
-              value + props.yLabel.split(" ")[1],
-              props.yLabel.split(" ")[0],
+              value + yLabel.split(" ")[1],
+              yLabel.split(" ")[0],
             ]}
             content={(vals) => {
               const payload =
                 vals.payload.length > 0 ? vals.payload[0].payload : {};
-              const splitYLabel = props.yLabel.split(" ");
-              const unit = splitYLabel.length > 1 ? splitYLabel[1] : "";
+              const splitYLabel = yLabel.split(" ");
               return (
                 <div className="sf-bg-white sf-p-3 sf-border sf-flex sf-flex-col">
                   <h3 className="sf-font-medium">{payload.x}</h3>
@@ -150,7 +198,7 @@ export function Graph(props: GraphData) {
                       : splitYLabel[0]}
                     :
                     <div className="sf-text-center sf-text-[#0369a1]">
-                      {payload.y + unit}
+                      {yUnit ? payload.y + yUnit : payload.y}
                     </div>
                   </div>
                   {nonXYLabels.map((label) => (
@@ -204,7 +252,7 @@ export function Graph(props: GraphData) {
           </XAxis>
           <YAxis allowDecimals={false}>
             <Label
-              value={props.yLabel || ""}
+              value={yLabel}
               angle={-90}
               style={{ textAnchor: "middle" }}
               position="insideLeft"
