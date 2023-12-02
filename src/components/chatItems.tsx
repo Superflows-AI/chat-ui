@@ -3,7 +3,6 @@ import {
   LightBulbIcon,
   MinusIcon,
   PlusIcon,
-  ShareIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import React, { useEffect, useState } from "react";
@@ -12,7 +11,6 @@ import remarkGfm from "remark-gfm";
 import { ParsedOutput, parseOutput } from "../lib/parser";
 import {
   AssistantMessage,
-  ChatGPTMessage,
   GraphData,
   GraphMessage,
   Json,
@@ -77,12 +75,12 @@ export function ChatItem(props: {
   const chatItem = props.chatItem;
   if (chatItem.role === "confirmation") {
     return <ConfirmationChatItem {...props} />;
-  } else if (chatItem.role === "graph") {
-    return <GraphVizChatItem {...props} chatItem={chatItem} />;
   } else if (chatItem.role === "user") {
     return <UserChatItem {...props} chatItem={chatItem} />;
   } else if (props.devMode || chatItem.role === "error") {
     return <PlainTextChatItem {...props} chatItem={chatItem} />;
+  } else if (chatItem.role === "graph") {
+    return <GraphVizChatItem {...props} chatItem={chatItem} />;
   } else if (chatItem.role === "assistant") {
     return <AssistantChatItem {...props} chatItem={chatItem} />;
   } else if (chatItem.role === "debug") {
@@ -112,11 +110,11 @@ export function UserChatItem(props: {
 }
 
 export function PlainTextChatItem(props: {
-  chatItem: Exclude<StreamingStepInput, { role: "graph" }>;
+  chatItem: StreamingStepInput;
   AIname?: string;
   onConfirm?: (confirm: boolean) => Promise<void>;
 }) {
-  const [content, setContent] = useState(props.chatItem.content);
+  const [content, setContent] = useState("");
 
   useEffect(() => {
     if (props.chatItem.role === "function") {
@@ -125,6 +123,8 @@ export function PlainTextChatItem(props: {
       } catch {
         setContent(props.chatItem.content);
       }
+    } else if (props.chatItem.role === "graph") {
+      setContent(JSON.stringify(props.chatItem.content, null, 2));
     } else {
       setContent(props.chatItem.content);
     }
@@ -143,6 +143,8 @@ export function PlainTextChatItem(props: {
           ? "sf-bg-blue-100"
           : props.chatItem.role === "function"
           ? "sf-bg-green-100"
+          : props.chatItem.role === "graph"
+          ? "sf-bg-blue-100"
           : "",
       )}
     >
@@ -294,7 +296,7 @@ export function GraphVizChatItem(props: {
     <div className="sf-w-full sf-flex sf-flex-row sf-justify-center sf-my-1">
       <div
         className={classNames(
-          "sf-relative sf-rounded sf-flex sf-flex-col sf-mx-8 md:sf-mx-20 lg:sf-mx-28 xl:sf-mx-40 sf-w-full sf-text-left sf-place-items-baseline sf-bg-sky-50 sf-border sf-border-gray-200",
+          "sf-relative sf-rounded sf-flex sf-flex-col sf-mx-8 md:sf-max-w-2xl lg:sf-max-w-3xl xl:sf-max-w-3xl sf-w-full sf-text-left sf-place-items-baseline sf-bg-sky-50 sf-border sf-border-gray-200",
           !expanded && "hover:sf-bg-sky-100 sf-cursor-pointer",
         )}
       >
@@ -304,7 +306,7 @@ export function GraphVizChatItem(props: {
         >
           <p className="sf-text-xs sf-text-sky-600 sf-mb-1">Plot</p>
           <div className="sf-text-sm sf-text-black">
-            Graph of{" "}
+            {props.chatItem.content.type !== "value" && "Graph of"}{" "}
             <b className="font-medium">{props.chatItem.content.graphTitle}</b>
           </div>
           {expanded ? (
@@ -323,6 +325,11 @@ export function GraphVizChatItem(props: {
         {/*    <div className="popup sf--right-3.5 sf--top-9 sf-w-fit">Share</div>*/}
         {/*  </div>*/}
         {/*</div>*/}
+        {/*{expanded && (*/}
+        {/*  <div className="sf-w-full sf-text-center sf-text-xs sf-text-gray-400 sf-my-1">*/}
+        {/*    Feature is in beta - no guarantee that graphs are correct*/}
+        {/*  </div>*/}
+        {/*)}*/}
       </div>
     </div>
   );
