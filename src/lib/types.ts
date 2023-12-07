@@ -67,7 +67,7 @@ export type GraphMessage = {
 export type StreamingStepInput =
   | NonSystemGPTMessage
   | {
-      role: "error" | "debug" | "confirmation";
+      role: "error" | "debug" | "confirmation" | "loading";
       content: string;
     }
   | GraphMessage;

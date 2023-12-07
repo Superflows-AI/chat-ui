@@ -120,6 +120,8 @@ export function Graph(props: GraphData) {
   const yUnit = yUnitReg ? yUnitReg[1] : undefined;
 
   if (props.type === "value") {
+    const value = formatValue(props.data[0].y);
+    const valueWithUnits = includeUnits(value, yUnit);
     return (
       <div
         className={
@@ -132,19 +134,9 @@ export function Graph(props: GraphData) {
           }
         >
           <div className="sf-flex sf-flex-row">
-            {yUnit && (
-              <div className="sf-text-center sf-font-medium sf-text-transparent sf-text-2xl sf-mb">
-                {yUnit}
-              </div>
-            )}
-            <div className="sf-text-center sf-text-gray-950 sf-font-medium sf-text-5xl sf-mb">
-              {Math.round(props.data[0].y * 100) / 100}
+            <div className="sf-text-center sf-text-gray-950 sf-font-medium sf-text-4xl sf-mb">
+              {valueWithUnits}
             </div>
-            {yUnit && (
-              <div className="sf-text-center sf-text-gray-800 sf-font-medium sf-text-2xl sf-mb">
-                {yUnit}
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -181,24 +173,22 @@ export function Graph(props: GraphData) {
             tick={{ fontSize: 12 }}
           />
           <Tooltip
-            formatter={(value, name, vals) => [
-              value + yLabel.split(" ")[1],
-              yLabel.split(" ")[0],
-            ]}
             content={(vals) => {
               const payload =
                 vals.payload.length > 0 ? vals.payload[0].payload : {};
-              const splitYLabel = yLabel.split(" ");
+              const value = formatValue(payload.y);
+              const valueWithUnits = includeUnits(value, yUnit);
+              const splitYLabel = yLabel.split("(");
               return (
                 <div className="sf-bg-white sf-p-3 sf-border sf-flex sf-flex-col">
                   <h3 className="sf-font-medium">{payload.x}</h3>
                   <div className="sf-flex sf-flex-row sf-gap-x-1">
                     {splitYLabel[0]
-                      ? splitYLabel[0].replaceAll("_", " ")
-                      : splitYLabel[0]}
+                      ? splitYLabel[0].replaceAll("_", " ").trim()
+                      : splitYLabel[0].trim()}
                     :
                     <div className="sf-text-center sf-text-[#0369a1]">
-                      {yUnit ? payload.y + yUnit : payload.y}
+                      {valueWithUnits}
                     </div>
                   </div>
                   {nonXYLabels.map((label) => (
@@ -250,6 +240,40 @@ export function Graph(props: GraphData) {
               position="insideBottom"
             />
           </XAxis>
+          <Tooltip
+            content={(vals) => {
+              const payload =
+                vals.payload.length > 0 ? vals.payload[0].payload : {};
+              const value = formatValue(payload.y);
+              const valueWithUnits = includeUnits(value, yUnit);
+              const splitYLabel = yLabel.split("(");
+              return (
+                <div className="sf-bg-white sf-p-3 sf-border sf-flex sf-flex-col">
+                  <h3 className="sf-font-medium">{payload.x}</h3>
+                  <div className="sf-flex sf-flex-row sf-gap-x-1">
+                    {splitYLabel[0]
+                      ? splitYLabel[0].replaceAll("_", " ").trim()
+                      : splitYLabel[0].trim()}
+                    :
+                    <div className="sf-text-center sf-text-[#0369a1]">
+                      {valueWithUnits}
+                    </div>
+                  </div>
+                  {nonXYLabels.map((label) => (
+                    <div
+                      key={label}
+                      className="sf-flex sf-flex-row sf-gap-x-1 sf-text-gray-500"
+                    >
+                      {capitaliseFirstLetter(
+                        label ? label.replaceAll("_", " ") : label,
+                      )}
+                      : {payload[label]}
+                    </div>
+                  ))}
+                </div>
+              );
+            }}
+          />
           <YAxis allowDecimals={false}>
             <Label
               value={yLabel}
@@ -453,3 +477,47 @@ export function checkStringMatch(
 
   return possibleLabels.some((y) => processStr(fieldName) === processStr(y));
 }
+
+function formatValue(value: number | string): string {
+  if (typeof value === "number") {
+    if (Math.abs(value) >= 1000) {
+      return numberWithCommas(Math.round(value));
+    } else if (Math.abs(value) > 0.1) {
+      return (Math.round(value * 100) / 100).toString();
+    } else if (Math.abs(value) > 0) {
+      return value.toExponential(2);
+    } else {
+      return "0";
+    }
+  }
+  return value;
+}
+
+function numberWithCommas(x: number): string {
+  /** Converts a number to a string containing commas */
+  const parts = x.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+}
+
+function includeUnits(value: string, unit: string | undefined): string {
+  if (!unit || value === undefined || value == null) return value;
+  if (unit in mapCurrencyNameToSymbol) {
+    unit = mapCurrencyNameToSymbol[unit];
+  }
+  value = value.toString();
+  if (["£", "$", "€"].includes(unit)) {
+    const isNeg = value.startsWith("-");
+    if (isNeg) {
+      return `-${unit}${value.slice(1)}`;
+    }
+    return `${unit}${value}`;
+  }
+  return `${value}${unit}`;
+}
+
+const mapCurrencyNameToSymbol: Record<string, string> = {
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+};
