@@ -222,7 +222,9 @@ export default function Chat(props: ChatProps) {
       const followUpJson = (await followUpResponse.json()) as {
         suggestions: string[];
       };
-      setFollowUpSuggestions(followUpJson.suggestions);
+      if (!alreadyRunning.current) {
+        setFollowUpSuggestions(followUpJson.suggestions);
+      }
     },
     [
       props.userApiKey,
@@ -345,7 +347,7 @@ export default function Chat(props: ChatProps) {
         id={"sf-scrollable-chat-contents"}
       >
         {/* Show clear chat button only when there is chat to clear */}
-        {devChatContents.length > 0 && (
+        {devChatContents.length > 0 && !loading && (
           <button
             className={
               "sf-z-40 sf-ml-auto sf-sticky sf-top-2 sf-right-2 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-px-2 sf-py-1 sf-rounded-md sf-bg-white sf-border focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500 sf-transition sf-border-gray-300 hover:sf-border-gray-400 sf-text-gray-500 hover:sf-text-gray-600"
@@ -654,18 +656,18 @@ function FeedbackButtons(props: {
       </div>
       <div
         className={classNames(
-          "sf-flex sf-flex-col sf-place-items-center sf-gap-y-1 sm:sf-text-sm sf-text-md",
+          "sf-flex sf-flex-col sf-place-items-center sf-gap-y-1 sf-text-xs sm:sf-text-sm",
           (props.showNegativeTextbox || showThankYouMessage) && "sf-hidden",
         )}
       >
-        <div className="sf-flex sf-flex-row sf-gap-x-4 sf-px-2 sf-whitespace-nowrap">
+        <div className="sf-flex sf-flex-row sf-gap-x-4 sf-px-2 sf-text-gray-900 sf-whitespace-nowrap">
           Was this response helpful?
         </div>
         <div className="sf-flex sf-flex-row sf-gap-x-2">
           <button
             onClick={() => props.setShowNegativeTextbox(true)}
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-text-xs sf-transition sf-bg-red-500 sf-ring-red-500",
+              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-1.5 sf-text-xs sf-transition sf-bg-red-500 sf-ring-red-500",
             )}
           >
             <HandThumbDownIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
@@ -678,7 +680,7 @@ function FeedbackButtons(props: {
               setTimeout(() => setShowThankYouMessage(false), 5000);
             }}
             className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-2 sf-text-xs  sf-bg-green-500 sf-ring-green-500 ",
+              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-1.5 sf-text-xs  sf-bg-green-500 sf-ring-green-500 ",
             )}
           >
             <HandThumbUpIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
