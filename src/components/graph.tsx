@@ -91,19 +91,14 @@ function attemptDatetimeConversion(array: any[]): number[] | null {
 const secondsToDay = 60 * 60 * 24;
 
 export function Graph(props: GraphData) {
-  // Title currently does nothing in recharts, though there's an open
-  // ticket for it
-
   const xIsNumber = typeof props.data[0].x === "number";
 
   let xRange: number;
   let offset: number;
-  let data = [...props.data];
+  const graphData = formatGraphData(props);
+  const data = [...graphData.data];
 
   if (xIsNumber) {
-    // sort the data by x value
-    data = props.data.sort((a, b) => (a.x as number) - (b.x as number));
-
     xRange =
       Math.max(...props.data.map((obj) => obj.x as number)) -
       Math.min(...props.data.map((obj) => obj.x as number));
@@ -349,6 +344,44 @@ export const possibleYlabels = [
   "Satisfaction",
 ];
 
+function formatGraphData(graphData: GraphData): GraphData {
+  if (graphData.type === "value") {
+    return graphData;
+  }
+  if (typeof graphData.data[0].x === "number") {
+    return {
+      ...graphData,
+      data: graphData.data.sort((a, b) => (a.x as number) - (b.x as number)),
+    };
+  } else if (typeof graphData.data[0].x === "string") {
+    const dates = attemptDatetimeConversion(graphData.data.map((obj) => obj.x));
+    if (dates) {
+      const xRange = Math.max(...dates) - Math.min(...dates);
+      return {
+        ...graphData,
+        data: graphData.data
+          .map((obj, index) => ({
+            ...obj,
+            x: dates[index],
+          }))
+          .sort((a, b) => a.x - b.x)
+          .map((obj) => ({
+            ...obj,
+            x: DateTime.fromSeconds(obj.x).toLocaleString(
+              xRange < 1 / 24
+                ? DateTime.TIME_24_WITH_SECONDS
+                : xRange < 1
+                ? DateTime.TIME_24_SIMPLE
+                : DateTime.DATE_SHORT,
+            ),
+          })),
+        xIsdate: true,
+      };
+    }
+  }
+  return graphData;
+}
+
 export function extractGraphData(
   data: Json,
   type: SupportedGraphTypes,
@@ -419,7 +452,7 @@ export function extractGraphData(
         array.map((obj) => obj[xLabel]),
       );
 
-      const x = dateParseRes ? dateParseRes : array.map((obj) => obj[xLabel]);
+      const x = dateParseRes ?? array.map((obj) => obj[xLabel]);
       const data = [];
       for (let i = 0; i < x.length; i++) {
         data.push({
