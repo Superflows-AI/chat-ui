@@ -72,7 +72,10 @@ export default function useMessageCache(
     messages: StreamingStepInput[],
   ) => {
     setDevChatContents(messages);
-    updateMessagesCache(conversationId, messages);
+    updateMessagesCache(
+      conversationId,
+      messages.filter((m) => m.role !== "loading"),
+    );
   };
 
   return { clearMessageCache, updateDevChatContents, getMessagesFromCache };

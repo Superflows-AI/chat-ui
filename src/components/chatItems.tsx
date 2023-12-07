@@ -40,15 +40,7 @@ export interface ToConfirm extends FunctionCall {
   actionId: number;
 }
 
-type ChatItemRole =
-  | "system"
-  | "user"
-  | "assistant"
-  | "function"
-  | "error"
-  | "confirmation"
-  | "debug"
-  | "graph";
+type ChatItemRole = Pick<StreamingStepInput, "role">["role"];
 
 export function ChatItem(props: {
   chatItem: StreamingStepInput;
@@ -73,7 +65,14 @@ export function ChatItem(props: {
   }, [props.chatItem, props.chatItem.content]);
 
   const chatItem = props.chatItem;
-  if (chatItem.role === "confirmation") {
+  if (chatItem.role === "loading") {
+    return (
+      <LoadingItem
+        text={chatItem.content}
+        isLast={props.prevAndNextChatRoles[1] === undefined}
+      />
+    );
+  } else if (chatItem.role === "confirmation") {
     return <ConfirmationChatItem {...props} />;
   } else if (chatItem.role === "user") {
     return <UserChatItem {...props} chatItem={chatItem} />;
@@ -89,6 +88,34 @@ export function ChatItem(props: {
     return <FunctionVizChatItem {...props} chatItem={chatItem} />;
   }
   return <></>;
+}
+
+function LoadingItem(props: { text: string; isLast: boolean }) {
+  if (!props.isLast) {
+    return <></>;
+  }
+  return (
+    <div
+      className={
+        "sf-w-full sf-flex sf-flex-row sf-justify-center sf-text-sm sf-mt-1.5"
+      }
+    >
+      <div
+        className={classNames(
+          "sf-px-8 sf-py-1 sf-rounded sf-border sf-flex sf-flex-col sf-place-items-center",
+          props.text === "Thinking"
+            ? "sf-border-orange-300 sf-bg-orange-200 sf-text-orange-700"
+            : "sf-border-blue-300 sf-bg-blue-200 sf-text-blue-700",
+        )}
+      >
+        <div className="sf-flex sf-flex-row sf-place-items-center sf-gap-x-1">
+          <LightBulbSolidIcon className="sf-w-4 sf-h-4" />
+          {props.text}...
+        </div>
+        <LoadingSpinner classes={"sf-mt-1 sf-w-5 sf-h-5 sf-mx-auto"} />
+      </div>
+    </div>
+  );
 }
 
 export function UserChatItem(props: {
@@ -206,13 +233,13 @@ export function FunctionVizChatItem(props: {
 
   // TODO: Perhaps remove this?
   // If this chat item is empty and the previous and next chat items are functions, then don't show anything
-  if (
-    ["[]", "{}"].includes(props.chatItem.content) ||
-    (props.prevAndNextChatRoles &&
-      props.prevAndNextChatRoles.every((role) => role === "function"))
-  ) {
-    return <></>;
-  }
+  // if (
+  //   ["[]", "{}"].includes(props.chatItem.content) ||
+  //   (props.prevAndNextChatRoles &&
+  //     props.prevAndNextChatRoles.every((role) => role === "function"))
+  // ) {
+  //   return <></>;
+  // }
 
   return (
     <div className="sf-w-full sf-flex sf-flex-row sf-justify-center sf-my-1">
@@ -547,10 +574,9 @@ export function AssistantChatItem(props: {
               // Taking actions
               props.chatItem.content.includes("Commands:")) && (
               <div
-                className={classNames(
-                  "sf-w-full sf-flex sf-flex-row sf-justify-center sf-text-sm",
-                  !props.chatItem.content ? "" : "sf-mt-1.5",
-                )}
+                className={
+                  "sf-w-full sf-flex sf-flex-row sf-justify-center sf-text-sm sf-mt-1.5"
+                }
               >
                 <div
                   className={classNames(
