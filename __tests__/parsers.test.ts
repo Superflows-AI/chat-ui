@@ -506,6 +506,18 @@ describe("parseFunctionCall", () => {
       },
     });
   });
+  it("parse escaped quotes properly - backslash", () => {
+    const out = parseFunctionCall(
+      `perform_data_analysis(instruction='Break down Lucas\\' closed deals in the last 6 months by value')`,
+    );
+    expect(out).toStrictEqual({
+      name: "perform_data_analysis",
+      args: {
+        instruction:
+          "Break down Lucas' closed deals in the last 6 months by value",
+      },
+    });
+  });
   it("parse okay when brackets forgotten", () => {
     const out = parseFunctionCall(`list_users`);
     expect(out).toStrictEqual({

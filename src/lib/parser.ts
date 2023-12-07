@@ -163,7 +163,8 @@ export function parseFunctionCall(text: string): FunctionCall {
   //   ".*?([^\\])" matches a string wrapped in double quotes
   //   \[.*?\] matches an array
   //   [^,]* matches anything that is not a comma (e.g. string without quotes/number/boolean)
-  const argumentRegex = /([^,\s]+?)=({.*?}|'.*?'|".*?([^\\])"|\[.*?\]|[^,]*)/g;
+  const argumentRegex =
+    /([^,\s]+?)=({.*?}|'.*?[^\\]'|".*?([^\\])"|\[.*?\]|[^,]*)/g;
 
   const functionCallMatch = text.match(functionCallRegex);
   if (!functionCallMatch) {
@@ -251,7 +252,10 @@ export function makeDoubleExternalQuotes(text: string): string {
   if (text[0] === "'" && text[text.length - 1] === "'") {
     // Converting from single to double quotes requires escaping all
     // double quotes, unless they are already escaped
-    return `"${text.slice(1, -1).replaceAll(/(?<!\\)"/g, '\\"')}"`;
+    return `"${text
+      .slice(1, -1)
+      .replace(/(?<!\\)"/g, '\\"')
+      .replace(/\\'/g, "'")}"`;
   }
   return text;
 }
