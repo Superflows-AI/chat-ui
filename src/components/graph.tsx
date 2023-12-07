@@ -211,6 +211,7 @@ export function Graph(props: GraphData) {
         </BarChart>
       ) : (
         <LineChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="x"
             tick={{ fontSize: 12 }}
