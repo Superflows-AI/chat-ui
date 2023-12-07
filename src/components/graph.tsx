@@ -144,7 +144,11 @@ export function Graph(props: GraphData) {
   }
 
   return (
-    <ResponsiveContainer width="80%" aspect={2} className="sf-mx-auto sf-mt-2">
+    <ResponsiveContainer
+      width="80%"
+      aspect={2}
+      className="sf-mx-auto sf-mt-2 sf-mb-3"
+    >
       {props.type === "bar" ? (
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
