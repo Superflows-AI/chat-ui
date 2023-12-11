@@ -318,6 +318,7 @@ export function GraphVizChatItem(props: {
   prevAndNextChatRoles?: ChatItemRole[];
 }) {
   const [expanded, setExpanded] = useState<boolean>(true);
+  if (props.chatItem.content.data.length === 0) return <></>;
 
   return (
     <div className="sf-w-full sf-flex sf-flex-row sf-justify-center sf-my-1">
@@ -544,7 +545,7 @@ export function AssistantChatItem(props: {
               {assistantChatObj.tellUser
                 .match(/(\[[^\]]+]\([^)]+\)|[^[]+|\[)/g)
                 .map((text) => (
-                  <>
+                  <div className="sf-inline" key={text}>
                     {text.match(/^(\[[^\]]+]\([^)]+\))$/g) ? (
                       <a
                         className="sf-inline sf-text-sky-500 visited:sf-text-purple-500 hover:sf-underline sf-cursor-pointer"
@@ -555,7 +556,7 @@ export function AssistantChatItem(props: {
                     ) : (
                       text
                     )}
-                  </>
+                  </div>
                 ))}
             </div>
           )}

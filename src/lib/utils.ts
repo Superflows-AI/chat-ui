@@ -270,7 +270,6 @@ export function scrollToBottom(
       (ele.scrollHeight - ele.scrollTop - ele.offsetHeight <= threshold ||
         force)
     ) {
-      console.log("Scroll to bottom");
       ele.scrollTo({ top: ele.scrollHeight, behavior });
     }
   }

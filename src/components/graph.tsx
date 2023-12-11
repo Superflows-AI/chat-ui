@@ -91,6 +91,7 @@ function attemptDatetimeConversion(array: any[]): number[] | null {
 const secondsToDay = 60 * 60 * 24;
 
 export function Graph(props: GraphData) {
+  if (props.data.length === 0) return <></>;
   const xIsNumber = typeof props.data[0].x === "number";
 
   let xRange: number;
