@@ -219,6 +219,10 @@ export default function Chat(props: ChatProps) {
           }),
         },
       );
+      if (!followUpResponse.ok) {
+        console.error("Error getting follow-up suggestions", followUpResponse);
+        return;
+      }
       const followUpJson = (await followUpResponse.json()) as {
         suggestions: string[];
       };
