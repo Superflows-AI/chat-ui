@@ -321,6 +321,30 @@ describe("Parse output", () => {
     expect(output.commands).toStrictEqual([]);
     expect(output.completed).toBe(true);
   });
+  it("Bug found when required args with no choice are filled in", () => {
+    const output = parseOutput(
+      "Reasoning: \nTo break down the listings by the number of guests allowed, we need to fetch all the listings and then perform data analysis on them to count the number of listings that allow a certain number of guests.\n\nPlan:\n- Fetch all listings using get_listings function.\n- Perform data analysis using perform_data_analysis function to count the number of listings for each guest capacity.\n\nCommands:\nget_listings(limit=\"\", start=\"\")\nperform_data_analysis(instruction='Count the number of listings for each guest capacity', type='bar')",
+    );
+    expect(output).toBeDefined();
+    expect(output.reasoning).toBe(
+      "To break down the listings by the number of guests allowed, we need to fetch all the listings and then perform data analysis on them to count the number of listings that allow a certain number of guests.",
+    );
+    expect(output.plan).toBe(
+      "- Fetch all listings using get_listings function.\n- Perform data analysis using perform_data_analysis function to count the number of listings for each guest capacity.",
+    );
+    expect(output.tellUser).toBe("");
+    expect(output.commands).toStrictEqual([
+      { name: "get_listings", args: { limit: "", start: "" } },
+      {
+        name: "perform_data_analysis",
+        args: {
+          instruction: "Count the number of listings for each guest capacity",
+          type: "bar",
+        },
+      },
+    ]);
+    expect(output.completed).toBe(false);
+  });
 });
 
 describe("parseFunctionCall", () => {
