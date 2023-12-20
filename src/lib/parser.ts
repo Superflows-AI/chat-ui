@@ -157,14 +157,16 @@ export function parseFunctionCall(text: string): FunctionCall {
   const functionCallRegex = /^((\w+)\((.*)\)|(\w+))$/;
   // Below regex captures the arguments inside the function call brackets, one by one
   // ([^,\s]+?) matches the argument name
-  // ({.*?}|'.*?'|".*?([^\\])"|\[.*?\]|[^,]*) matches the argument value
+  // ({.*?}|'.*?[^\\]'|''|".*?[^\\]"|""|\[.*?\]|[^,]*) matches the argument value
   //   {.*?} matches an object
-  //   '.*?' matches a string wrapped in single quotes
-  //   ".*?([^\\])" matches a string wrapped in double quotes
+  //   '' matches an empty string
+  //   '.*?[^\\]' matches a string wrapped in single quotes
+  //   "" matches an empty string
+  //   ".*?[^\\]" matches a string wrapped in double quotes
   //   \[.*?\] matches an array
   //   [^,]* matches anything that is not a comma (e.g. string without quotes/number/boolean)
   const argumentRegex =
-    /([^,\s]+?)=({.*?}|'.*?[^\\]'|".*?([^\\])"|\[.*?\]|[^,]*)/g;
+    /([^,\s]+?)=({.*?}|''|'.*?[^\\]'|""|".*?[^\\]"|\[.*?\]|[^,]*)/g;
 
   const functionCallMatch = text.match(functionCallRegex);
   if (!functionCallMatch) {
@@ -191,7 +193,7 @@ export function parseFunctionCall(text: string): FunctionCall {
     if (/^\d+(\.\d+)?$/.test(argMatch[2])) {
       // Number
       value = parseFloat(argMatch[2]);
-    } else if (/^["'](.*)["']$/.test(argMatch[2])) {
+    } else if (/^(""|''|["'].*?[^\\]["'])$/.test(argMatch[2])) {
       // String
       try {
         value = JSON.parse(makeDoubleExternalQuotes(argMatch[2]));
