@@ -14,7 +14,7 @@ function Development() {
         superflowsUrl={import.meta.env.VITE_SUPERFLOWS_URL}
         userDescription={import.meta.env.VITE_USER_DESCRIPTION}
         userApiKey={import.meta.env.VITE_USER_API_KEY}
-        AIname={"Superflows Assistant"}
+        AIname={"Acme CRM"}
         styling={{
           type: "modal",
           solidIcon: true,
