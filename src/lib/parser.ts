@@ -154,7 +154,11 @@ export function parseFunctionCall(text: string): FunctionCall {
   // \) matches the closing bracket
   // |(\w+) matches the function name if the brackets were forgotten
   //  (common on fine-tuned 3.5)
-  const functionCallRegex = /^((\w+)\((.*)\)|(\w+))$/;
+  const functionCallRegex = /^(([\w\\_]+)\((.*)\)|([\w\\_]+))$/;
+  const functionCallMatch = text.match(functionCallRegex);
+  if (!functionCallMatch) {
+    throw new Error("Invalid function call format: " + text);
+  }
   // Below regex captures the arguments inside the function call brackets, one by one
   // ([^,\s]+?) matches the argument name
   // ({.*?}|'.*?[^\\]'|''|".*?[^\\]"|""|\[.*?\]|[^,]*) matches the argument value
@@ -168,18 +172,15 @@ export function parseFunctionCall(text: string): FunctionCall {
   const argumentRegex =
     /([^,\s]+?)=({.*?}|''|'.*?[^\\]'|""|".*?[^\\]"|\[.*?\]|[^,]*)/g;
 
-  const functionCallMatch = text.match(functionCallRegex);
-  if (!functionCallMatch) {
-    throw new Error("Invalid function call format: " + text);
-  }
-
-  const name = functionCallMatch[2] || functionCallMatch[4];
+  const name = handleEscapedUnderscores(
+    functionCallMatch[2] || functionCallMatch[4],
+  );
   const argsText = functionCallMatch[3] ?? "";
   let argMatch;
   const args = {};
 
   while ((argMatch = argumentRegex.exec(argsText)) !== null) {
-    const key = argMatch[1];
+    const key = handleEscapedUnderscores(argMatch[1]);
     let value;
 
     // Below regexes must stay as inline variables, otherwise they will exhibit below behaviour:
@@ -193,12 +194,13 @@ export function parseFunctionCall(text: string): FunctionCall {
     if (/^\d+(\.\d+)?$/.test(argMatch[2])) {
       // Number
       value = parseFloat(argMatch[2]);
-    } else if (/^(""|''|["'].*?[^\\]["'])$/.test(argMatch[2])) {
+    } else if (/^(""|''|".*?[^\\]"|'.*?[^\\]')$/.test(argMatch[2])) {
       // String
       try {
         value = JSON.parse(makeDoubleExternalQuotes(argMatch[2]));
       } catch (e) {
-        value = argMatch[2];
+        // Slice removes the quotes
+        value = argMatch[2].slice(1, -1);
       }
     } else if (/^(true|false)$/.test(argMatch[2])) {
       // Boolean
@@ -220,6 +222,13 @@ export function parseFunctionCall(text: string): FunctionCall {
   }
 
   return { name, args };
+}
+
+function handleEscapedUnderscores(text: string): string {
+  // Common mistake made by LLM is to escape underscore when it doesn't need to
+  // Replace escaped underscores with a placeholder
+  // E.g. "hello\_world" -> "hello_world"
+  return text.replaceAll(/\\_/g, "_");
 }
 
 export function extractObjText(matchText: string, argsText: string): string {
