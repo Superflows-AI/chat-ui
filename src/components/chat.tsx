@@ -30,6 +30,24 @@ import {
 import { parseOutput } from "../lib/parser";
 import FollowUpSuggestions from "./followUpSuggestions";
 import useMessageCache from "../lib/useMessageCache";
+import { MicrophoneIcon } from "@heroicons/react/24/solid";
+
+const textChunks = [
+  "Which ",
+  "sales ",
+  "reps ",
+  "closed ",
+  "the ",
+  "most ",
+  "valuable ",
+  "deals ",
+  "in ",
+  "the ",
+  "past ",
+  "12 ",
+  "months",
+  "?",
+];
 
 export default function Chat(props: ChatProps) {
   const [userText, setUserText] = useState<string>("");
@@ -57,6 +75,63 @@ export default function Chat(props: ChatProps) {
       ]);
     }
   }, [loading]);
+
+  const [recordingAudio, setRecordingAudio] = useState<boolean>(false);
+  useEffect(() => {
+    //   Use OpenAI Whisper API to convert audio to text
+    if (!recordingAudio) return;
+    setTimeout(() => {
+      textChunks.forEach((chunk, idx) => {
+        setTimeout(() => {
+          setUserText((prev) => prev + chunk);
+        }, idx * 60);
+        if (idx === textChunks.length - 1) {
+          setTimeout(
+            () => {
+              callSuperflowsApi([
+                ...devChatContents,
+                { role: "user", content: textChunks.join("") },
+              ]);
+              setUserText("");
+            },
+            idx * 60 + 100,
+          );
+        }
+      });
+      // setUserText(textChunks.join(""));
+      setRecordingAudio(false);
+    }, 4500);
+
+    // const audio = new Audio();
+    // const audioContext = new AudioContext();
+    // const source = audioContext.createMediaElementSource(audio);
+    // const analyser = audioContext.createAnalyser();
+    // const gainNode = audioContext.createGain();
+    // source.connect(analyser);
+    // analyser.connect(gainNode);
+    // gainNode.connect(audioContext.destination);
+    // audio.srcObject = audioContext;
+    // audio.play();
+    // const recognition = new window.webkitSpeechRecognition();
+    // recognition.continuous = true;
+    // recognition.interimResults = true;
+    // recognition.lang = "en-US";
+    // recognition.start();
+    // recognition.onresult = (event) => {
+    //   const result = event.results[event.results.length - 1];
+    //   if (result.isFinal) {
+    //     setUserText(result[0].transcript);
+    //     setRecordingAudio(false);
+    //     recognition.stop();
+    //   }
+    // };
+    // recognition.onend = () => {
+    //   setRecordingAudio(false);
+    // };
+    // return () => {
+    //   recognition.stop();
+    // };
+  }, [recordingAudio]);
 
   // This is a hack to prevent the effect from running twice in development
   // It's because React strict mode runs in development in nextjs, which renders everything
@@ -552,7 +627,12 @@ export default function Chat(props: ChatProps) {
         </div>
       </div>
       {/* Textbox user types into */}
-      <div className="sf-flex sf-flex-col">
+      <div className="sf-flex sf-flex-col sf-relative">
+        {recordingAudio && (
+          <div className="sf-absolute sf-top-0 sf-left-0 sf-right-0 sf-bottom-4 sf-bg-gray-700 sf-border sf-border-gray-600 sf-z-50 sf-flex sf-place-items-center sf-justify-center sf-gap-x-2 sf-text-gray-100 sf-rounded-md sf-text-xl">
+            Recording Audio <LoadingSpinner classes="sf-h-10 sf-w-10" />
+          </div>
+        )}
         <AutoGrowingTextArea
           className={classNames(
             "sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border sf-border-solid focus:sf-ring-1 focus:sf-outline-0 sf-text-black placeholder:sf-text-gray-400",
@@ -605,38 +685,46 @@ export default function Chat(props: ChatProps) {
               setShowNegativeTextbox={setShowNegativeFeedbackTextbox}
             />
           </div>
-          <button
-            ref={props.initialFocus}
-            type="submit"
-            className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-h-10 sf-place-items-center sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
-              loading || !userText
-                ? "sf-bg-gray-500 sf-cursor-not-allowed"
-                : `hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500`,
-              !props.styling?.buttonColor &&
-                !(loading || !userText) &&
-                "sf-bg-purple-500",
-              showNegativeFeedbackTextbox && "sf-invisible",
-            )}
-            onClick={() => {
-              if (!loading && userText) {
-                void callSuperflowsApi([
-                  ...devChatContents,
-                  { role: "user", content: userText },
-                ]);
-                setUserText("");
-                killSwitchClicked.current = false;
+          <div className={"sf-flex sf-flex-row sf-gap-x-2"}>
+            <button
+              className="sf-bg-sky-400 sf-px-2 sf-rounded-md hover:sf-bg-sky-500 active:sf-outline active:sf-outline-sky-600"
+              onClick={() => setRecordingAudio(true)}
+            >
+              <MicrophoneIcon className={"sf-h-6 sf-w-6 sf-text-sky-50"} />
+            </button>
+            <button
+              ref={props.initialFocus}
+              type="submit"
+              className={classNames(
+                "sf-flex sf-flex-row sf-gap-x-1 sf-h-10 sf-place-items-center sf-justify-center sf-select-none focus:sf-outline-0 sf-rounded-md sf-px-3 sf-py-2 sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm",
+                loading || !userText
+                  ? "sf-bg-gray-500 sf-cursor-not-allowed"
+                  : `hover:sf-opacity-90 focus:sf-outline focus:sf-outline-2 focus:sf-outline-offset-2 focus:sf-outline-sky-500`,
+                !props.styling?.buttonColor &&
+                  !(loading || !userText) &&
+                  "sf-bg-purple-500",
+                showNegativeFeedbackTextbox && "sf-invisible",
+              )}
+              onClick={() => {
+                if (!loading && userText) {
+                  void callSuperflowsApi([
+                    ...devChatContents,
+                    { role: "user", content: userText },
+                  ]);
+                  setUserText("");
+                  killSwitchClicked.current = false;
+                }
+              }}
+              style={
+                props.styling?.buttonColor && !(loading || !userText)
+                  ? { backgroundColor: props.styling?.buttonColor }
+                  : {}
               }
-            }}
-            style={
-              props.styling?.buttonColor && !(loading || !userText)
-                ? { backgroundColor: props.styling?.buttonColor }
-                : {}
-            }
-          >
-            {loading && <LoadingSpinner classes="sf-h-4 sf-w-4" />}
-            Submit
-          </button>
+            >
+              {loading && <LoadingSpinner classes="sf-h-4 sf-w-4" />}
+              Submit
+            </button>
+          </div>
         </div>
       </div>
     </div>
