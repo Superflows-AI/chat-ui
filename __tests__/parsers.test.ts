@@ -174,7 +174,6 @@ describe("Parse output", () => {
     });
   });
   it("incorrectly-ordered real world output", () => {
-    console.log("Incorrectly ordered real world output");
     const gptOut =
       "Reasoning: To create a new account for the client, I will use the 'create_account' function. The required parameters are 'workflow' and 'data'. Under 'workflow', I will set the code to 'client.sub-account' as we are creating a sub-account for an existing client. Under 'data', I will provide the clientId (which in this case is 23030138) and a currency code as per ISO 4217.\n" +
       "\n" +
@@ -547,6 +546,15 @@ describe("parseFunctionCall", () => {
     expect(out).toStrictEqual({
       name: "list_users",
       args: {},
+    });
+  });
+  it("replace backslash underscore with underscore in fn name and arg names, but not string values", () => {
+    const out = parseFunctionCall(
+      `update\\_property(property\\_id="ID\\_1", bedrooms=4)`,
+    );
+    expect(out).toStrictEqual({
+      name: "update_property",
+      args: { property_id: "ID\\_1", bedrooms: 4 },
     });
   });
 });
