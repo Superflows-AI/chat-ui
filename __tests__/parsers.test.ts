@@ -557,6 +557,15 @@ describe("parseFunctionCall", () => {
       args: { property_id: "ID\\_1", bedrooms: 4 },
     });
   });
+  it("True with capital T, False with capital F", () => {
+    const out = parseFunctionCall(
+      `update\\_property(expand=True, go_away=False)`,
+    );
+    expect(out).toStrictEqual({
+      name: "update_property",
+      args: { expand: true, go_away: false },
+    });
+  });
 });
 
 describe("makeDoubleExternalQuotes", () => {

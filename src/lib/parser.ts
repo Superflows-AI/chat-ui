@@ -202,10 +202,10 @@ export function parseFunctionCall(text: string): FunctionCall {
         // Slice removes the quotes
         value = argMatch[2].slice(1, -1);
       }
-    } else if (/^(true|false)$/.test(argMatch[2])) {
+    } else if (/^([tT]rue|[fF]alse)$/.test(argMatch[2])) {
       // Boolean
-      value = argMatch[2] === "true";
-    } else if (/\{.*?}/g.test(argMatch[2]) || /\[(.*?)\]/g.test(argMatch[2])) {
+      value = ["true", "True"].includes(argMatch[2]);
+    } else if (/\{.*?}/g.test(argMatch[2]) || /\[(.*?)]/g.test(argMatch[2])) {
       // Object/array
       const objText = extractObjText(argMatch[2], argsText);
       try {
