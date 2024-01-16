@@ -121,4 +121,5 @@ export interface ChatProps {
   }[];
   initialFocus?: Ref<any>;
   showThoughts?: boolean;
+  debugMode?: boolean;
 }

@@ -93,6 +93,7 @@ export default function Chat(props: ChatProps) {
             mock_api_responses: props.mockApiResponses ?? false,
             stream: true,
             api_params: props.apiParams,
+            debug: props.debugMode,
           }),
         });
 
