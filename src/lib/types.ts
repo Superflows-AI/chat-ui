@@ -114,6 +114,11 @@ export interface ChatProps {
   styling?: ChatStyle;
   initialMessage?: string;
   welcomeText?: string;
+  apiParams?: {
+    name: string;
+    hostname?: string;
+    headers?: Record<string, string>;
+  }[];
   initialFocus?: Ref<any>;
   showThoughts?: boolean;
 }

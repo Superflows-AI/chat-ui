@@ -92,6 +92,7 @@ export default function Chat(props: ChatProps) {
             user_description: props.userDescription,
             mock_api_responses: props.mockApiResponses ?? false,
             stream: true,
+            api_params: props.apiParams,
           }),
         });
 
@@ -258,6 +259,7 @@ export default function Chat(props: ChatProps) {
           user_api_key: props.userApiKey ?? "", // Need a fallback or zod fails
           confirm: confirm,
           mock_api_responses: props.mockApiResponses,
+          api_params: props.apiParams,
         }),
       });
 
