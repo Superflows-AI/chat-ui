@@ -37,6 +37,29 @@ export default function Chat(props: ChatProps) {
       ? [{ role: "assistant", content: props.welcomeText }]
       : [],
   );
+  // Update welcome text if it changes
+  useEffect(() => {
+    if (props.welcomeText) {
+      if (devChatContents.length === 0) {
+        // No welcome text previously - add it
+        setDevChatContents([{ role: "assistant", content: props.welcomeText }]);
+      } else if (
+        devChatContents.length === 1 &&
+        devChatContents[0].role === "assistant"
+      ) {
+        // Just welcome text previously - replace
+        setDevChatContents([{ role: "assistant", content: props.welcomeText }]);
+      }
+    } else {
+      // Welcome text removed
+      if (
+        devChatContents.length === 1 &&
+        devChatContents[0].role === "assistant"
+      ) {
+        setDevChatContents((prev) => prev.slice(1));
+      }
+    }
+  }, [props.welcomeText]);
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
 
   const killSwitchClicked = useRef(false);
