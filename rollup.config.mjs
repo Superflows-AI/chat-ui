@@ -1,6 +1,7 @@
 import tailwind from "@superflows/rollup-plugin-tailwindcss";
 import typescript from "rollup-plugin-typescript2";
 import postcss from "rollup-plugin-postcss";
+import babel from "@rollup/plugin-babel";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import nodePolyfills from "rollup-plugin-polyfill-node";
@@ -19,6 +20,13 @@ export default {
     },
   ],
   plugins: [
+    babel(
+      {
+        plugins: [
+          '@babel/plugin-transform-optional-chaining',
+        ],
+      }
+    ),
     resolve(),
     nodePolyfills({ include: ["process*", "path", "url*"] }),
     commonjs({
