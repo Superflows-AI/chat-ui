@@ -63,9 +63,8 @@ export default function Chat(props: ChatProps) {
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
 
   const killSwitchClicked = useRef(false);
-
   const hostname = addTrailingSlash(
-    props.superflowsUrl ?? "https://dashboard.superflows.ai/",
+    props.superflowsUrl || "https://dashboard.superflows.ai/",
   );
 
   const { clearMessageCache, updateDevChatContents, getMessagesFromCache } =
