@@ -23,7 +23,8 @@ export default {
     babel(
       {
         plugins: [
-          '@babel/plugin-transform-optional-chaining',
+          "@babel/plugin-transform-optional-chaining",
+          "@babel/plugin-transform-nullish-coalescing-operator"
         ],
       }
     ),
