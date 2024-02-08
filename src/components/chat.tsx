@@ -366,7 +366,7 @@ export default function Chat(props: ChatProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="sf-flex sf-min-h-0 sf-h-full sf-w-full sf-flex-1 sf-flex-col">
+    <div className="superflows-styling sf-flex sf-min-h-0 sf-h-full sf-w-full sf-flex-1 sf-flex-col">
       <div
         ref={scrollRef}
         className={classNames(

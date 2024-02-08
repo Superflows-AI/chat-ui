@@ -12,7 +12,7 @@ export default function SuperflowsModal(props: SuperflowsModalProps) {
     <Dialog
       open={props.open}
       as="div"
-      className="sf-relative sf-z-30"
+      className="superflows-styling sf-relative sf-z-30"
       onClose={props.setOpen}
       initialFocus={focusRef}
     >

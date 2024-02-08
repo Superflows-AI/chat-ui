@@ -16,7 +16,7 @@ export default function SuperflowsSidebar(props: SuperflowsSidebarProps) {
     <Dialog
       open={props.open}
       as="div"
-      className="sf-relative sf-z-50"
+      className="superflows-styling sf-relative sf-z-50"
       onClose={props.setOpen}
       initialFocus={focusRef}
     >
