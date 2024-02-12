@@ -148,13 +148,14 @@ export function getLastSectionName(gptString: string): string {
 
 export function parseFunctionCall(text: string): FunctionCall {
   // Below regex captures the function name and arguments
+  // (?:\d\. |- )? optionally matches a numbering/bullet point
   // (\w+) matches the function name (any non whitespace characters)
   // \( matches the opening bracket
   // (.*) matches everything inside the brackets
   // \) matches the closing bracket
   // |(\w+) matches the function name if the brackets were forgotten
   //  (common on fine-tuned 3.5)
-  const functionCallRegex = /^(([\w\\_]+)\((.*)\)|([\w\\_]+))$/;
+  const functionCallRegex = /^(?:\d\. |- )?(([\w\\_]+)\((.*)\)|([\w\\_]+))$/;
   const functionCallMatch = text.match(functionCallRegex);
   if (!functionCallMatch) {
     throw new Error("Invalid function call format: " + text);
