@@ -51,6 +51,7 @@ export function ChatItem(props: {
   prevAndNextChatRoles?: (ChatItemRole | undefined)[];
   precedingUrls?: { name: string; url: string }[];
   showThoughts?: boolean;
+  showFunctionCalls?: boolean;
   scrollRef: React.MutableRefObject<HTMLDivElement | null>;
 }) {
   useEffect(() => {
@@ -84,7 +85,7 @@ export function ChatItem(props: {
     return <AssistantChatItem {...props} chatItem={chatItem} />;
   } else if (chatItem.role === "debug") {
     return <></>;
-  } else if (chatItem.role === "function") {
+  } else if (chatItem.role === "function" && props.showFunctionCalls) {
     return <FunctionVizChatItem {...props} chatItem={chatItem} />;
   }
   return <></>;
