@@ -8,12 +8,15 @@ export type Json =
   | { [key: string]: Json }
   | Json[];
 
+type ContentString = {
+  content: string;
+};
+
 export type ChatItemType =
   | StreamingStep
-  | {
+  | ({
       role: "user";
-      content: string;
-    };
+    } & ContentString);
 
 export type SuperflowsStyle = {
   solidIcon?: boolean;
@@ -60,16 +63,30 @@ export type ChatGPTMessage =
 
 type NonSystemGPTMessage = Exclude<ChatGPTMessage, { role: "system" }>;
 
-export type GraphMessage = {
+export interface GraphMessage {
   role: "graph";
   content: GraphData;
-};
+}
+
+export type ErrorMessage = {
+  role: "error";
+} & ContentString;
+export type DebugMessage = {
+  role: "debug";
+} & ContentString;
+export type ConfirmationMessage = {
+  role: "confirmation";
+} & ContentString;
+export type LoadingMessage = {
+  role: "loading";
+} & ContentString;
+
 export type StreamingStepInput =
   | NonSystemGPTMessage
-  | {
-      role: "error" | "debug" | "confirmation" | "loading";
-      content: string;
-    }
+  | ErrorMessage
+  | DebugMessage
+  | ConfirmationMessage
+  | LoadingMessage
   | GraphMessage;
 export type StreamingStep = StreamingStepInput & { id: number };
 
@@ -121,5 +138,6 @@ export interface ChatProps {
   }[];
   initialFocus?: Ref<any>;
   showThoughts?: boolean;
+  showFunctionCalls?: boolean;
   debugMode?: boolean;
 }
