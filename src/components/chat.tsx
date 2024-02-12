@@ -430,6 +430,7 @@ export default function Chat(props: ChatProps) {
                     : []
                 }
                 showThoughts={props.showThoughts}
+                showFunctionCalls={props.showFunctionCalls}
                 scrollRef={scrollRef}
               />
             );
