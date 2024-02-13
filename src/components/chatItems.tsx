@@ -31,6 +31,7 @@ import {
   MapIcon,
   LightBulbIcon as LightBulbSolidIcon,
 } from "@heroicons/react/24/solid";
+import { loadMoreNumRowsToAdd, startingTableRows } from "../lib/consts";
 
 export interface FunctionCall {
   name: string;
@@ -208,7 +209,7 @@ export function FunctionVizChatItem(props: {
   const [content, setContent] = useState(props.chatItem.content);
   const [isJson, setIsJson] = useState(false);
   const [fullTableString, setFullTableString] = useState<string>("");
-  const [tableNumRows, setTableNumRows] = useState<number>(5);
+  const [tableNumRows, setTableNumRows] = useState<number>(startingTableRows);
 
   useEffect(() => {
     if (["[]", "{}"].includes(props.chatItem.content)) {
@@ -223,7 +224,12 @@ export function FunctionVizChatItem(props: {
       if (functionJsonResponse && typeof functionJsonResponse === "object") {
         const localTableString = convertToMarkdownTable(functionJsonResponse);
         setFullTableString(localTableString);
-        setContent(localTableString.split("\n").slice(0, 7).join("\n"));
+        setContent(
+          localTableString
+            .split("\n")
+            .slice(0, startingTableRows + 2)
+            .join("\n"),
+        );
       }
     } catch {
       let dataToShow = props.chatItem.content.slice(0, 100);
@@ -284,7 +290,7 @@ export function FunctionVizChatItem(props: {
                           const splitFullTableString =
                             fullTableString.split("\n");
                           const newNumRows = Math.min(
-                            tableNumRows + 2 + 25,
+                            tableNumRows + 2 + loadMoreNumRowsToAdd,
                             splitFullTableString.length,
                           );
                           setTableNumRows(newNumRows);
@@ -296,7 +302,7 @@ export function FunctionVizChatItem(props: {
                         }}
                       >
                         <ArrowDownIcon className="sf-w-4 sf-h-4 sf-mr-1" />
-                        Load 25 more
+                        Load {loadMoreNumRowsToAdd} more
                       </button>
                     )}
                   {fullTableString.split("\n").length > tableNumRows + 2 && (
@@ -348,7 +354,7 @@ export function GraphVizChatItem(props: {
     null,
   );
   const [tableString, setTableString] = useState<string>("");
-  const [tableNumRows, setTableNumRows] = useState<number>(5);
+  const [tableNumRows, setTableNumRows] = useState<number>(startingTableRows);
   const [tabOpen, setTabOpen] = useState<"table" | "graph">(
     props.chatItem.content.type === "table" ? "table" : "graph",
   );
@@ -379,7 +385,9 @@ export function GraphVizChatItem(props: {
       return out;
     });
     setTableData(localData);
-    setTableString(convertToMarkdownTable(localData.slice(0, 5)));
+    setTableString(
+      convertToMarkdownTable(localData.slice(0, startingTableRows)),
+    );
   }, [props.chatItem.content.data]);
 
   if (props.chatItem.content.data?.length === 0) return <></>;
@@ -425,7 +433,7 @@ export function GraphVizChatItem(props: {
                       className="sf-w-[calc(100%-2rem)] sf-flex sf-place-items-center sf-justify-center sf-bg-gray-50 sf-mx-4 sf-border-b sf-border-x sf-text-little sf-text-gray-600 sf-py-1.5"
                       onClick={() => {
                         const newNumRows = Math.min(
-                          tableNumRows + 25,
+                          tableNumRows + loadMoreNumRowsToAdd,
                           tableData.length,
                         );
                         setTableNumRows(newNumRows);
@@ -437,7 +445,7 @@ export function GraphVizChatItem(props: {
                       }}
                     >
                       <ArrowDownIcon className="sf-w-4 sf-h-4 sf-mr-1" />
-                      Load 25 more
+                      Load {loadMoreNumRowsToAdd} more
                     </button>
                   )}
                   {props.chatItem.content.data.length > tableNumRows && (
