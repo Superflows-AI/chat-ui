@@ -1,5 +1,6 @@
 import {
   ArrowDownIcon,
+  ArrowTopRightOnSquareIcon,
   CheckCircleIcon,
   LightBulbIcon,
   MinusIcon,
@@ -32,6 +33,7 @@ import {
   LightBulbIcon as LightBulbSolidIcon,
 } from "@heroicons/react/24/solid";
 import { loadMoreNumRowsToAdd, startingTableRows } from "../lib/consts";
+import { exportDataAsCSV } from "../lib/export";
 
 export interface FunctionCall {
   name: string;
@@ -302,7 +304,12 @@ export function FunctionVizChatItem(props: {
                         }}
                       >
                         <ArrowDownIcon className="sf-w-4 sf-h-4 sf-mr-1" />
-                        Load {loadMoreNumRowsToAdd} more
+                        Load{" "}
+                        {Math.min(
+                          loadMoreNumRowsToAdd,
+                          fullTableString.split("\n").length - tableNumRows - 2,
+                        )}{" "}
+                        more
                       </button>
                     )}
                   {fullTableString.split("\n").length > tableNumRows + 2 && (
@@ -417,11 +424,37 @@ export function GraphVizChatItem(props: {
         </button>
         {expanded && (
           <>
-            {!["table", "value"].includes(props.chatItem.content.type) && (
-              <div className="sf-mt-1.5 sf--mb-1.5">
-                <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />
+            <div className="sf-w-full sf-mt-1.5 sf--mb-1.5 sf-flex sf-justify-between">
+              <div>
+                {!["table", "value"].includes(props.chatItem.content.type) && (
+                  <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />
+                )}
               </div>
-            )}
+              <div>
+                {props.chatItem.content.type !== "value" && (
+                  <button
+                    className="sf-mb-2 sf-bg-white sf-rounded-lg sf-border hover:sf-bg-gray-50 sf-px-2 sf-py-2 sf-mr-4 sf-text-gray-600 hover:sf-text-gray-700 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-text-sm sf-shadow-sm"
+                    onClick={() => {
+                      const graphData = exportDataAsCSV(props.chatItem.content);
+                      const blob = new Blob([graphData], {
+                        type: "text/csv;charset=utf-8;",
+                      });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `Export:${props.chatItem.content.graphTitle}.csv`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <ArrowTopRightOnSquareIcon
+                      className={"sf-h-4 sf-w-4 sf-text-gray-800"}
+                    />
+                    Export
+                  </button>
+                )}
+              </div>
+            </div>
             {tabOpen !== "table" ? (
               <Graph {...props.chatItem.content} />
             ) : (
@@ -445,7 +478,12 @@ export function GraphVizChatItem(props: {
                       }}
                     >
                       <ArrowDownIcon className="sf-w-4 sf-h-4 sf-mr-1" />
-                      Load {loadMoreNumRowsToAdd} more
+                      Load{" "}
+                      {Math.min(
+                        loadMoreNumRowsToAdd,
+                        tableData.length - tableNumRows,
+                      )}{" "}
+                      more
                     </button>
                   )}
                   {props.chatItem.content.data.length > tableNumRows && (
@@ -833,7 +871,7 @@ export function Tabs(props: {
   const options: ("table" | "graph")[] = ["graph", "table"];
   return (
     <nav
-      className="sf-ml-3 sf-isolate sf-flex sf-divide-x sf-divide-gray-200 sf-rounded-lg sf-shadow sf-mb-4"
+      className="sf-ml-3 sf-isolate sf-flex sf-divide-x sf-divide-gray-200 sf-rounded-lg sf-shadow sf-mb-2"
       aria-label="Tabs"
     >
       {options.map((tab, tabIdx) => (
@@ -845,7 +883,7 @@ export function Tabs(props: {
               : "sf-text-gray-500 hover:sf-text-gray-700",
             tabIdx === 0 ? "sf-rounded-l-lg" : "",
             tabIdx === 1 ? "sf-rounded-r-lg" : "",
-            "sf-relative sf-cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-2 sf-px-2 sf-text-center sf-text-sm sf-font-sm hover:sf-bg-gray-50 focus:sf-z-10",
+            "sf-relative sf-cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-2 sf-px-2 sf-text-center sf-text-sm hover:sf-bg-gray-50 focus:sf-z-10",
           )}
           aria-current={props.tabOpen === tab ? "page" : undefined}
           onClick={() => {
