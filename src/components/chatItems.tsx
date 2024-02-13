@@ -1,4 +1,5 @@
 import {
+  ArrowDownIcon,
   CheckCircleIcon,
   LightBulbIcon,
   MinusIcon,
@@ -204,10 +205,10 @@ export function FunctionVizChatItem(props: {
     throw new Error("Not a function chat item");
 
   const [expanded, setExpanded] = useState<boolean>(false);
-  const [graphedData, setGraphedData] = useState<GraphData | null>(null);
   const [content, setContent] = useState(props.chatItem.content);
   const [isJson, setIsJson] = useState(false);
-  const [tabOpen, setTabOpen] = useState<"table" | "graph">("table");
+  const [fullTableString, setFullTableString] = useState<string>("");
+  const [tableNumRows, setTableNumRows] = useState<number>(5);
 
   useEffect(() => {
     if (["[]", "{}"].includes(props.chatItem.content)) {
@@ -217,11 +218,12 @@ export function FunctionVizChatItem(props: {
     try {
       const functionJsonResponse = JSON.parse(props.chatItem.content) as Json;
       setIsJson(true);
-      setGraphedData(extractGraphData(functionJsonResponse, "line"));
 
       // First check is for null
       if (functionJsonResponse && typeof functionJsonResponse === "object") {
-        setContent(convertToMarkdownTable(functionJsonResponse));
+        const localTableString = convertToMarkdownTable(functionJsonResponse);
+        setFullTableString(localTableString);
+        setContent(localTableString.split("\n").slice(0, 7).join("\n"));
       }
     } catch {
       let dataToShow = props.chatItem.content.slice(0, 100);
@@ -270,17 +272,40 @@ export function FunctionVizChatItem(props: {
         </button>
         {expanded && (
           <>
-            {graphedData && (
-              <div className="-sf-py-4">
-                <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />{" "}
-              </div>
-            )}
-
             {content &&
-              (tabOpen === "graph" ? (
-                <Graph {...graphedData} />
-              ) : isJson ? (
-                <StyledMarkdown>{content}</StyledMarkdown>
+              (isJson ? (
+                <div className="sf-flex sf-flex-col sf-w-full">
+                  <StyledMarkdown>{content}</StyledMarkdown>
+                  {fullTableString &&
+                    fullTableString.split("\n").length > tableNumRows + 2 && (
+                      <button
+                        className="sf-w-[calc(100%-2rem)] sf-flex sf-place-items-center sf-justify-center sf-bg-gray-50 sf-mx-4 sf-border-b sf-border-x sf-text-little sf-text-gray-600 sf-py-1.5"
+                        onClick={() => {
+                          const splitFullTableString =
+                            fullTableString.split("\n");
+                          const newNumRows = Math.min(
+                            tableNumRows + 2 + 25,
+                            splitFullTableString.length,
+                          );
+                          setTableNumRows(newNumRows);
+                          setContent(
+                            splitFullTableString
+                              .slice(0, newNumRows)
+                              .join("\n"),
+                          );
+                        }}
+                      >
+                        <ArrowDownIcon className="sf-w-4 sf-h-4 sf-mr-1" />
+                        Load 25 more
+                      </button>
+                    )}
+                  {fullTableString.split("\n").length > tableNumRows + 2 && (
+                    <div className="sf-w-full sf-flex sf-justify-end sf-text-sm sf-text-gray-500 sf-py-0.5 sf-pr-5">
+                      {fullTableString.split("\n").length - (tableNumRows + 2)}{" "}
+                      more rows
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-break-words">
                   {content}
@@ -319,7 +344,45 @@ export function GraphVizChatItem(props: {
   prevAndNextChatRoles?: ChatItemRole[];
 }) {
   const [expanded, setExpanded] = useState<boolean>(true);
-  if (props.chatItem.content.data.length === 0) return <></>;
+  const [tableData, setTableData] = useState<Record<string, unknown>[] | null>(
+    null,
+  );
+  const [tableString, setTableString] = useState<string>("");
+  const [tableNumRows, setTableNumRows] = useState<number>(5);
+  const [tabOpen, setTabOpen] = useState<"table" | "graph">(
+    props.chatItem.content.type === "table" ? "table" : "graph",
+  );
+
+  useEffect(() => {
+    const removeX =
+      !props.chatItem.content.xLabel &&
+      !props.chatItem.content.data.some(
+        (d) => d.x !== props.chatItem.content.data[0].x,
+      );
+    const removeY =
+      !props.chatItem.content.yLabel &&
+      !props.chatItem.content.data.some(
+        (d) => d.y !== props.chatItem.content.data[0].y,
+      );
+    const localData = props.chatItem.content.data.map((item) => {
+      const out: Record<string, unknown> = { ...item };
+      if (props.chatItem.content.xLabel) {
+        out[props.chatItem.content.xLabel] = item.x;
+        delete out.x;
+      }
+      if (props.chatItem.content.yLabel) {
+        out[props.chatItem.content.yLabel] = item.y;
+        delete out.y;
+      }
+      if (removeX) delete out.x;
+      if (removeY) delete out.y;
+      return out;
+    });
+    setTableData(localData);
+    setTableString(convertToMarkdownTable(localData.slice(0, 5)));
+  }, [props.chatItem.content.data]);
+
+  if (props.chatItem.content.data?.length === 0) return <></>;
 
   return (
     <div className="sf-w-full sf-flex sf-flex-row sf-justify-center sf-my-1">
@@ -344,7 +407,50 @@ export function GraphVizChatItem(props: {
             <PlusIcon className={"sf-w-5 sf-h-5 sf-mr-6"} />
           )}
         </button>
-        {expanded && <Graph {...props.chatItem.content} />}
+        {expanded && (
+          <>
+            {!["table", "value"].includes(props.chatItem.content.type) && (
+              <div className="sf-mt-1.5 sf--mb-1.5">
+                <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />
+              </div>
+            )}
+            {tabOpen !== "table" ? (
+              <Graph {...props.chatItem.content} />
+            ) : (
+              tableData && (
+                <div className="sf-flex sf-flex-col sf-w-full sf-mb-2">
+                  <StyledMarkdown>{tableString}</StyledMarkdown>
+                  {tableData.length > tableNumRows && (
+                    <button
+                      className="sf-w-[calc(100%-2rem)] sf-flex sf-place-items-center sf-justify-center sf-bg-gray-50 sf-mx-4 sf-border-b sf-border-x sf-text-little sf-text-gray-600 sf-py-1.5"
+                      onClick={() => {
+                        const newNumRows = Math.min(
+                          tableNumRows + 25,
+                          tableData.length,
+                        );
+                        setTableNumRows(newNumRows);
+                        setTableString(
+                          convertToMarkdownTable(
+                            tableData.slice(0, newNumRows),
+                          ),
+                        );
+                      }}
+                    >
+                      <ArrowDownIcon className="sf-w-4 sf-h-4 sf-mr-1" />
+                      Load 25 more
+                    </button>
+                  )}
+                  {props.chatItem.content.data.length > tableNumRows && (
+                    <div className="sf-w-full sf-flex sf-justify-end sf-text-sm sf-text-gray-500 sf-py-0.5 sf-pr-5">
+                      {props.chatItem.content.data.length - tableNumRows} more
+                      rows
+                    </div>
+                  )}
+                </div>
+              )
+            )}
+          </>
+        )}
         {/* TODO: Make graph sharing work */}
         {/*<div className="sf-absolute sf-bottom-1 sf-right-3">*/}
         {/*  <div className="sf-relative">*/}
@@ -655,7 +761,7 @@ export function AssistantChatItem(props: {
 function StyledMarkdown(props: { children: string }) {
   return (
     <ReactMarkdown
-      className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full"
+      className="sf-px-4 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full"
       components={{
         a: ({ node, ...props }) => (
           <a className="sf-text-blue-500 hover:sf-underline" {...props} />
@@ -716,12 +822,13 @@ export function Tabs(props: {
   tabOpen: "table" | "graph";
   setTabOpen: (tab: "table" | "graph") => void;
 }) {
+  const options: ("table" | "graph")[] = ["graph", "table"];
   return (
     <nav
-      className="isolate sf-flex sf-divide-x sf-divide-gray-200 sf-rounded-lg sf-shadow sf-mb-4"
+      className="sf-ml-3 sf-isolate sf-flex sf-divide-x sf-divide-gray-200 sf-rounded-lg sf-shadow sf-mb-4"
       aria-label="Tabs"
     >
-      {["table", "graph"].map((tab, tabIdx) => (
+      {options.map((tab, tabIdx) => (
         <a
           key={tab}
           className={classNames(
@@ -734,14 +841,14 @@ export function Tabs(props: {
           )}
           aria-current={props.tabOpen === tab ? "page" : undefined}
           onClick={() => {
-            props.setTabOpen(tabIdx === 0 ? "table" : "graph");
+            props.setTabOpen(options[tabIdx]);
           }}
         >
-          <span>{tab}</span>
+          <span>{tab.slice(0, 1).toUpperCase() + tab.slice(1)}</span>
           <span
             aria-hidden="true"
             className={classNames(
-              props.tabOpen === tab ? "sf-bg-indigo-500" : "sf-bg-transparent",
+              props.tabOpen === tab ? "sf-bg-sky-500" : "sf-bg-transparent",
               "sf-absolute sf-inset-x-0 sf-bottom-0 sf-h-0.5",
             )}
           />
