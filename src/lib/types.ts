@@ -90,7 +90,7 @@ export type StreamingStepInput =
   | GraphMessage;
 export type StreamingStep = StreamingStepInput & { id: number };
 
-export type SupportedGraphTypes = "line" | "bar" | "value";
+export type SupportedGraphTypes = "line" | "bar" | "table" | "value";
 
 export interface GraphData {
   type: SupportedGraphTypes;
