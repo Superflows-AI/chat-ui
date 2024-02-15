@@ -23,6 +23,47 @@ import useMessageCache from "../lib/useMessageCache";
 export default function Chat(props: ChatProps) {
   const [userText, setUserText] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [autoRetried, setAutoRetried] = useState<boolean>(false);
+
+  // Empty the chat and rerun the API call if loading stops when the last message is a loading message
+  useEffect(() => {
+    if (
+      // Loading just stopped
+      !loading &&
+      // Chat isn't empty
+      devChatContents.length > 0 &&
+      // Last message is a loading message
+      devChatContents[devChatContents.length - 1].role === "loading"
+    ) {
+      console.log("Re-running!!");
+      if (autoRetried) {
+        // If we've already retried once, don't retry again
+        setAutoRetried(false);
+        setDevChatContents((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content:
+              "Sorry, an unexpected error has occurred.\n\nPlease click 'clear chat' (top right) and try again.",
+          },
+        ]);
+        ``;
+        return;
+      }
+      // Remove messages
+      clearMessageCache();
+      const lastUserMessage = devChatContents.findLast(
+        (chat) => chat.role === "user",
+      );
+      setDevChatContents([]);
+      setConversationId(null);
+      // Rerun the API call
+      void callSuperflowsApi([
+        { role: "user", content: lastUserMessage?.content.toString() },
+      ]);
+      setAutoRetried(true);
+    }
+  }, [loading]);
 
   // This is a hack to prevent the effect from running twice in development
   // It's because React strict mode runs in development in nextjs, which renders everything
@@ -163,7 +204,7 @@ export default function Chat(props: ChatProps) {
         { role: "assistant", content: "" },
       ] as ChatItemType[];
       let incompleteChunk = "";
-      let localConverationId = conversationId;
+      let localConversationId = conversationId;
 
       while (!done) {
         const { value, done: doneReading } = await reader.read();
@@ -183,7 +224,7 @@ export default function Chat(props: ChatProps) {
               const data = JSON.parse(chunkOfChunk) as StreamingStep;
               if (conversationId === null) {
                 setConversationId(data.id);
-                localConverationId = data.id;
+                localConversationId = data.id;
               }
               if (
                 // Different message role from the last message
@@ -205,7 +246,7 @@ export default function Chat(props: ChatProps) {
                 outputMessages[outputMessages.length - 1].content +=
                   data.content;
               }
-              updateDevChatContents(localConverationId, [
+              updateDevChatContents(localConversationId, [
                 ...chat,
                 ...outputMessages,
               ]);
@@ -238,7 +279,7 @@ export default function Chat(props: ChatProps) {
             Authorization: `Bearer ${props.superflowsApiKey}`,
           },
           body: JSON.stringify({
-            conversation_id: localConverationId,
+            conversation_id: localConversationId,
             user_description: props.userDescription,
           }),
         },
