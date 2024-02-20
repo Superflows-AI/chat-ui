@@ -215,11 +215,11 @@ export default function Chat(props: ChatProps) {
           console.log("Kill switch clicked");
           await reader.cancel("Cancel clicked");
           setLoading(false);
+          updateDevChatContents(localConversationId, [...chat]);
           alreadyRunning.current = false;
           setTimeout(() => {
             killSwitchClicked.current = false;
           }, 1000);
-          updateDevChatContents(localConversationId, [...chat]);
           return;
         }
         const chunkValue = incompleteChunk + decoder.decode(value);
