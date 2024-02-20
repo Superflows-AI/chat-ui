@@ -30,6 +30,8 @@ export default function Chat(props: ChatProps) {
     if (
       // Loading just stopped
       !loading &&
+      // Kill switch hasn't been clicked
+      !killSwitchClicked.current &&
       // Chat isn't empty
       devChatContents.length > 0 &&
       // Last message is a loading message
@@ -199,16 +201,27 @@ export default function Chat(props: ChatProps) {
 
       const reader = data.getReader();
       const decoder = new TextDecoder();
-      let done = false;
       const outputMessages = [
         { role: "assistant", content: "" },
       ] as ChatItemType[];
       let incompleteChunk = "";
       let localConversationId = conversationId;
 
+      let done = false,
+        value: Uint8Array;
       while (!done) {
-        const { value, done: doneReading } = await reader.read();
-        done = doneReading || killSwitchClicked.current;
+        ({ value, done } = await reader.read());
+        if (killSwitchClicked.current) {
+          console.log("Kill switch clicked");
+          await reader.cancel("Cancel clicked");
+          setLoading(false);
+          alreadyRunning.current = false;
+          setTimeout(() => {
+            killSwitchClicked.current = false;
+          }, 1000);
+          updateDevChatContents(localConversationId, [...chat]);
+          return;
+        }
         const chunkValue = incompleteChunk + decoder.decode(value);
         // One server-side chunk can be split across multiple client-side chunks,
         // so we catch errors thrown by JSON.parse() and append the next chunk
@@ -264,7 +277,6 @@ export default function Chat(props: ChatProps) {
       }
       setLoading(false);
       alreadyRunning.current = false;
-      killSwitchClicked.current = false;
 
       // If not an assistant message (confirmation, error etc) don't give follow-up suggestions
       if (outputMessages[outputMessages.length - 1].role !== "assistant")
