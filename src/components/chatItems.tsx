@@ -379,11 +379,19 @@ export function GraphVizChatItem(props: {
       );
     const localData = props.chatItem.content.data.map((item) => {
       const out: Record<string, unknown> = { ...item };
-      if (props.chatItem.content.xLabel) {
+      if (
+        props.chatItem.content.xLabel &&
+        item.x &&
+        !out[props.chatItem.content.xLabel]
+      ) {
         out[props.chatItem.content.xLabel] = item.x;
         delete out.x;
       }
-      if (props.chatItem.content.yLabel) {
+      if (
+        props.chatItem.content.yLabel &&
+        item.y &&
+        !out[props.chatItem.content.yLabel]
+      ) {
         out[props.chatItem.content.yLabel] = item.y;
         delete out.y;
       }
