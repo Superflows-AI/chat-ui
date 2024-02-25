@@ -22,29 +22,6 @@ import FollowUpSuggestions from "./followUpSuggestions";
 import useMessageCache from "../lib/useMessageCache";
 import { MicrophoneIcon } from "@heroicons/react/24/solid";
 
-const textChunks = [
-  "Which ",
-  "sales ",
-  "reps ",
-  "closed ",
-  "the ",
-  "most ",
-  "valuable ",
-  "deals ",
-  "in ",
-  "the ",
-  "past ",
-  "12 ",
-  "months",
-  "?",
-];
-
-declare global {
-  interface Window {
-    webkitSpeechRecognition: typeof SpeechRecognition;
-  }
-}
-
 export default function Chat(props: ChatProps) {
   const [userText, setUserText] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -96,36 +73,37 @@ export default function Chat(props: ChatProps) {
   const [recognition, setRecognition] = useState<any | null>(null);
 
   useEffect(() => {
-    const recognitionInstance = new window.webkitSpeechRecognition();
-    let finalTranscript = "";
-    if (recognitionInstance) {
-      recognitionInstance.continuous = false;
-      recognitionInstance.interimResults = false;
-
-      recognitionInstance.onstart = () => {
-        console.log("Speech has started");
-      };
-
-      recognitionInstance.onresult = (event: {
-        results: SpeechRecognitionResultList;
-        resultIndex: number;
-      }) => {
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript + " ";
-          }
-        }
-      };
-      recognitionInstance.onend = () => {
-        console.log("Speech has ended");
-        setRecordingAudio(false);
-        console.log("Final transcript:", finalTranscript);
-      };
-      setRecognition(recognitionInstance);
-    } else {
-      console.error("Speech Recognition API is not supported in this browser.");
+    if ("webkitSpeechRecognition" in window) {
+      setRecognition(new (window as any).webkitSpeechRecognition() as any);
     }
   }, []);
+
+  useEffect(() => {
+    if (!recognition) return;
+    let finalTranscript = "";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "de";
+    recognition.onstart = () => {
+      finalTranscript = "";
+    };
+
+    recognition.onresult = (event: {
+      results: SpeechRecognitionResultList;
+      resultIndex: number;
+    }) => {
+      Array.from(event.results, (result, index) => {
+        if (index >= event.resultIndex && result.isFinal) {
+          finalTranscript += result[0].transcript + " ";
+        }
+      });
+    };
+    recognition.onend = () => {
+      setRecordingAudio(false);
+      setUserText(finalTranscript);
+    };
+    setRecognition(recognition);
+  }, [recognition]);
 
   useEffect(() => {
     // Start or stop recognition based on recordingAudio state
@@ -653,19 +631,21 @@ export default function Chat(props: ChatProps) {
             />
           </div>
           <div className={"sf-flex sf-flex-row sf-gap-x-2"}>
-            <button
-              className="sf-bg-sky-400 sf-px-2 sf-rounded-md hover:sf-bg-sky-500 active:sf-outline active:sf-outline-sky-600"
-              onClick={() => {
-                setRecordingAudio((recordingAudio) => !recordingAudio);
-              }}
-            >
-              <MicrophoneIcon
-                className={classNames(
-                  "sf-h-6 sf-w-6",
-                  recordingAudio ? "sf-text-grey-100" : "sf-text-sky-50",
-                )}
-              />
-            </button>
+            {recognition && (
+              <button
+                className="sf-bg-sky-400 sf-px-2 sf-rounded-md hover:sf-bg-sky-500 active:sf-outline active:sf-outline-sky-600"
+                onClick={() => {
+                  setRecordingAudio((recordingAudio) => !recordingAudio);
+                }}
+              >
+                <MicrophoneIcon
+                  className={classNames(
+                    "sf-h-6 sf-w-6",
+                    recordingAudio ? "sf-text-grey-100" : "sf-text-sky-50",
+                  )}
+                />
+              </button>
+            )}
             <button
               ref={props.initialFocus}
               type="submit"
