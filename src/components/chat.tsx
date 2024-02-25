@@ -4,6 +4,7 @@ import {
   HandThumbDownIcon,
   HandThumbUpIcon,
   CheckCircleIcon,
+  StopCircleIcon,
 } from "@heroicons/react/24/outline";
 import { ChatItem } from "./chatItems";
 import {
@@ -37,6 +38,12 @@ const textChunks = [
   "months",
   "?",
 ];
+
+declare global {
+  interface Window {
+    webkitSpeechRecognition: typeof SpeechRecognition;
+  }
+}
 
 export default function Chat(props: ChatProps) {
   const [userText, setUserText] = useState<string>("");
@@ -86,61 +93,93 @@ export default function Chat(props: ChatProps) {
   }, [loading]);
 
   const [recordingAudio, setRecordingAudio] = useState<boolean>(false);
-  useEffect(() => {
-    //   Use OpenAI Whisper API to convert audio to text
-    if (!recordingAudio) return;
-    setTimeout(() => {
-      textChunks.forEach((chunk, idx) => {
-        setTimeout(() => {
-          setUserText((prev) => prev + chunk);
-        }, idx * 60);
-        if (idx === textChunks.length - 1) {
-          setTimeout(
-            () => {
-              callSuperflowsApi([
-                ...devChatContents,
-                { role: "user", content: textChunks.join("") },
-              ]);
-              setUserText("");
-            },
-            idx * 60 + 100,
-          );
-        }
-      });
-      // setUserText(textChunks.join(""));
-      setRecordingAudio(false);
-    }, 4500);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [audioUrl, setAudioUrl] = useState("");
 
-    // const audio = new Audio();
-    // const audioContext = new AudioContext();
-    // const source = audioContext.createMediaElementSource(audio);
-    // const analyser = audioContext.createAnalyser();
-    // const gainNode = audioContext.createGain();
-    // source.connect(analyser);
-    // analyser.connect(gainNode);
-    // gainNode.connect(audioContext.destination);
-    // audio.srcObject = audioContext;
-    // audio.play();
-    // const recognition = new window.webkitSpeechRecognition();
-    // recognition.continuous = true;
-    // recognition.interimResults = true;
-    // recognition.lang = "en-US";
-    // recognition.start();
-    // recognition.onresult = (event) => {
-    //   const result = event.results[event.results.length - 1];
-    //   if (result.isFinal) {
-    //     setUserText(result[0].transcript);
-    //     setRecordingAudio(false);
-    //     recognition.stop();
-    //   }
-    // };
-    // recognition.onend = () => {
-    //   setRecordingAudio(false);
-    // };
-    // return () => {
-    //   recognition.stop();
-    // };
-  }, [recordingAudio]);
+  const startRecording = () => {
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((stream) => {
+        const newMediaRecorder = new MediaRecorder(stream);
+        newMediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            const url = URL.createObjectURL(event.data);
+            setAudioUrl(url);
+          }
+        };
+        newMediaRecorder.start();
+        setMediaRecorder(newMediaRecorder);
+        setRecordingAudio(true);
+      })
+      .catch((err) => {
+        console.error("Error accessing the microphone", err);
+      });
+  };
+  const stopRecording = () => {
+    if (mediaRecorder) {
+      const audio = new Audio(audioUrl);
+      audio.play();
+      mediaRecorder.stop();
+      setRecordingAudio(false);
+    }
+  };
+  // useEffect(() => {
+  //   //   Use OpenAI Whisper API to convert audio to text
+  //   if (!recordingAudio) stopRecording();
+  //   // const medstartRecording();
+  //   setTimeout(startRecording, 1000);
+  // setTimeout(() => {
+  //   textChunks.forEach((chunk, idx) => {
+  //     setTimeout(() => {
+  //       setUserText((prev) => prev + chunk);
+  //     }, idx * 60);
+  //     if (idx === textChunks.length - 1) {
+  //       setTimeout(
+  //         () => {
+  //           callSuperflowsApi([
+  //             ...devChatContents,
+  //             { role: "user", content: textChunks.join("") },
+  //           ]);
+  //           setUserText("");
+  //         },
+  //         idx * 60 + 100,
+  //       );
+  //     }
+  //   });
+  //   // setUserText(textChunks.join(""));
+  //   setRecordingAudio(false);
+  // }, 4500);
+
+  // const audio = new Audio();
+  // const audioContext = new AudioContext();
+  // const source = audioContext.createMediaElementSource(audio);
+  // const analyser = audioContext.createAnalyser();
+  // const gainNode = audioContext.createGain();
+  // source.connect(analyser);
+  // analyser.connect(gainNode);
+  // gainNode.connect(audioContext.destination);
+  // audio.srcObject = audioContext;
+  // audio.play();
+  // const recognition = new window.webkitSpeechRecognition();
+  // recognition.continuous = true;
+  // recognition.interimResults = true;
+  // recognition.lang = "en-US";
+  // recognition.start();
+  // recognition.onresult = (event) => {
+  //   const result = event.results[event.results.length - 1];
+  //   if (result.isFinal) {
+  //     setUserText(result[0].transcript);
+  //     setRecordingAudio(false);
+  //     recognition.stop();
+  //   }
+  // };
+  // recognition.onend = () => {
+  //   setRecordingAudio(false);
+  // };
+  // return () => {
+  //   //   recognition.stop();
+  //   // };
+  // }, [recordingAudio]);
 
   // This is a hack to prevent the effect from running twice in development
   // It's because React strict mode runs in development in nextjs, which renders everything
@@ -606,11 +645,6 @@ export default function Chat(props: ChatProps) {
       </div>
       {/* Textbox user types into */}
       <div className="sf-flex sf-flex-col sf-relative">
-        {recordingAudio && (
-          <div className="sf-absolute sf-top-0 sf-left-0 sf-right-0 sf-bottom-4 sf-bg-gray-700 sf-border sf-border-gray-600 sf-z-50 sf-flex sf-place-items-center sf-justify-center sf-gap-x-2 sf-text-gray-100 sf-rounded-md sf-text-xl">
-            Recording Audio <LoadingSpinner classes="sf-h-10 sf-w-10" />
-          </div>
-        )}
         <AutoGrowingTextArea
           className={classNames(
             "sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-py-2 sf-px-4 sf-border-gray-300 sf-border sf-border-solid focus:sf-ring-1 focus:sf-outline-0 sf-text-black placeholder:sf-text-gray-400",
@@ -666,9 +700,14 @@ export default function Chat(props: ChatProps) {
           <div className={"sf-flex sf-flex-row sf-gap-x-2"}>
             <button
               className="sf-bg-sky-400 sf-px-2 sf-rounded-md hover:sf-bg-sky-500 active:sf-outline active:sf-outline-sky-600"
-              onClick={() => setRecordingAudio(true)}
+              onClick={recordingAudio ? stopRecording : startRecording}
             >
-              <MicrophoneIcon className={"sf-h-6 sf-w-6 sf-text-sky-50"} />
+              <MicrophoneIcon
+                className={classNames(
+                  "sf-h-6 sf-w-6",
+                  recordingAudio ? "sf-text-grey-100" : "sf-text-sky-50",
+                )}
+              />
             </button>
             <button
               ref={props.initialFocus}
