@@ -656,10 +656,8 @@ export default function Chat(props: ChatProps) {
             {recognition && (
               <button
                 className={classNames(
-                  "sf-py-1 sf-rounded-md active:sf-outline active:sf-outline-sky-600 sf-flex sf-items-center",
-                  recordingAudio
-                    ? "sf-px-6 sf-bg-purple-600 hover:sf-bg-purple-500 sf-space-x-1"
-                    : "sf-bg-purple-600 hover:sf-bg-purple-500 sf-px-2",
+                  "sf-py-1 sf-rounded-md active:sf-outline active:sf-outline-sky-600 sf-flex sf-items-center sf-bg-purple-500 hover:sf-bg-purple-400",
+                  recordingAudio ? "sf-px-12 sf-space-x-1" : "sf-px-6",
                 )}
                 onClick={() => {
                   setRecordingAudio((recordingAudio) => !recordingAudio);
