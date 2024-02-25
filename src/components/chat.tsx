@@ -4,7 +4,6 @@ import {
   HandThumbDownIcon,
   HandThumbUpIcon,
   CheckCircleIcon,
-  StopCircleIcon,
 } from "@heroicons/react/24/outline";
 import { ChatItem } from "./chatItems";
 import {
@@ -79,11 +78,12 @@ export default function Chat(props: ChatProps) {
   }, []);
 
   useEffect(() => {
-    if (!recognition) return;
+    if (!recognition || recordingAudio) return;
     let finalTranscript = "";
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = "de";
+    // TODO: set language based on organisation? Doesn't support mixed language sentences
+    recognition.lang = "en";
     recognition.onstart = () => {
       finalTranscript = "";
     };
@@ -633,17 +633,18 @@ export default function Chat(props: ChatProps) {
           <div className={"sf-flex sf-flex-row sf-gap-x-2"}>
             {recognition && (
               <button
-                className="sf-bg-sky-400 sf-px-2 sf-rounded-md hover:sf-bg-sky-500 active:sf-outline active:sf-outline-sky-600"
+                className={classNames(
+                  "sf-py-1 sf-rounded-md active:sf-outline active:sf-outline-sky-600 sf-flex sf-items-center",
+                  recordingAudio
+                    ? "sf-px-6 sf-bg-purple-600 hover:sf-bg-purple-500 sf-space-x-1"
+                    : "sf-bg-purple-600 hover:sf-bg-purple-500 sf-px-2",
+                )}
                 onClick={() => {
                   setRecordingAudio((recordingAudio) => !recordingAudio);
                 }}
               >
-                <MicrophoneIcon
-                  className={classNames(
-                    "sf-h-6 sf-w-6",
-                    recordingAudio ? "sf-text-grey-100" : "sf-text-sky-50",
-                  )}
-                />
+                <MicrophoneIcon className="sf-h-6 sf-w-6 sf-fill-white" />
+                {recordingAudio && <RecordingDots />}
               </button>
             )}
             <button
@@ -838,3 +839,17 @@ function FeedbackButtons(props: {
     </div>
   );
 }
+
+const RecordingDots = () => (
+  <div className="sf-flex sf-justify-center sf-items-center sf-space-x-1">
+    {[...Array(3)].map((_, i) => (
+      <span
+        key={i}
+        className="sf-bg-white sf-rounded-full sf-w-2 sf-h-2 sf-animate-bounce"
+        style={{
+          animationDelay: `${i * 0.2}s`,
+        }}
+      ></span>
+    ))}
+  </div>
+);
