@@ -381,7 +381,7 @@ export function GraphVizChatItem(props: {
       const out: Record<string, unknown> = { ...item };
       if (
         props.chatItem.content.xLabel &&
-        item.x &&
+        "x" in item &&
         !out[props.chatItem.content.xLabel]
       ) {
         out[props.chatItem.content.xLabel] = item.x;
@@ -389,7 +389,7 @@ export function GraphVizChatItem(props: {
       }
       if (
         props.chatItem.content.yLabel &&
-        item.y &&
+        "y" in item &&
         !out[props.chatItem.content.yLabel]
       ) {
         out[props.chatItem.content.yLabel] = item.y;
