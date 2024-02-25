@@ -84,93 +84,48 @@ export default function Chat(props: ChatProps) {
   }, [loading]);
 
   const [recordingAudio, setRecordingAudio] = useState<boolean>(false);
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [audioUrl, setAudioUrl] = useState("");
+  const [recognition, setRecognition] = useState<any | null>(null);
 
-  const startRecording = () => {
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then((stream) => {
-        const newMediaRecorder = new MediaRecorder(stream);
-        newMediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            const url = URL.createObjectURL(event.data);
-            setAudioUrl(url);
+  useEffect(() => {
+    const recognitionInstance = new window.webkitSpeechRecognition();
+    let finalTranscript = "";
+    if (recognitionInstance) {
+      recognitionInstance.continuous = false;
+      recognitionInstance.interimResults = false;
+
+      recognitionInstance.onstart = () => {
+        console.log("Speech has started");
+      };
+
+      recognitionInstance.onresult = (event: {
+        results: SpeechRecognitionResultList;
+        resultIndex: number;
+      }) => {
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript + " ";
           }
-        };
-        newMediaRecorder.start();
-        setMediaRecorder(newMediaRecorder);
-        setRecordingAudio(true);
-      })
-      .catch((err) => {
-        console.error("Error accessing the microphone", err);
-      });
-  };
-  const stopRecording = () => {
-    if (mediaRecorder) {
-      const audio = new Audio(audioUrl);
-      audio.play();
-      mediaRecorder.stop();
-      setRecordingAudio(false);
+        }
+      };
+      recognitionInstance.onend = () => {
+        console.log("Speech has ended");
+        setRecordingAudio(false);
+        console.log("Final transcript:", finalTranscript);
+      };
+      setRecognition(recognitionInstance);
+    } else {
+      console.error("Speech Recognition API is not supported in this browser.");
     }
-  };
-  // useEffect(() => {
-  //   //   Use OpenAI Whisper API to convert audio to text
-  //   if (!recordingAudio) stopRecording();
-  //   // const medstartRecording();
-  //   setTimeout(startRecording, 1000);
-  // setTimeout(() => {
-  //   textChunks.forEach((chunk, idx) => {
-  //     setTimeout(() => {
-  //       setUserText((prev) => prev + chunk);
-  //     }, idx * 60);
-  //     if (idx === textChunks.length - 1) {
-  //       setTimeout(
-  //         () => {
-  //           callSuperflowsApi([
-  //             ...devChatContents,
-  //             { role: "user", content: textChunks.join("") },
-  //           ]);
-  //           setUserText("");
-  //         },
-  //         idx * 60 + 100,
-  //       );
-  //     }
-  //   });
-  //   // setUserText(textChunks.join(""));
-  //   setRecordingAudio(false);
-  // }, 4500);
+  }, []);
 
-  // const audio = new Audio();
-  // const audioContext = new AudioContext();
-  // const source = audioContext.createMediaElementSource(audio);
-  // const analyser = audioContext.createAnalyser();
-  // const gainNode = audioContext.createGain();
-  // source.connect(analyser);
-  // analyser.connect(gainNode);
-  // gainNode.connect(audioContext.destination);
-  // audio.srcObject = audioContext;
-  // audio.play();
-  // const recognition = new window.webkitSpeechRecognition();
-  // recognition.continuous = true;
-  // recognition.interimResults = true;
-  // recognition.lang = "en-US";
-  // recognition.start();
-  // recognition.onresult = (event) => {
-  //   const result = event.results[event.results.length - 1];
-  //   if (result.isFinal) {
-  //     setUserText(result[0].transcript);
-  //     setRecordingAudio(false);
-  //     recognition.stop();
-  //   }
-  // };
-  // recognition.onend = () => {
-  //   setRecordingAudio(false);
-  // };
-  // return () => {
-  //   //   recognition.stop();
-  //   // };
-  // }, [recordingAudio]);
+  useEffect(() => {
+    // Start or stop recognition based on recordingAudio state
+    if (recordingAudio) {
+      recognition?.start();
+    } else {
+      recognition?.stop();
+    }
+  }, [recordingAudio, recognition]);
 
   // This is a hack to prevent the effect from running twice in development
   // It's because React strict mode runs in development in nextjs, which renders everything
@@ -722,7 +677,9 @@ export default function Chat(props: ChatProps) {
           <div className={"sf-flex sf-flex-row sf-gap-x-2"}>
             <button
               className="sf-bg-sky-400 sf-px-2 sf-rounded-md hover:sf-bg-sky-500 active:sf-outline active:sf-outline-sky-600"
-              onClick={recordingAudio ? stopRecording : startRecording}
+              onClick={() => {
+                setRecordingAudio((recordingAudio) => !recordingAudio);
+              }}
             >
               <MicrophoneIcon
                 className={classNames(
