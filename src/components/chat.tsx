@@ -23,7 +23,6 @@ import useMessageCache from "../lib/useMessageCache";
 export default function Chat(props: ChatProps) {
   const [userText, setUserText] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [autoRetried, setAutoRetried] = useState<boolean>(false);
 
   // Empty the chat and rerun the API call if loading stops when the last message is a loading message
   useEffect(() => {
@@ -37,33 +36,14 @@ export default function Chat(props: ChatProps) {
       // Last message is a loading message
       devChatContents[devChatContents.length - 1].role === "loading"
     ) {
-      console.log("Re-running!!");
-      if (autoRetried) {
-        // If we've already retried once, don't retry again
-        setAutoRetried(false);
-        setDevChatContents((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content:
-              "Sorry, an unexpected error has occurred.\n\nPlease click 'clear chat' (top right) and try again.",
-          },
-        ]);
-        ``;
-        return;
-      }
-      // Remove messages
-      clearMessageCache();
-      const lastUserMessage = devChatContents.findLast(
-        (chat) => chat.role === "user",
-      );
-      setDevChatContents([]);
-      setConversationId(null);
-      // Rerun the API call
-      void callSuperflowsApi([
-        { role: "user", content: lastUserMessage?.content.toString() },
+      setDevChatContents((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "Sorry, an unexpected error has occurred.\n\nPlease click 'clear chat' (top right) and try again.",
+        },
       ]);
-      setAutoRetried(true);
     }
   }, [loading]);
 
