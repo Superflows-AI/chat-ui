@@ -15,7 +15,13 @@ import {
 import { AutoGrowingTextArea } from "./autoGrowingTextarea";
 import { addTrailingSlash, classNames, scrollToBottom } from "../lib/utils";
 import { LoadingSpinner } from "./loadingspinner";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { parseOutput } from "../lib/parser";
 import FollowUpSuggestions from "./followUpSuggestions";
 import useMessageCache from "../lib/useMessageCache";
@@ -398,8 +404,17 @@ export default function Chat(props: ChatProps) {
   }, [feedback]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const containerRef = useRef(null);
+  const [width, setWidth] = useState(0);
+  useLayoutEffect(() => {
+    setWidth(containerRef.current.offsetWidth);
+  }, [containerRef.current]);
+
   return (
-    <div className="superflows-styling sf-flex sf-min-h-0 sf-h-full sf-w-full sf-flex-1 sf-flex-col">
+    <div
+      ref={containerRef}
+      className="superflows-styling sf-flex sf-min-h-0 sf-h-full sf-w-full sf-flex-1 sf-flex-col"
+    >
       <div
         ref={scrollRef}
         className={classNames(
@@ -412,7 +427,7 @@ export default function Chat(props: ChatProps) {
         {devChatContents.length > 0 && !loading && (
           <button
             className={
-              "sf-z-40 sf-ml-auto sf-sticky sf-top-2 sf-right-2 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-px-2 sf-py-1 sf-rounded-md sf-bg-white sf-border focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500 sf-transition sf-border-gray-300 hover:sf-border-gray-400 sf-text-gray-500 hover:sf-text-gray-600"
+              "sf-z-30 sf-ml-auto sf-sticky sf-top-2 sf-right-2 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-px-2 sf-py-1 sf-rounded-md sf-bg-white sf-border focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-gray-500 sf-transition sf-border-gray-300 hover:sf-border-gray-400 sf-text-gray-500 hover:sf-text-gray-600"
             }
             onClick={() => {
               clearMessageCache();
@@ -462,6 +477,7 @@ export default function Chat(props: ChatProps) {
                     ? uniqueUrls
                     : []
                 }
+                width={width}
                 showThoughts={props.showThoughts}
                 showFunctionCalls={props.showFunctionCalls}
                 scrollRef={scrollRef}
@@ -473,7 +489,14 @@ export default function Chat(props: ChatProps) {
             props.suggestions &&
             props.suggestions.length > 0 && (
               <div className="sf-py-4 sf-px-1.5">
-                <h2 className="sf-ml-2 sf-font-medium">Suggestions</h2>
+                <h2
+                  className={classNames(
+                    "sf-ml-2 sf-font-medium",
+                    width > 640 ? "sf-text-base" : "sf-text-little",
+                  )}
+                >
+                  Suggestions
+                </h2>
                 <div className="sf-mt-1 sf-flex sf-flex-col sf-gap-y-1 sf-place-items-baseline">
                   {props.suggestions.map((text) => (
                     <button
@@ -505,6 +528,7 @@ export default function Chat(props: ChatProps) {
                 ]);
               }}
               scrollRef={scrollRef}
+              width={width}
             />
           )}
         </div>

@@ -1,12 +1,13 @@
 import { StreamingStepInput } from "../lib/types";
 import React, { useEffect } from "react";
-import { scrollToBottom } from "../lib/utils";
+import { classNames, scrollToBottom } from "../lib/utils";
 
 export default function FollowUpSuggestions(props: {
   devChatContents: StreamingStepInput[];
   followUpSuggestions: string[];
   onClick: (text: string) => void;
   scrollRef: React.RefObject<HTMLDivElement>;
+  width: number;
 }) {
   useEffect(() => {
     setTimeout(() => {
@@ -15,7 +16,14 @@ export default function FollowUpSuggestions(props: {
   }, [props.followUpSuggestions]);
 
   return (
-    <div className="sf-z-20 sf-overflow-hidden sf-flex-wrap sf-gap-y-1 sf-border-t sf-pt-1 sf--mb-3.5 sf-pb-1 sf-mx-1.5 sf-mt-0.5 sf-flex sf-flex-row sf-gap-x-1.5 sf-place-items-baseline">
+    <div
+      className={classNames(
+        "sf-z-20 sf-gap-y-1 sf-border-t sf-pt-1 sf--mb-3.5 sf-pb-1 sf-mx-1.5 sf-mt-0.5 sf-flex sf-gap-x-1.5 sf-place-items-baseline",
+        props.width > 640
+          ? "sf-flex-row sf-overflow-hidden sf-flex-wrap"
+          : "sf-flex-col",
+      )}
+    >
       {props.followUpSuggestions.map((text) => (
         <button
           key={text}

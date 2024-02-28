@@ -7,7 +7,7 @@ import {
 import { Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { classNames } from "../lib/utils";
-import { SidebarStyle, SuperflowsSidebarProps } from "../lib/types";
+import { SuperflowsSidebarProps } from "../lib/types";
 import Chat from "./chat";
 
 export default function SuperflowsSidebar(props: SuperflowsSidebarProps) {
