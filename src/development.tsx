@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 // Clear the existing HTML content
 document.body.innerHTML = '<div id="app"></div>';
 
+import SuperflowsChat from "./components/chat";
 import SuperflowsButton from "./components/superflowsButton";
 import React from "react";
 
@@ -24,6 +25,19 @@ function Development() {
         suggestions={import.meta.env.VITE_SUGGESTIONS?.split(",")}
         showFunctionCalls={true}
       />
+      <div className="sf-w-80 sf-h-screen">
+        <SuperflowsChat
+          superflowsApiKey={import.meta.env.VITE_SUPERFLOWS_API_KEY}
+          superflowsUrl={import.meta.env.VITE_SUPERFLOWS_URL}
+          userDescription={import.meta.env.VITE_USER_DESCRIPTION}
+          userApiKey={import.meta.env.VITE_USER_API_KEY}
+          AIname={"Superflows Assistant"}
+          devMode={false}
+          welcomeText={import.meta.env.VITE_WELCOME_MESSAGE}
+          suggestions={import.meta.env.VITE_SUGGESTIONS?.split(",")}
+          showFunctionCalls={true}
+        />
+      </div>
     </div>
   );
 }

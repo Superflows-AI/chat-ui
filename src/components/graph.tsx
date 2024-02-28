@@ -9,12 +9,12 @@ import {
   BarChart,
   CartesianGrid,
   Tooltip,
-  Legend,
   Bar,
 } from "recharts";
 
 import { DateTime } from "luxon";
 import { GraphData, Json, SupportedGraphTypes } from "../lib/types";
+import { classNames } from "../lib/utils";
 
 const formats = [
   "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
@@ -90,7 +90,7 @@ function attemptDatetimeConversion(array: any[]): number[] | null {
 
 const secondsToDay = 60 * 60 * 24;
 
-export function Graph(props: GraphData) {
+export function Graph(props: GraphData & { small: boolean }) {
   if (props.data.length === 0) return <></>;
   const xIsNumber = typeof props.data[0].x === "number";
 
@@ -138,24 +138,29 @@ export function Graph(props: GraphData) {
       </div>
     );
   }
+  const tickFontSize = props.small ? 10 : 12;
+  const labelFontSize = props.small ? 12 : 15;
 
   return (
     <ResponsiveContainer
-      width="80%"
+      width={props.small ? "95%" : "80%"}
       aspect={2}
-      className="sf-mx-auto sf-mt-2 sf-mb-3"
+      className={classNames(
+        "sf-mx-auto sf-mt-2",
+        props.small ? "sf-mb-1.5" : "sf-mb-3",
+      )}
     >
       {props.type === "bar" ? (
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="x"
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: tickFontSize }}
             label={
               props.xLabel
                 ? {
                     value: props.xLabel,
-                    fontSize: 15,
+                    fontSize: labelFontSize,
                     dy: 10,
                   }
                 : {}
@@ -166,11 +171,12 @@ export function Graph(props: GraphData) {
             label={{
               value: yLabel,
               angle: yLabel.length > 5 ? -90 : 0,
+              fontSize: labelFontSize,
               position: "insideLeft",
               dy: yLabel.length * 3,
               dx: -4,
             }}
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: tickFontSize }}
           />
           <Tooltip
             content={(vals) => {
@@ -180,7 +186,12 @@ export function Graph(props: GraphData) {
               const valueWithUnits = includeUnits(value, yUnit);
               const splitYLabel = yLabel.split("(");
               return (
-                <div className="sf-bg-white sf-p-3 sf-border sf-flex sf-flex-col">
+                <div
+                  className={classNames(
+                    "sf-bg-white sf-border sf-flex sf-flex-col",
+                    props.small ? "sf-text-xs sf-p-2" : "sf-text-sm sf-p-3",
+                  )}
+                >
                   <h3 className="sf-font-medium">{payload.x}</h3>
                   <div className="sf-flex sf-flex-row sf-gap-x-1">
                     {splitYLabel[0]
@@ -214,7 +225,7 @@ export function Graph(props: GraphData) {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="x"
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: tickFontSize }}
             type={xIsNumber ? "number" : "category"}
             angle={0}
             domain={
@@ -238,6 +249,7 @@ export function Graph(props: GraphData) {
             <Label
               value={props.xLabel || ""}
               offset={-2}
+              style={{ fontSize: labelFontSize }}
               position="insideBottom"
             />
           </XAxis>
@@ -249,7 +261,12 @@ export function Graph(props: GraphData) {
               const valueWithUnits = includeUnits(value, yUnit);
               const splitYLabel = yLabel.split("(");
               return (
-                <div className="sf-bg-white sf-p-3 sf-border sf-flex sf-flex-col">
+                <div
+                  className={classNames(
+                    "sf-bg-white sf-border sf-flex sf-flex-col",
+                    props.small ? "sf-text-sm sf-p-2" : "sf-text-base sf-p-3",
+                  )}
+                >
                   <h3 className="sf-font-medium">{payload.x}</h3>
                   <div className="sf-flex sf-flex-row sf-gap-x-1">
                     {splitYLabel[0]
@@ -275,11 +292,11 @@ export function Graph(props: GraphData) {
               );
             }}
           />
-          <YAxis allowDecimals={false}>
+          <YAxis allowDecimals={false} tick={{ fontSize: tickFontSize }}>
             <Label
               value={yLabel}
               angle={-90}
-              style={{ textAnchor: "middle" }}
+              style={{ textAnchor: "middle", fontSize: labelFontSize }}
               position="insideLeft"
             />
           </YAxis>

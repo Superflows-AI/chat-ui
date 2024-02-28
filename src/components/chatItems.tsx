@@ -7,7 +7,7 @@ import {
   PlusIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ParsedOutput, parseOutput } from "../lib/parser";
@@ -56,6 +56,7 @@ export function ChatItem(props: {
   precedingUrls?: { name: string; url: string }[];
   showThoughts?: boolean;
   showFunctionCalls?: boolean;
+  width: number;
   scrollRef: React.MutableRefObject<HTMLDivElement | null>;
 }) {
   useEffect(() => {
@@ -126,6 +127,7 @@ function LoadingItem(props: { text: string; isLast: boolean }) {
 export function UserChatItem(props: {
   chatItem: UserMessage;
   prevAndNextChatRoles?: ChatItemRole[];
+  width: number;
 }) {
   return (
     <div
@@ -133,7 +135,16 @@ export function UserChatItem(props: {
         "sf-my-2 sf-py-3 sf-mx-1.5 sf-flex sf-flex-col sf-w-full sf-border-y sf-border-gray-200 first:sf-border-t-0",
       )}
     >
-      <p className="sf-font-semibold sf-mb-1 sf-px-1.5">You</p>
+      <p
+        className={classNames(
+          "sf-mb-1 sf-px-1.5",
+          props.width > 640
+            ? "sf-font-semibold sf-text-base"
+            : "sf-font-medium sf-text-little",
+        )}
+      >
+        You
+      </p>
       <div className="sf-px-2 sf-mt-1 sf-text-little sf-text-gray-900 sf-w-full sf-whitespace-pre-wrap">
         {props.chatItem.content}
       </div>
@@ -203,6 +214,7 @@ export function PlainTextChatItem(props: {
 export function FunctionVizChatItem(props: {
   chatItem: Extract<StreamingStepInput, { role: "function" }>;
   prevAndNextChatRoles?: ChatItemRole[];
+  width: number;
 }) {
   if (props.chatItem.role !== "function")
     throw new Error("Not a function chat item");
@@ -257,18 +269,30 @@ export function FunctionVizChatItem(props: {
       <div
         className={classNames(
           "sf-rounded sf-flex sf-flex-col sf-w-full sf-text-left sf-place-items-baseline sf-bg-gray-50 sf-border sf-border-gray-200",
-          expanded
-            ? "sf-mx-8 md:sf-mx-12 lg:sf-mx-16 xl:sf-mx-20"
-            : "hover:sf-bg-gray-100 sf-cursor-pointer sf-mx-8 md:sf-mx-20 lg:sf-mx-28 xl:sf-mx-40",
+          props.width > 640
+            ? expanded
+              ? "sf-mx-8 md:sf-mx-12 lg:sf-mx-16 xl:sf-mx-20"
+              : "hover:sf-bg-gray-100 sf-cursor-pointer sf-mx-8 md:sf-mx-20 lg:sf-mx-28 xl:sf-mx-40"
+            : expanded
+            ? "sf-mx-4"
+            : "hover:sf-bg-gray-100 sf-cursor-pointer sf-mx-4",
         )}
       >
         <button
           className="sf-group sf-flex sf-flex-row sf-w-full sf-justify-between sf-py-1 sf-px-1.5"
           onClick={() => setExpanded((prev) => !prev)}
         >
-          <p className="sf-text-xs sf-text-gray-600 sf-mb-1">Data received</p>
+          <p className="sf-text-xs sf-text-gray-600 sf-mb-1">
+            Data{props.width > 640 ? " received" : ""}
+          </p>
           <div className="sf-text-sm sf-text-gray-800">
-            <b className="font-medium">
+            <b
+              className={classNames(
+                props.width > 640
+                  ? "sf-font-medium"
+                  : "sf-font-normal sf-text-sm",
+              )}
+            >
               {functionNameToDisplay(props.chatItem?.name ?? "")}
             </b>
           </div>
@@ -355,6 +379,7 @@ export function FunctionVizChatItem(props: {
 export function GraphVizChatItem(props: {
   chatItem: GraphMessage;
   prevAndNextChatRoles?: ChatItemRole[];
+  width: number;
 }) {
   const [expanded, setExpanded] = useState<boolean>(true);
   const [tableData, setTableData] = useState<Record<string, unknown>[] | null>(
@@ -411,7 +436,8 @@ export function GraphVizChatItem(props: {
     <div className="sf-w-full sf-flex sf-flex-row sf-justify-center sf-my-1">
       <div
         className={classNames(
-          "sf-relative sf-rounded sf-flex sf-flex-col sf-mx-8 md:sf-max-w-2xl lg:sf-max-w-3xl xl:sf-max-w-3xl sf-w-full sf-text-left sf-place-items-baseline sf-bg-sky-50 sf-border sf-border-gray-200",
+          "sf-relative sf-rounded sf-flex sf-flex-col md:sf-max-w-2xl lg:sf-max-w-3xl sf-w-full sf-text-left sf-place-items-baseline sf-bg-sky-50 sf-border sf-border-gray-200",
+          props.width > 640 ? "sf-mx-8" : "sf-mx-4",
           !expanded && "hover:sf-bg-sky-100 sf-cursor-pointer",
         )}
       >
@@ -422,7 +448,13 @@ export function GraphVizChatItem(props: {
           <p className="sf-text-xs sf-text-sky-600 sf-mb-1">Plot</p>
           <div className="sf-text-sm sf-text-black">
             {props.chatItem.content.type !== "value" && "Graph of"}{" "}
-            <b className="font-medium">{props.chatItem.content.graphTitle}</b>
+            <b
+              className={classNames(
+                props.width > 640 ? "sf-font-semibold" : "sf-font-medium",
+              )}
+            >
+              {props.chatItem.content.graphTitle}
+            </b>
           </div>
           {expanded ? (
             <MinusIcon className={"sf-w-5 sf-h-5 sf-mr-6"} />
@@ -432,16 +464,30 @@ export function GraphVizChatItem(props: {
         </button>
         {expanded && (
           <>
-            <div className="sf-w-full sf-mt-1.5 sf--mb-1.5 sf-flex sf-justify-between">
+            <div
+              className={classNames(
+                "sf-w-full sf--mb-1.5 sf-flex sf-justify-between",
+                props.width > 640 ? "sf-mt-1.5" : "sf-mt-0.5",
+              )}
+            >
               <div>
                 {!["table", "value"].includes(props.chatItem.content.type) && (
-                  <Tabs tabOpen={tabOpen} setTabOpen={setTabOpen} />
+                  <Tabs
+                    tabOpen={tabOpen}
+                    setTabOpen={setTabOpen}
+                    small={props.width <= 640}
+                  />
                 )}
               </div>
               <div>
                 {props.chatItem.content.type !== "value" && (
                   <button
-                    className="sf-mb-2 sf-bg-white sf-rounded-lg sf-border hover:sf-bg-gray-50 sf-px-2 sf-py-2 sf-mr-4 sf-text-gray-600 hover:sf-text-gray-700 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-text-sm sf-shadow-sm"
+                    className={classNames(
+                      "sf-bg-white sf-rounded-lg sf-border hover:sf-bg-gray-50 sf-text-gray-600 hover:sf-text-gray-700 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-text-sm sf-shadow-sm",
+                      props.width > 640
+                        ? "sf-mb-2 sf-mr-4 sf-px-2 sf-py-2"
+                        : "sf-mb-1.5 sf-mr-2.5 sf-px-1.5 sf-py-1.5",
+                    )}
                     onClick={() => {
                       const graphData = exportDataAsCSV(props.chatItem.content);
                       const blob = new Blob([graphData], {
@@ -456,7 +502,12 @@ export function GraphVizChatItem(props: {
                     }}
                   >
                     <ArrowTopRightOnSquareIcon
-                      className={"sf-h-4 sf-w-4 sf-text-gray-800"}
+                      className={classNames(
+                        "sf-text-gray-800",
+                        props.width > 640
+                          ? "sf-h-4 sf-w-4"
+                          : "sf-h-3.5 sf-w-3.5",
+                      )}
                     />
                     Export
                   </button>
@@ -464,7 +515,7 @@ export function GraphVizChatItem(props: {
               </div>
             </div>
             {tabOpen !== "table" ? (
-              <Graph {...props.chatItem.content} />
+              <Graph {...props.chatItem.content} small={props.width <= 640} />
             ) : (
               tableData && (
                 <div className="sf-flex sf-flex-col sf-w-full sf-mb-2">
@@ -641,6 +692,7 @@ export function AssistantChatItem(props: {
   prevAndNextChatRoles?: ChatItemRole[];
   precedingUrls?: { name: string; url: string }[];
   showThoughts?: boolean;
+  width: number;
 }) {
   const [assistantChatObj, setAssistantChatObj] = useState<ParsedOutput>(
     parseOutput(props.chatItem.content),
@@ -661,7 +713,14 @@ export function AssistantChatItem(props: {
     >
       {(!props.prevAndNextChatRoles[0] ||
         props.prevAndNextChatRoles[0] === "user") && (
-        <p className=" sf-font-semibold sf-px-1.5 sf-mb-0.5">
+        <p
+          className={classNames(
+            "sf-px-1.5 sf-mb-0.5",
+            props.width > 640
+              ? "sf-font-semibold sf-text-base"
+              : "sf-font-medium sf-text-little",
+          )}
+        >
           {(props.AIname ?? "Assistant") + " AI"}
         </p>
       )}
@@ -815,7 +874,7 @@ export function AssistantChatItem(props: {
 function StyledMarkdown(props: { children: string }) {
   return (
     <ReactMarkdown
-      className="sf-px-4 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full"
+      className="sf-px-4 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-overflow-x-auto"
       components={{
         a: ({ node, ...props }) => (
           <a className="sf-text-blue-500 hover:sf-underline" {...props} />
@@ -875,11 +934,15 @@ function StyledMarkdown(props: { children: string }) {
 export function Tabs(props: {
   tabOpen: "table" | "graph";
   setTabOpen: (tab: "table" | "graph") => void;
+  small?: boolean;
 }) {
   const options: ("table" | "graph")[] = ["graph", "table"];
   return (
     <nav
-      className="sf-ml-3 sf-isolate sf-flex sf-divide-x sf-divide-gray-200 sf-rounded-lg sf-shadow sf-mb-2"
+      className={classNames(
+        "sf-isolate sf-flex sf-divide-x sf-divide-gray-200 sf-rounded-lg sf-shadow",
+        props.small ? "sf-ml-1.5 sf-mb-1" : "sf-ml-3 sf-mb-2",
+      )}
       aria-label="Tabs"
     >
       {options.map((tab, tabIdx) => (
@@ -891,7 +954,8 @@ export function Tabs(props: {
               : "sf-text-gray-500 hover:sf-text-gray-700",
             tabIdx === 0 ? "sf-rounded-l-lg" : "",
             tabIdx === 1 ? "sf-rounded-r-lg" : "",
-            "sf-relative sf-cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-py-2 sf-px-2 sf-text-center sf-text-sm hover:sf-bg-gray-50 focus:sf-z-10",
+            "sf-relative sf-cursor-pointer sf-min-w-0 sf-flex-1 sf-overflow-hidden sf-bg-white sf-text-center sf-text-sm hover:sf-bg-gray-50 focus:sf-z-10",
+            props.small ? "sf-py-1.5 sf-px-1.5" : "sf-py-2 sf-px-2",
           )}
           aria-current={props.tabOpen === tab ? "page" : undefined}
           onClick={() => {
