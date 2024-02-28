@@ -1,9 +1,9 @@
-import React, { Fragment, ReactNode } from "react";
+import React, { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import classNames from "classnames";
 import { SparklesIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import Chat from "./chat";
-import { ModalStyle, SuperflowsModalProps } from "../lib/types";
+import { SuperflowsModalProps } from "../lib/types";
 
 export default function SuperflowsModal(props: SuperflowsModalProps) {
   const focusRef = React.useRef(null);
