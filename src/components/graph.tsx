@@ -14,7 +14,12 @@ import {
 
 import { DateTime } from "luxon";
 import { GraphData, Json, SupportedGraphTypes } from "../lib/types";
-import { classNames } from "../lib/utils";
+
+function classNames(
+  ...classes: (string | undefined | null | boolean)[]
+): string {
+  return classes.filter(Boolean).join(" ");
+}
 
 const formats = [
   "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",

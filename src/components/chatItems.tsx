@@ -7,13 +7,12 @@ import {
   PlusIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ParsedOutput, parseOutput } from "../lib/parser";
 import {
   AssistantMessage,
-  GraphData,
   GraphMessage,
   Json,
   StreamingStepInput,
@@ -25,7 +24,7 @@ import {
   functionNameToDisplay,
   scrollToBottom,
 } from "../lib/utils";
-import { Graph, extractGraphData } from "./graph";
+import { Graph } from "./graph";
 import { LoadingSpinner } from "./loadingspinner";
 import {
   BoltIcon,
