@@ -266,7 +266,7 @@ export function makeDoubleExternalQuotes(text: string): string {
     // double quotes, unless they are already escaped
     return `"${text
       .slice(1, -1)
-      .replace(/(?<!\\)"/g, '\\"')
+      .replace(/([^\\])"/g, '$1\\"')
       .replace(/\\'/g, "'")}"`;
   }
   return text;
