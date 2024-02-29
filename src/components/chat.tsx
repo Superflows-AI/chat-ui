@@ -13,7 +13,12 @@ import {
   StreamingStepInput,
 } from "../lib/types";
 import { AutoGrowingTextArea } from "./autoGrowingTextarea";
-import { addTrailingSlash, classNames, scrollToBottom } from "../lib/utils";
+import {
+  addTrailingSlash,
+  classNames,
+  getRandomThree,
+  scrollToBottom,
+} from "../lib/utils";
 import { LoadingSpinner } from "./loadingspinner";
 import {
   useCallback,
@@ -59,6 +64,14 @@ export default function Chat(props: ChatProps) {
   const alreadyRunning = useRef(false);
 
   // TODO: Grab suggestions from DB if none are provided
+  const [suggestions, setSuggestions] = useState<string[]>(
+    props.suggestions.slice(0, 3),
+  );
+  useEffect(() => {
+    if (props.suggestions && props.suggestions.length > 0) {
+      setSuggestions(getRandomThree(props.suggestions));
+    }
+  }, [props.suggestions]);
 
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [devChatContents, setDevChatContents] = useState<StreamingStepInput[]>(
@@ -267,6 +280,11 @@ export default function Chat(props: ChatProps) {
       // If not an assistant message (confirmation, error etc) don't give follow-up suggestions
       if (outputMessages[outputMessages.length - 1].role !== "assistant")
         return;
+
+      if (props.suggestions.length > 5) {
+        setFollowUpSuggestions(getRandomThree(props.suggestions));
+        return;
+      }
       // Get follow-up suggestions
       const followUpResponse = await fetch(
         new URL("api/v1/follow-ups", hostname).href,
@@ -486,8 +504,8 @@ export default function Chat(props: ChatProps) {
           })}
           {(devChatContents.length === 0 ||
             (devChatContents.length === 1 && props.welcomeText)) &&
-            props.suggestions &&
-            props.suggestions.length > 0 && (
+            suggestions &&
+            suggestions.length > 0 && (
               <div className="sf-py-4 sf-px-1.5">
                 <h2
                   className={classNames(
@@ -498,7 +516,7 @@ export default function Chat(props: ChatProps) {
                   Suggestions
                 </h2>
                 <div className="sf-mt-1 sf-flex sf-flex-col sf-gap-y-1 sf-place-items-baseline">
-                  {props.suggestions.map((text) => (
+                  {suggestions.map((text) => (
                     <button
                       key={text}
                       className="sf-text-left sf-px-2 sf-py-1 sf-rounded-md sf-border sf-bg-white sf-text-little sf-text-gray-800 sf-shadow hover:sf-border-gray-400 sf-transition-all"

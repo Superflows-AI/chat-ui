@@ -274,3 +274,18 @@ export function scrollToBottom(
     }
   }
 }
+
+export function getRandomThree<Item>(array: Item[]): Item[] {
+  if (array.length <= 3) return array;
+  const result: Item[] = [];
+
+  while (result.length < 3) {
+    const random = Math.floor(Math.random() * array.length); //get random index
+    if (result.indexOf(array[random]) === -1) {
+      //check if item is already in result
+      result.push(array[random]); //if not, add it
+    }
+  }
+
+  return result;
+}
