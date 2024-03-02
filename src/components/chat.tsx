@@ -94,7 +94,7 @@ export default function Chat(props: ChatProps) {
       });
     };
     recognition.onend = () => {
-      if (!audioCancelled) {
+      if (!audioCancelled && finalTranscript.length > 0) {
         setUserText(finalTranscript);
       }
       setRecordingAudio(false);
