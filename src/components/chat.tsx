@@ -4,6 +4,7 @@ import {
   HandThumbDownIcon,
   HandThumbUpIcon,
   CheckCircleIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { ChatItem } from "./chatItems";
 import {
@@ -61,6 +62,7 @@ export default function Chat(props: ChatProps) {
 
   const [recordingAudio, setRecordingAudio] = useState<boolean>(false);
   const [recognition, setRecognition] = useState<any | null>(null);
+  const [audioCancelled, setAudioCancelled] = useState<boolean>(false);
 
   useEffect(() => {
     if ("webkitSpeechRecognition" in window) {
@@ -71,7 +73,8 @@ export default function Chat(props: ChatProps) {
   useEffect(() => {
     if (!recognition || recordingAudio) return;
     let finalTranscript = "";
-    recognition.continuous = false;
+    // If false, stops recording when it detects the end of speech
+    recognition.continuous = true;
     recognition.interimResults = false;
     // TODO: set language based on organisation? Doesn't support mixed language sentences
     recognition.lang = "en";
@@ -90,11 +93,14 @@ export default function Chat(props: ChatProps) {
       });
     };
     recognition.onend = () => {
+      if (!audioCancelled) {
+        setUserText(finalTranscript);
+      }
       setRecordingAudio(false);
-      setUserText(finalTranscript);
+      setAudioCancelled(false);
     };
     setRecognition(recognition);
-  }, [recognition]);
+  }, [recognition, audioCancelled]);
 
   useEffect(() => {
     // Start or stop recognition based on recordingAudio state
@@ -654,18 +660,31 @@ export default function Chat(props: ChatProps) {
           </div>
           <div className={"sf-flex sf-flex-row sf-gap-x-2"}>
             {recognition && (
-              <button
-                className={classNames(
-                  "sf-py-1 sf-rounded-md active:sf-outline active:sf-outline-sky-600 sf-flex sf-items-center sf-bg-purple-500 hover:sf-bg-purple-400",
-                  recordingAudio ? "sf-px-12 sf-space-x-1" : "sf-px-6",
+              <>
+                {recordingAudio && (
+                  <button
+                    className={classNames("sf-py-1 sf-flex sf-items-center")}
+                    onClick={() => {
+                      setAudioCancelled(true);
+                      setRecordingAudio(false);
+                    }}
+                  >
+                    <TrashIcon className="sf-h-6 sf-w-6" />
+                  </button>
                 )}
-                onClick={() => {
-                  setRecordingAudio((recordingAudio) => !recordingAudio);
-                }}
-              >
-                <MicrophoneIcon className="sf-h-6 sf-w-6 sf-fill-white" />
-                {recordingAudio && <RecordingDots />}
-              </button>
+                <button
+                  className={classNames(
+                    "sf-py-1 sf-rounded-md active:sf-outline active:sf-outline-sky-600 sf-flex sf-items-center sf-bg-purple-500 hover:sf-bg-purple-400",
+                    recordingAudio ? "sf-px-12 sf-space-x-1" : "sf-px-6",
+                  )}
+                  onClick={() => {
+                    setRecordingAudio((recordingAudio) => !recordingAudio);
+                  }}
+                >
+                  <MicrophoneIcon className="sf-h-6 sf-w-6 sf-fill-white" />
+                  {recordingAudio && <RecordingDots />}
+                </button>
+              </>
             )}
             <button
               ref={props.initialFocus}
