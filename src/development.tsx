@@ -23,6 +23,7 @@ function Development() {
         welcomeText={import.meta.env.VITE_WELCOME_MESSAGE}
         suggestions={import.meta.env.VITE_SUGGESTIONS?.split(",")}
         showFunctionCalls={true}
+        enableSpeech={false}
       />
     </div>
   );
