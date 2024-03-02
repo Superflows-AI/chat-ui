@@ -65,6 +65,7 @@ export default function Chat(props: ChatProps) {
   const [audioCancelled, setAudioCancelled] = useState<boolean>(false);
 
   useEffect(() => {
+    if (props.enableSpeech !== null && !props.enableSpeech) return;
     if ("webkitSpeechRecognition" in window) {
       setRecognition(new (window as any).webkitSpeechRecognition() as any);
     }

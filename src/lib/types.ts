@@ -139,5 +139,6 @@ export interface ChatProps {
   initialFocus?: Ref<any>;
   showThoughts?: boolean;
   showFunctionCalls?: boolean;
+  enableSpeech?: boolean;
   debugMode?: boolean;
 }
