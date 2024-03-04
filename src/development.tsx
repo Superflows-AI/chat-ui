@@ -24,6 +24,7 @@ function Development() {
         suggestions={import.meta.env.VITE_SUGGESTIONS?.split(",")}
         showFunctionCalls={true}
         enableSpeech={true}
+        speechLanguage="en"
       />
     </div>
   );
