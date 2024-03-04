@@ -25,6 +25,7 @@ function Development() {
         suggestions={import.meta.env.VITE_SUGGESTIONS?.split(",")}
         showFunctionCalls={true}
         enableSpeech={true}
+        speechLanguage="en"
       />
       <div className="sf-w-80 sf-h-screen">
         <SuperflowsChat

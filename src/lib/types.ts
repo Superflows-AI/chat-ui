@@ -140,5 +140,6 @@ export interface ChatProps {
   showThoughts?: boolean;
   showFunctionCalls?: boolean;
   enableSpeech?: boolean;
+  speechLanguage?: string;
   debugMode?: boolean;
 }

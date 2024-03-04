@@ -77,8 +77,7 @@ export default function Chat(props: ChatProps) {
     // If false, stops recording when it detects the end of speech
     recognition.continuous = true;
     recognition.interimResults = false;
-    // TODO: set language based on organisation? Doesn't support mixed language sentences
-    recognition.lang = "en";
+    recognition.lang = props.speechLanguage ?? "en";
     recognition.onstart = () => {
       finalTranscript = "";
     };
