@@ -658,31 +658,44 @@ export default function Chat(props: ChatProps) {
               setShowNegativeTextbox={setShowNegativeFeedbackTextbox}
             />
           </div>
-          <div className={"sf-flex sf-flex-row sf-gap-x-2"}>
+          <div className={"sf-flex sf-flex-row sf-gap-x-2.5"}>
             {recognition && (
               <>
                 {recordingAudio && (
                   <button
-                    className={classNames("sf-py-1 sf-flex sf-items-center")}
+                    className={classNames(
+                      "sf-py-1 sf-flex sf-items-center sf-justify-center sf-flex-col sf-text-2xs sf-text-gray-800",
+                    )}
                     onClick={() => {
                       setAudioCancelled(true);
                       setRecordingAudio(false);
                     }}
                   >
-                    <TrashIcon className="sf-h-6 sf-w-6" />
+                    <TrashIcon className="sf-h-5 sf-w-5" />
+                    Cancel
                   </button>
                 )}
                 <button
                   className={classNames(
-                    "sf-py-1 sf-rounded-md active:sf-outline active:sf-outline-sky-600 sf-flex sf-items-center sf-bg-purple-500 hover:sf-bg-purple-400",
-                    recordingAudio ? "sf-px-12 sf-space-x-1" : "sf-px-6",
+                    "sf-rounded-md active:sf-outline active:sf-outline-sky-600 sf-flex sf-items-center sf-bg-blue-500 hover:sf-bg-blue-400",
+                    recordingAudio ? "sf-px-6" : "sf-px-6 sf-py-1",
                   )}
                   onClick={() => {
                     setRecordingAudio((recordingAudio) => !recordingAudio);
                   }}
                 >
-                  <MicrophoneIcon className="sf-h-6 sf-w-6 sf-fill-white" />
-                  {recordingAudio && <RecordingDots />}
+                  {!recordingAudio ? (
+                    <MicrophoneIcon
+                      className={classNames("sf-fill-white", "sf-h-6 sf-w-6")}
+                    />
+                  ) : (
+                    <div className="sf-mt-1 sf-flex sf-space-y-1 sf-flex-col sf-justify-center sf-space-x-1 sf-py-0.5">
+                      <RecordingDots />
+                      <div className="sf-text-2xs sf-text-blue-100">
+                        Tap to end recording
+                      </div>
+                    </div>
+                  )}
                 </button>
               </>
             )}
@@ -884,11 +897,15 @@ const RecordingDots = () => (
     {[...Array(3)].map((_, i) => (
       <span
         key={i}
-        className="sf-bg-white sf-rounded-full sf-w-2 sf-h-2 sf-animate-bounce"
-        style={{
-          animationDelay: `${i * 0.2}s`,
-        }}
-      ></span>
+        className={classNames(
+          "sf-bg-white sf-rounded-full sf-w-2 sf-h-2 sf-animate-bounce",
+          i === 0
+            ? ""
+            : i === 1
+            ? "sf-animation-delay-02"
+            : "sf-animation-delay-04",
+        )}
+      />
     ))}
   </div>
 );

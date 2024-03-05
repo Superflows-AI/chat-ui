@@ -11,6 +11,14 @@
   }
 }
 
+.sf-animation-delay-02 {
+    animation-delay: 0.2s !important;
+}
+
+.sf-animation-delay-04 {
+    animation-delay: 0.4s !important;
+}
+
 /*
 ! tailwindcss v3.3.3 | MIT License | https://tailwindcss.com
 *//*
