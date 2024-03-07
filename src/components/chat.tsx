@@ -616,9 +616,13 @@ export default function Chat(props: ChatProps) {
           )}
           placeholder={"Send a message"}
           value={userText}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setUserText(e.target.value)
-          }
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+            if (userText === "") {
+              setUserText(e.target.value.trim());
+            } else {
+              setUserText(e.target.value);
+            }
+          }}
           onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
             if (e.key === "Enter") {
               e.preventDefault();
