@@ -118,7 +118,7 @@ export default function Chat(props: ChatProps) {
 
   // TODO: Grab suggestions from DB if none are provided
   const [suggestions, setSuggestions] = useState<string[]>(
-    props.suggestions.slice(0, 3),
+    props.suggestions ? props.suggestions.slice(0, 3) : [],
   );
   useEffect(() => {
     if (props.suggestions && props.suggestions.length > 0) {
