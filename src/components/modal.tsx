@@ -67,7 +67,7 @@ export default function SuperflowsModal(props: SuperflowsModalProps) {
                 </button>
                 <div className="sf-w-full sf-flex sf-flex-row sf-gap-x-2.5 sf-border-b sf-border-gray-200 sf-pb-1.5">
                   <SparklesIcon className="sf-h-8 sf-w-8 sf-text-gray-500" />
-                  <Dialog.Title className="sf-text-xl sf-font-medium">
+                  <Dialog.Title className="sf-text-xl sf-font-medium sf-text-gray-900">
                     {props.AIname} AI
                   </Dialog.Title>
                 </div>
