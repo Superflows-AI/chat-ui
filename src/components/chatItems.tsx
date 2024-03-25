@@ -136,7 +136,7 @@ export function UserChatItem(props: {
     >
       <p
         className={classNames(
-          "sf-mb-1 sf-px-1.5",
+          "sf-mb-1 sf-px-1.5 sf-text-gray-900",
           props.width > 640
             ? "sf-font-semibold sf-text-base"
             : "sf-font-medium sf-text-little",
@@ -714,7 +714,7 @@ export function AssistantChatItem(props: {
         props.prevAndNextChatRoles[0] === "user") && (
         <p
           className={classNames(
-            "sf-px-1.5 sf-mb-0.5",
+            "sf-px-1.5 sf-mb-0.5 sf-text-gray-900",
             props.width > 640
               ? "sf-font-semibold sf-text-base"
               : "sf-font-medium sf-text-little",

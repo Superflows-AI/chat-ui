@@ -334,34 +334,39 @@ export default function Chat(props: ChatProps) {
       if (outputMessages[outputMessages.length - 1].role !== "assistant")
         return;
 
+      // Get follow-up suggestions
       if (props.suggestions.length > 5) {
         setFollowUpSuggestions(getRandomThree(props.suggestions));
         return;
       }
-      // Get follow-up suggestions
-      const followUpResponse = await fetch(
-        new URL("api/v1/follow-ups", hostname).href,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${props.superflowsApiKey}`,
+      if (localConversationId !== null) {
+        const followUpResponse = await fetch(
+          new URL("api/v1/follow-ups", hostname).href,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${props.superflowsApiKey}`,
+            },
+            body: JSON.stringify({
+              conversation_id: localConversationId,
+              user_description: props.userDescription,
+            }),
           },
-          body: JSON.stringify({
-            conversation_id: localConversationId,
-            user_description: props.userDescription,
-          }),
-        },
-      );
-      if (!followUpResponse.ok) {
-        console.error("Error getting follow-up suggestions", followUpResponse);
-        return;
-      }
-      const followUpJson = (await followUpResponse.json()) as {
-        suggestions: string[];
-      };
-      if (!alreadyRunning.current) {
-        setFollowUpSuggestions(followUpJson.suggestions);
+        );
+        if (!followUpResponse.ok) {
+          console.error(
+            "Error getting follow-up suggestions",
+            followUpResponse,
+          );
+          return;
+        }
+        const followUpJson = (await followUpResponse.json()) as {
+          suggestions: string[];
+        };
+        if (!alreadyRunning.current) {
+          setFollowUpSuggestions(followUpJson.suggestions);
+        }
       }
     },
     [
@@ -562,7 +567,7 @@ export default function Chat(props: ChatProps) {
               <div className="sf-py-4 sf-px-1.5">
                 <h2
                   className={classNames(
-                    "sf-ml-2 sf-font-medium",
+                    "sf-ml-2 sf-font-medium sf-text-gray-900",
                     width > 640 ? "sf-text-base" : "sf-text-little",
                   )}
                 >
