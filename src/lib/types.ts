@@ -137,6 +137,7 @@ export interface ChatProps {
     headers?: Record<string, string>;
   }[];
   initialFocus?: Ref<any>;
+  textBelowInput?: string;
   showThoughts?: boolean;
   showFunctionCalls?: boolean;
   enableSpeech?: boolean;

@@ -26,6 +26,9 @@ function Development() {
         showFunctionCalls={true}
         enableSpeech={true}
         speechLanguage="en"
+        // textBelowInput={
+        //   "This feature is in beta. We recommend you read the Acme AI [user guide](https://www.google.com)"
+        // }
       />
       <div className="sf-w-80 sf-h-screen">
         <SuperflowsChat
