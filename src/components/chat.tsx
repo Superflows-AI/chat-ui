@@ -657,15 +657,39 @@ export default function Chat(props: ChatProps) {
           >
             Cancel
           </button>
-          <div className={!feedbackButtonsVisible ? "sf-invisible" : ""}>
-            <FeedbackButtons
-              feedback={feedback}
-              setFeedback={setFeedback}
-              negativeFeedbackText={negativeFeedbackText}
-              setNegativeFeedbackText={setNegativeFeedbackText}
-              showNegativeTextbox={showNegativeFeedbackTextbox}
-              setShowNegativeTextbox={setShowNegativeFeedbackTextbox}
-            />
+          <div className="sf-h-16">
+            {feedbackButtonsVisible ? (
+              <FeedbackButtons
+                feedback={feedback}
+                setFeedback={setFeedback}
+                negativeFeedbackText={negativeFeedbackText}
+                setNegativeFeedbackText={setNegativeFeedbackText}
+                showNegativeTextbox={showNegativeFeedbackTextbox}
+                setShowNegativeTextbox={setShowNegativeFeedbackTextbox}
+              />
+            ) : props.textBelowInput ? (
+              <div className="sf-text-xs sf-text-gray-500">
+                {props.textBelowInput
+                  .split(/(\[.*]\(\S*\))/)
+                  .map((text, idx) => {
+                    const markdownLinkMatch = text.match(/\[(.*)]\((\S*)\)/);
+                    if (markdownLinkMatch) {
+                      return (
+                        <a
+                          key={idx}
+                          className="sf-text-blue-500 hover:sf-underline"
+                          href={markdownLinkMatch[2]}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {markdownLinkMatch[1]}
+                        </a>
+                      );
+                    }
+                    return text;
+                  })}
+              </div>
+            ) : undefined}
           </div>
           <div className={"sf-flex sf-flex-row sf-gap-x-2.5"}>
             {recognition && (
@@ -800,10 +824,6 @@ function FeedbackButtons(props: {
   setShowNegativeTextbox: (show: boolean) => void;
 }) {
   const [showThankYouMessage, setShowThankYouMessage] = useState(false);
-  const ref = useRef(null);
-  useEffect(() => {
-    ref.current.focus();
-  }, [props.showNegativeTextbox]);
 
   const handleNegativeFeedbackSubmission = () => {
     props.setFeedback("no");
@@ -813,90 +833,94 @@ function FeedbackButtons(props: {
   };
 
   return (
-    <div className="sf-flex sf-flex-row sf-h-16">
-      <div
-        className={classNames(
-          "sf-my-auto sf-flex sf-flex-row sf-whitespace-nowrap",
-          !showThankYouMessage && "sf-hidden",
-        )}
-      >
-        Thanks for your feedback!
-        <CheckCircleIcon className="sf-h-5 sf-w-5 sf-ml-1 sf-mr-2 sf-text-green-500 sf-my-auto" />
-      </div>
-      <div
-        className={classNames(
-          "sf-align-center sf-flex sf-flex-row sf-my-auto",
-          (!props.showNegativeTextbox || showThankYouMessage) && "sf-hidden",
-        )}
-      >
-        <div className="sf-relative">
-          <input
-            ref={ref}
-            className={classNames(
-              "sf-peer sf-pt-4 sf-pb-1 sf-h-10 sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-px-4 sf-border-gray-300 sf-border focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400 focus:sf-border-purple-400 focus:sf-ring-purple-400",
-            )}
-            placeholder=""
-            value={props.negativeFeedbackText ?? ""}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleNegativeFeedbackSubmission();
-              }
-            }}
-            onChange={(e) => props.setNegativeFeedbackText(e.target.value)}
-          />
-          <div
-            className={classNames(
-              "sf-absolute sf-pointer-events-none sf-text-sm sf-text-gray-400 sf-left-4 sf-top-3 peer-focus:sf-scale-75 peer-focus:sf--translate-y-5/8 sf-select-none sf-transition sf-duration-300",
-              props.negativeFeedbackText
-                ? "sf--translate-x-1/8 sf--translate-y-5/8 sf-scale-75"
-                : "peer-focus:sf--translate-x-1/8",
-            )}
-          >
-            What went wrong?
+    <div className="sf-flex sf-flex-row">
+      {!showThankYouMessage && !props.showNegativeTextbox ? (
+        <div
+          className={classNames(
+            "sf-flex sf-flex-col sf-place-items-center sf-gap-y-1 sf-text-xs sm:sf-text-sm",
+          )}
+        >
+          <div className="sf-flex sf-flex-row sf-gap-x-4 sf-px-2 sf-text-gray-900 sf-whitespace-nowrap">
+            Was this response helpful?
+          </div>
+          <div className="sf-flex sf-flex-row sf-gap-x-2">
+            <button
+              onClick={() => props.setShowNegativeTextbox(true)}
+              className={classNames(
+                "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-1.5 sf-text-xs sf-transition sf-bg-red-500 sf-ring-red-500",
+              )}
+            >
+              <HandThumbDownIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
+              No
+            </button>
+            <button
+              onClick={() => {
+                props.setFeedback("yes");
+                setShowThankYouMessage(true);
+                setTimeout(() => setShowThankYouMessage(false), 5000);
+              }}
+              className={classNames(
+                "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-1.5 sf-text-xs  sf-bg-green-500 sf-ring-green-500 ",
+              )}
+            >
+              <HandThumbUpIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
+              Yes
+            </button>
           </div>
         </div>
-        <button
-          className="sf-h-10 sf-place-items-center sf-rounded-md sf-px-3 sf-my-auto sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm hover:sf-bg-purple-600 sf-bg-purple-500"
-          onClick={() => handleNegativeFeedbackSubmission()}
+      ) : props.showNegativeTextbox && !showThankYouMessage ? (
+        <div
+          className={classNames(
+            "sf-align-center sf-flex sf-flex-row sf-my-auto",
+            showThankYouMessage && "sf-hidden",
+          )}
         >
-          Done
-        </button>
-      </div>
-      <div
-        className={classNames(
-          "sf-flex sf-flex-col sf-place-items-center sf-gap-y-1 sf-text-xs sm:sf-text-sm",
-          (props.showNegativeTextbox || showThankYouMessage) && "sf-hidden",
-        )}
-      >
-        <div className="sf-flex sf-flex-row sf-gap-x-4 sf-px-2 sf-text-gray-900 sf-whitespace-nowrap">
-          Was this response helpful?
-        </div>
-        <div className="sf-flex sf-flex-row sf-gap-x-2">
+          <div className="sf-relative">
+            <input
+              className={classNames(
+                "sf-peer sf-pt-4 sf-pb-1 sf-h-10 sf-text-sm sf-resize-none sf-mx-1 sf-rounded sf-px-4 sf-border-gray-300 sf-border focus:sf-ring-1 focus:sf-outline-0 placeholder:sf-text-gray-400 focus:sf-border-purple-400 focus:sf-ring-purple-400",
+              )}
+              placeholder=""
+              autoFocus={true}
+              value={props.negativeFeedbackText ?? ""}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleNegativeFeedbackSubmission();
+                }
+              }}
+              onChange={(e) => props.setNegativeFeedbackText(e.target.value)}
+            />
+            <div
+              className={classNames(
+                "sf-absolute sf-pointer-events-none sf-text-sm sf-text-gray-400 sf-left-4 sf-top-3 peer-focus:sf-scale-75 peer-focus:sf--translate-y-5/8 sf-select-none sf-transition sf-duration-300",
+                props.negativeFeedbackText
+                  ? "sf--translate-x-1/8 sf--translate-y-5/8 sf-scale-75"
+                  : "peer-focus:sf--translate-x-1/8",
+              )}
+            >
+              What went wrong?
+            </div>
+          </div>
           <button
-            onClick={() => props.setShowNegativeTextbox(true)}
-            className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-1.5 sf-text-xs sf-transition sf-bg-red-500 sf-ring-red-500",
-            )}
+            className="sf-h-10 sf-place-items-center sf-rounded-md sf-px-3 sf-my-auto sf-text-sm sf-font-semibold sf-text-white sf-shadow-sm hover:sf-bg-purple-600 sf-bg-purple-500"
+            onClick={() => handleNegativeFeedbackSubmission()}
           >
-            <HandThumbDownIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
-            No
-          </button>
-          <button
-            onClick={() => {
-              props.setFeedback("yes");
-              setShowThankYouMessage(true);
-              setTimeout(() => setShowThankYouMessage(false), 5000);
-            }}
-            className={classNames(
-              "sf-flex sf-flex-row sf-gap-x-1 sf-font-medium sf-place-items-center sf-text-gray-50 sf-px-4 sf-rounded-md sf-py-1.5 sf-text-xs  sf-bg-green-500 sf-ring-green-500 ",
-            )}
-          >
-            <HandThumbUpIcon className="sf-h-5 sf-w-5 sm:sf-h-4" />
-            Yes
+            Done
           </button>
         </div>
-      </div>
+      ) : (
+        showThankYouMessage && (
+          <div
+            className={classNames(
+              "sf-my-auto sf-flex sf-flex-row sf-whitespace-nowrap",
+            )}
+          >
+            Thanks for your feedback!
+            <CheckCircleIcon className="sf-h-5 sf-w-5 sf-ml-1 sf-mr-2 sf-text-green-500 sf-my-auto" />
+          </div>
+        )
+      )}
     </div>
   );
 }
