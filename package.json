@@ -1,6 +1,6 @@
 {
   "name": "@superflows/chat-ui-react",
-  "version": "1.2.49",
+  "version": "1.2.50",
   "main": "dist/index.js",
   "devDependencies": {
     "@babel/core": "^7.23.9",
