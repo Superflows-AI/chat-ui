@@ -155,7 +155,8 @@ export function parseFunctionCall(text: string): FunctionCall {
   // \) matches the closing bracket
   // |(\w+) matches the function name if the brackets were forgotten
   //  (common on fine-tuned 3.5)
-  const functionCallRegex = /^(?:\d\. |- )?(([\w\\_]+)\((.*)\)|([\w\\_]+))$/;
+  const functionCallRegex =
+    /^(?:\d\. |- )?(([\w\\_]+)\((.*)\)|([\w\\_]+))[,;]?$/;
   const functionCallMatch = text.match(functionCallRegex);
   if (!functionCallMatch) {
     throw new Error("Invalid function call format: " + text);

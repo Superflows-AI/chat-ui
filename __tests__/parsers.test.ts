@@ -578,6 +578,15 @@ describe("parseFunctionCall", () => {
       },
     });
   });
+  it("Commas between commands", () => {
+    const out = parseFunctionCall(`item_get(id=9),`);
+    expect(out).toStrictEqual({
+      name: "item_get",
+      args: {
+        id: 9,
+      },
+    });
+  });
 });
 
 describe("makeDoubleExternalQuotes", () => {
