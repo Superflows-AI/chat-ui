@@ -45,7 +45,7 @@ export interface ToConfirm extends FunctionCall {
 
 type ChatItemRole = Pick<StreamingStepInput, "role">["role"];
 
-export function ChatItem(props: {
+export default function ChatItem(props: {
   chatItem: StreamingStepInput;
   devMode: boolean;
   AIname?: string;
@@ -842,28 +842,30 @@ export function AssistantChatItem(props: {
                 </div>
               </div>
             )}
-          {!props.isLoading && props.precedingUrls.length > 0 && (
-            <div className="sf-flex sf-justify-end sf-text-gray-800 sf-px-3 sf-mt-2.5 sf-text-xs">
-              <div className="sf-border sf-border-gray-300 sf-bg-gray-100 sf-rounded-md sf-px-1.5 sf-flex sf-flex-row sf-gap-x-1 sf-flex-wrap">
-                More info:
-                {props.precedingUrls.map((url, idx) => (
-                  <div key={idx} className="sf-flex sf-flex-row">
-                    <a
-                      href={url.url}
-                      className="sf-text-blue-500 hover:sf-underline visited:sf-text-purple-500"
-                      target={"_blank"}
-                      rel={"noreferrer noopener"}
-                    >
-                      {`${idx + 1}.`}{" "}
-                      {url.name ||
-                        url.url.replace(/https?:\/\//, "").split("/")[0]}
-                    </a>
-                    {idx + 1 < props.precedingUrls.length && ","}
-                  </div>
-                ))}
+          {!props.isLoading &&
+            props.precedingUrls &&
+            props.precedingUrls.length > 0 && (
+              <div className="sf-flex sf-justify-end sf-text-gray-800 sf-px-3 sf-mt-2.5 sf-text-xs">
+                <div className="sf-border sf-border-gray-300 sf-bg-gray-100 sf-rounded-md sf-px-1.5 sf-flex sf-flex-row sf-gap-x-1 sf-flex-wrap">
+                  More info:
+                  {props.precedingUrls.map((url, idx) => (
+                    <div key={idx} className="sf-flex sf-flex-row">
+                      <a
+                        href={url.url}
+                        className="sf-text-blue-500 hover:sf-underline visited:sf-text-purple-500"
+                        target={"_blank"}
+                        rel={"noreferrer noopener"}
+                      >
+                        {`${idx + 1}.`}{" "}
+                        {url.name ||
+                          url.url.replace(/https?:\/\//, "").split("/")[0]}
+                      </a>
+                      {idx + 1 < props.precedingUrls.length && ","}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       }
     </div>
