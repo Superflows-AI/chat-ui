@@ -6,7 +6,7 @@ import {
   CheckCircleIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { ChatItem } from "./chatItems";
+import ChatItem from "./chatItems";
 import {
   ChatItemType,
   ChatProps,
@@ -562,7 +562,6 @@ export default function Chat(props: ChatProps) {
           })}
           {(devChatContents.length === 0 ||
             (devChatContents.length === 1 && props.welcomeText)) &&
-            suggestions &&
             suggestions.length > 0 && (
               <div className="sf-py-4 sf-px-1.5">
                 <h2

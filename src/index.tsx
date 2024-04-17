@@ -3,7 +3,10 @@ import SuperflowsSidebar from "./components/sidebar";
 import SuperflowsModal from "./components/modal";
 import SuperflowsChat from "./components/chat";
 import FollowUpSuggestions from "./components/followUpSuggestions";
-import { PlainTextChatItem, AssistantChatItem } from "./components/chatItems";
+import SuperflowsChatItem, {
+  PlainTextChatItem,
+  AssistantChatItem,
+} from "./components/chatItems";
 import {
   getLastSectionName,
   parseFunctionCall,
@@ -28,4 +31,5 @@ export {
   SuperflowsSidebar,
   SuperflowsModal,
   SuperflowsChat,
+  SuperflowsChatItem,
 }; // Add more exports here
