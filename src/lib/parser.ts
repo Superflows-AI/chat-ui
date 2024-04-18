@@ -14,7 +14,7 @@ export interface ParsedOutput {
 
 function getSectionText(
   inputStr: string,
-  sectionInfo: { index: number; searchString: string },
+  sectionInfo: { index: number; match: string },
   allSectionInfo: { index: number }[],
 ): string {
   const sectionIndex = sectionInfo.index;
@@ -30,21 +30,19 @@ function getSectionText(
 
   if (nextSectionIdx === -1 || !nextSectionIdx) {
     // This returns the rest of the string after the section name
-    return inputStr
-      .slice(sectionIndex + sectionInfo.searchString.length + 1)
-      .trim();
+    return inputStr.slice(sectionIndex + sectionInfo.match.length).trim();
   }
 
   return inputStr
-    .slice(sectionIndex + sectionInfo.searchString.length + 1, nextSectionIdx)
+    .slice(sectionIndex + sectionInfo.match.length, nextSectionIdx)
     .trim();
 }
 
 const sections = [
-  { searchString: "reasoning:" },
-  { searchString: "plan:" },
-  { searchString: "tell user:" },
-  { searchString: "commands:" },
+  /^Reasoning:\s?/m,
+  /^Plan:\s?/m,
+  /^Tell user:\s?/m,
+  /^Commands:\s?/m,
 ];
 
 export function parseOutput(gptString: string): ParsedOutput {
@@ -59,13 +57,14 @@ export function parseOutput(gptString: string): ParsedOutput {
     };
   }
   const sectionInfo = sections
-    .map((section) => ({
-      ...section,
-      // TODO: Both `inString` and `index` could be wrong if by chance any of the
-      //  searchStrings are used by GPT in an earlier stage of the response
-      inString: gptString.toLowerCase().includes(section.searchString),
-      index: gptString.toLowerCase().indexOf(section.searchString),
-    }))
+    .map((section) => {
+      const match = gptString.match(section);
+      return {
+        inString: Boolean(match),
+        match: match?.[0] ?? "",
+        index: match?.index ?? -1,
+      };
+    })
     .map((section, _, overall) => ({
       ...section,
       sectionText: section.inString
@@ -120,6 +119,13 @@ export function parseOutput(gptString: string): ParsedOutput {
     // Sometimes the output is just "commands" followed
     // by a message for the user.
     tellUser = unparsedCommands.join("\n");
+  } else if (commands.length === 0 && sectionInfo[2].sectionText === "") {
+    // Sometimes the AI just writes and then puts commands at the end
+    const tellUserEndIdx = Math.min(
+      ...sectionInfo.map((s) => s.index).filter((i) => i !== -1),
+      gptString.length,
+    );
+    tellUser = gptString.slice(0, tellUserEndIdx).trim();
   } else {
     // Otherwise set to the "Tell user:" section
     tellUser = sectionInfo[2].sectionText;
