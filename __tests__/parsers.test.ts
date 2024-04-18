@@ -1,5 +1,6 @@
 import { describe, it, expect } from "@jest/globals";
 import {
+  FunctionCall,
   makeDoubleExternalQuotes,
   parseFunctionCall,
   parseOutput,
@@ -104,7 +105,7 @@ describe("Parse output", () => {
   });
 
   it("tell user as command", () => {
-    const output = parseOutput("Commands: Tell user: i did a nice command");
+    const output = parseOutput("Commands:\nTell user: i did a nice command");
     expect(output).toBeDefined();
     expect(output.reasoning).toBe("");
     expect(output.plan).toBe("");
@@ -343,6 +344,79 @@ describe("Parse output", () => {
       },
     ]);
     expect(output.completed).toBe(false);
+  });
+  it("Real world", () => {
+    const text = `I've found a variety of healthy vegetarian recipes for different meals of the day. Here's a suggested meal plan:
+
+### Breakfast
+- **Avocado Toast with Tomato and Poached Egg**: A simple yet nutritious start to the day, featuring ripe avocados, fresh tomatoes, and eggs on whole-grain bread.
+- **Green Smoothie Bowl**: Blend spinach, banana, almond milk, and chia seeds for a refreshing and filling breakfast bowl.
+
+### Lunch
+- **Quinoa Salad with Mixed Vegetables**: A hearty salad with quinoa, cucumbers, tomatoes, bell peppers, and a lemon vinaigrette.
+- **Lentil Soup**: Rich in protein and fiber, this soup is both satisfying and healthy.
+
+### Dinner
+- **Portobello and Poblano Enchiladas**: Stuffed flour tortillas with thinly-sliced portobellos and poblanos topped with cheddar and queso fresco. [Epicurious](URL11)
+- **Butternut Squash Risotto**: Creamy risotto with roasted butternut squash makes for a comforting dinner. [The Mediterranean Dish](URL12)
+
+### Snacks
+- **Famous Tomato Dip**: A quick blend of canned tomatoes, almonds, garlic, and olive oil. [A Couple Cooks](URL16)
+- **Crispy Roasted Chickpeas**: Spiced chickpeas roasted until crunchy. [MOON and spoon and yum](URL20)
+
+This meal plan provides a balance of nutrients across different meals while keeping the dishes varied and interesting.
+
+Sources:
+[Epicurious](URL11)
+[The Mediterranean Dish](URL12)
+[A Couple Cooks](URL16)
+[MOON and spoon and yum](URL20)`;
+    const out = parseOutput(text);
+    expect(out).toEqual({
+      plan: "",
+      reasoning: "",
+      commands: [],
+      tellUser: text,
+      completed: true,
+    });
+  });
+  it("Real world with bad commands text", () => {
+    const text = `I've found a variety of healthy vegetarian recipes for different meals of the day. Here's a suggested meal plan:
+
+### Breakfast
+- **Avocado Toast with Tomato and Poached Egg**: A simple yet nutritious start to the day, featuring ripe avocados, fresh tomatoes, and eggs on whole-grain bread.
+- **Green Smoothie Bowl**: Blend spinach, banana, almond milk, and chia seeds for a refreshing and filling breakfast bowl.
+
+### Lunch
+- **Quinoa Salad with Mixed Vegetables**: A hearty salad with quinoa, cucumbers, tomatoes, bell peppers, and a lemon vinaigrette.
+- **Lentil Soup**: Rich in protein and fiber, this soup is both satisfying and healthy.
+
+### Dinner
+- **Portobello and Poblano Enchiladas**: Stuffed flour tortillas with thinly-sliced portobellos and poblanos topped with cheddar and queso fresco. [Epicurious](URL11)
+- **Butternut Squash Risotto**: Creamy risotto with roasted butternut squash makes for a comforting dinner. [The Mediterranean Dish](URL12)
+
+### Snacks
+- **Famous Tomato Dip**: A quick blend of canned tomatoes, almonds, garlic, and olive oil. [A Couple Cooks](URL16)
+- **Crispy Roasted Chickpeas**: Spiced chickpeas roasted until crunchy. [MOON and spoon and yum](URL20)
+
+This meal plan provides a balance of nutrients across different meals while keeping the dishes varied and interesting.
+
+Sources:
+[Epicurious](URL11)
+[The Mediterranean Dish](URL12)
+[A Couple Cooks](URL16)
+[MOON and spoon and yum](URL20)
+
+Commands:
+None, I don't need to do anything here`;
+    const out = parseOutput(text);
+    expect(out).toEqual({
+      plan: "",
+      reasoning: "",
+      commands: [],
+      tellUser: text.split("Commands:")[0].trim(),
+      completed: true,
+    });
   });
 });
 
