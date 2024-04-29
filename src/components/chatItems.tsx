@@ -907,7 +907,7 @@ function StyledMarkdown(props: { children: string }) {
         ),
         th: ({ node, ...props }) => (
           <th
-            className="sf-border sf-border-gray-300 sf-font-normal sf-px-2 sf-py-2"
+            className="sf-border sf-border-gray-300 sf-break-keep sf-font-normal sf-px-2 sf-py-2"
             {...props}
           />
         ),
@@ -919,7 +919,7 @@ function StyledMarkdown(props: { children: string }) {
         ),
         td: ({ node, ...props }) => (
           <td
-            className="sf-bg-gray-200 sf-border sf-border-gray-300 sf-whitespace-wrap sf-px-2 sf-py-2.5 sf-text-xs md:sf-text-sm sf-text-gray-700 sf-break-words sf-break"
+            className="sf-bg-gray-200 sf-border sf-border-gray-300 sf-break-keep sf-whitespace-wrap sf-px-2 sf-py-2.5 sf-text-xs md:sf-text-sm sf-text-gray-700 sf-break-words sf-break"
             style={{ wordBreak: "break-word" }}
             {...props}
           />
