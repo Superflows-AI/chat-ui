@@ -284,9 +284,12 @@ export default function Chat(props: ChatProps) {
           chunkValue
             .slice(6)
             .split("data: ")
-            .forEach((chunkOfChunk) => {
-              if (chunkOfChunk.length === 0) return;
-              const data = JSON.parse(chunkOfChunk) as StreamingStep;
+            .map((chunkOfChunk) => {
+              if (chunkOfChunk.length === 0) return null;
+              return JSON.parse(chunkOfChunk) as StreamingStep;
+            })
+            .filter(Boolean)
+            .forEach((data) => {
               if (conversationId === null) {
                 setConversationId(data.id);
                 localConversationId = data.id;
@@ -324,7 +327,7 @@ export default function Chat(props: ChatProps) {
               "'Include these keys in response' fields at the bottom of the edit action modal at https://dashboard.superflows.ai\n\n",
             e,
           );
-          incompleteChunk += chunkValue;
+          incompleteChunk = chunkValue;
         }
       }
       setLoading(false);
@@ -335,7 +338,7 @@ export default function Chat(props: ChatProps) {
         return;
 
       // Get follow-up suggestions
-      if (props.suggestions.length > 5) {
+      if (props.suggestions && props.suggestions.length > 5) {
         setFollowUpSuggestions(getRandomThree(props.suggestions));
         return;
       }
