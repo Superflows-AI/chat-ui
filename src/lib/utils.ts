@@ -102,6 +102,8 @@ export function convertToMarkdownTable(
             item[key] = stringify(value);
           } else if (typeof value === "string") {
             item[key] = value.trim().replaceAll("\n", "&#10;");
+          } else if (typeof value === "number") {
+            item[key] = value.toLocaleString(navigator.language ?? "en-US");
           } else item[key] = value;
         });
         return item;
@@ -176,7 +178,8 @@ export function processObjectForDisplay(
   /**
    * Processes an arbitrary object for display in a table
    * Returns a flattened form of the object, with nested keys separated by " -> "
-   * also recursively removes nodes with a single key where the value of the node
+   * also recursively replaces nodes with a single key with the value of the node
+   *  (e.g. {key: [1,2,3,4]} becomes [1,2,3,4])
    */
 
   // Handle special case where parent object is e.g. {a: [1,2,3]}, should return [1,2,3]
@@ -238,7 +241,10 @@ export function processObjectForDisplay(
 }
 
 function specialCaseDeNesting(obj: Record<string, any>): any[] | null {
-  // If obj contains only single key: value pairs and an array. Return the array. Else return null
+  /** If obj contains only single key: value pairs and an array.
+   * Return the array.
+   * Else return null
+   */
   if (typeof obj !== "object") return null;
   const keys = Object.keys(obj);
   if (keys.length !== 1) {
