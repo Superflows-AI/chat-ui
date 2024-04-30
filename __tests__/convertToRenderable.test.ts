@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+import uuid from "uuid";
 import { describe, expect, it } from "@jest/globals";
 import { convertToMarkdownTable } from "../src/lib/utils";
 
@@ -202,7 +206,7 @@ describe("convertToRenderable", () => {
     const input = {
       well: "i dreamed i saw the knights in armor coming",
       saying: "something about a queen",
-      uuid: crypto.randomUUID(),
+      uuid: uuid.v4(),
     };
     const output = convertToMarkdownTable(input);
     expect(output).toEqual(
@@ -216,7 +220,7 @@ describe("convertToRenderable", () => {
 
   it("removes uuid from array", () => {
     const input = "look at mother nature on the run".split(" ");
-    input.push(crypto.randomUUID());
+    input.push(uuid.v4());
     const output = convertToMarkdownTable(input);
     const expected = `|   |
 |---|
@@ -236,7 +240,7 @@ describe("convertToRenderable", () => {
       ["lying", "in"],
       ["a", "burned"],
       ["out", "basement"],
-      ["with", crypto.randomUUID()],
+      ["with", uuid.v4()],
     ];
     const output = convertToMarkdownTable(input);
     const expected = `|   0   |    1     |
@@ -252,7 +256,7 @@ describe("convertToRenderable", () => {
   it("removes uuid from nested object", () => {
     const input = [
       { flying: "mother nature's silver seed", to: "a new home in the sun" },
-      { flying: "mother nature's on the run", to: crypto.randomUUID() },
+      { flying: "mother nature's on the run", to: uuid.v4() },
     ];
     const output = convertToMarkdownTable(input);
     const expected = `|           Flying            |          To           |

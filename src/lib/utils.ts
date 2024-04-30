@@ -103,7 +103,7 @@ export function convertToMarkdownTable(
           } else if (typeof value === "string") {
             item[key] = value.trim().replaceAll("\n", "&#10;");
           } else if (typeof value === "number") {
-            item[key] = value.toLocaleString(navigator.language ?? "en-US");
+            item[key] = value.toLocaleString(navigator?.language ?? "en-US");
           } else item[key] = value;
         });
         return item;

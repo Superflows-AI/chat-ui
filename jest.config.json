@@ -1,8 +1,0 @@
-{
-  "preset": "ts-jest/presets/default-esm",
-  "testEnvironment": "node",
-  "extensionsToTreatAsEsm": [".ts"],
-  "transform": {},
-  "modulePathIgnorePatterns": ["<rootDir>/examples/"],
-  "transformIgnorePatterns": []
-}
