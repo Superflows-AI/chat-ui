@@ -217,7 +217,12 @@ export function parseFunctionCall(text: string): FunctionCall {
       // Object/array
       const objText = extractObjText(argMatch[2], argsText);
       try {
-        value = JSON.parse(objText.replaceAll(/'/g, '"'));
+        value = JSON.parse(
+          objText
+            .replaceAll(/'/g, '"')
+            .replace(/":\s?True/g, '": true')
+            .replace(/":\s?False/g, '": false'),
+        );
       } catch (e) {
         value = argMatch[2];
       }

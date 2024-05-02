@@ -418,6 +418,37 @@ None, I don't need to do anything here`;
       completed: true,
     });
   });
+  it("Real world with array of objects", () => {
+    const text = `
+Reasoning:
+1. The user wants to create a new active builder with specific parameters.
+2. The create_builder function is used to create new builders in the ERP system.
+3. The user has provided all necessary parameters for the function.
+
+Commands:
+create_builder(DbName="hello", Active=True, ModuleId="123", OwnerType=1, Fields=[{"Name": "bye", "Label": "bye", "Type": 1, "Required": True}], Name="hello")`;
+    const out = parseOutput(text);
+    expect(out).toEqual({
+      plan: "",
+      reasoning:
+        "1. The user wants to create a new active builder with specific parameters.\n2. The create_builder function is used to create new builders in the ERP system.\n3. The user has provided all necessary parameters for the function.",
+      commands: [
+        {
+          name: "create_builder",
+          args: {
+            DbName: "hello",
+            Active: true,
+            ModuleId: "123",
+            OwnerType: 1,
+            Fields: [{ Name: "bye", Label: "bye", Type: 1, Required: true }],
+            Name: "hello",
+          },
+        },
+      ],
+      tellUser: "",
+      completed: false,
+    });
+  });
 });
 
 describe("parseFunctionCall", () => {
