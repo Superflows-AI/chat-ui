@@ -47,9 +47,6 @@ const formats = [
   "yyyyMMdd'T'HHmm",
   "yyyyMMdd'T'HH",
   "yyyyMMdd",
-  "HH:mm:ss.SSS",
-  "HH:mm:ss",
-  "HH:mm",
   "MM-dd-yyyy",
   "dd.MM.yyyy",
   "MM/dd/yyyy",
@@ -57,10 +54,24 @@ const formats = [
   "h:mm a", // 1:30 PM
 ];
 
+const formatsToSkip = ["HH:mm:ss.SSS", "HH:mm:ss", "HH:mm"];
+
 function attemptDatetimeConversion(array: any[]): number[] | null {
   if (typeof array[0] !== "string") return null;
 
   let matchingFormat = null;
+
+  if (
+    formatsToSkip
+      .map((format) => {
+        const dt = DateTime.fromFormat(array[0], format);
+        if (dt.isValid) return format;
+        return null;
+      })
+      .filter(Boolean).length > 0
+  ) {
+    return null;
+  }
 
   for (const format of formats) {
     const dt = DateTime.fromFormat(array[0], format);
