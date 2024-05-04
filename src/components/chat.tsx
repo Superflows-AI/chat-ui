@@ -634,7 +634,12 @@ export default function Chat(props: ChatProps) {
           onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              if (userText && !showNegativeFeedbackTextbox) {
+              if (
+                userText &&
+                !showNegativeFeedbackTextbox &&
+                !loading &&
+                !alreadyRunning.current
+              ) {
                 void callSuperflowsApi([
                   ...devChatContents,
                   { role: "user", content: userText },
