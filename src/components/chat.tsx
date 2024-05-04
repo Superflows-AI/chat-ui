@@ -240,10 +240,11 @@ export default function Chat(props: ChatProps) {
         updateDevChatContents(null, [
           ...chat,
           {
-            role: "error",
+            role: "assistant",
             content: responseJson.error,
           },
         ]);
+        alreadyRunning.current = false;
         setLoading(false);
         return;
       }
