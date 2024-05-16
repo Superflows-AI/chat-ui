@@ -129,7 +129,80 @@ export default function Chat(props: ChatProps) {
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [devChatContents, setDevChatContents] = useState<StreamingStepInput[]>(
     props.welcomeText
-      ? [{ role: "assistant", content: props.welcomeText }]
+      ? [
+          { role: "assistant", content: props.welcomeText },
+          {
+            role: "graph",
+            content: {
+              type: "bar",
+              data: [
+                {
+                  "Item Code": "M501019730",
+                  y: 5942.708333333333,
+                  quantity: 7,
+                  purchasePrice: (848.9583333333333).toFixed(2),
+                },
+                {
+                  "Item Code": "M501019741",
+                  y: 3395.833333333333,
+                  quantity: 4,
+                  purchasePrice: (848.9583333333333).toFixed(2),
+                },
+                {
+                  "Item Code": "M501019795",
+                  y: 3359.375000000001,
+                  quantity: 3,
+                  purchasePrice: (1119.791666666667).toFixed(2),
+                },
+                {
+                  "Item Code": "M501019611",
+                  y: 2479.6875,
+                  quantity: 9,
+                  purchasePrice: (275.5208333333333).toFixed(2),
+                },
+                {
+                  "Item Code": "M501019623",
+                  y: 2406.25,
+                  quantity: 4,
+                  purchasePrice: (601.5625).toFixed(2),
+                },
+                {
+                  "Item Code": "M501019629",
+                  y: 1481.7708333333335,
+                  quantity: 5,
+                  purchasePrice: (296.3541666666667).toFixed(2),
+                },
+                {
+                  "Item Code": "M501019620",
+                  y: 1207.8125,
+                  quantity: 3,
+                  purchasePrice: (402.6041666666667).toFixed(2),
+                },
+                {
+                  "Item Code": "M501019784",
+                  y: 1119.791666666667,
+                  quantity: 1,
+                  purchasePrice: (1119.791666666667).toFixed(2),
+                },
+                {
+                  "Item Code": "M501019712",
+                  y: 1071.875,
+                  quantity: 2,
+                  purchasePrice: (535.9375).toFixed(2),
+                },
+                {
+                  "Item Code": "M501019690",
+                  y: 1000,
+                  quantity: 4,
+                  purchasePrice: 250,
+                },
+              ],
+              xLabel: "Item Code",
+              yLabel: "Total Value",
+              graphTitle: "Top 10 Order Lines by Total Value",
+            },
+          },
+        ]
       : [],
   );
   // Update welcome text if it changes
@@ -240,7 +313,9 @@ export default function Chat(props: ChatProps) {
         updateDevChatContents(null, [
           ...chat,
           {
-            role: "assistant",
+            // Show as error in dev mode, assistant in prod
+            // - big red messages (understandably) scare users
+            role: props.devMode ? "error" : "assistant",
             content: responseJson.error,
           },
         ]);
@@ -377,6 +452,7 @@ export default function Chat(props: ChatProps) {
       props.userApiKey,
       props.userDescription,
       props.mockApiResponses,
+      props.devMode,
       loading,
       setLoading,
       devChatContents,

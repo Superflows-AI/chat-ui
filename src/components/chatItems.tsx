@@ -33,6 +33,8 @@ import {
 } from "@heroicons/react/24/solid";
 import { loadMoreNumRowsToAdd, startingTableRows } from "../lib/consts";
 import { exportDataAsCSV } from "../lib/export";
+import Table from "./table";
+import { StyledMarkdown } from "./StyledMarkdown";
 
 export interface FunctionCall {
   name: string;
@@ -381,53 +383,9 @@ export function GraphVizChatItem(props: {
   width: number;
 }) {
   const [expanded, setExpanded] = useState<boolean>(true);
-  const [tableData, setTableData] = useState<Record<string, unknown>[] | null>(
-    null,
-  );
-  const [tableString, setTableString] = useState<string>("");
-  const [tableNumRows, setTableNumRows] = useState<number>(startingTableRows);
   const [tabOpen, setTabOpen] = useState<"table" | "graph">(
     props.chatItem.content.type === "table" ? "table" : "graph",
   );
-
-  useEffect(() => {
-    const removeX =
-      !props.chatItem.content.xLabel &&
-      !props.chatItem.content.data.some(
-        (d) => d.x !== props.chatItem.content.data[0].x,
-      );
-    const removeY =
-      !props.chatItem.content.yLabel &&
-      !props.chatItem.content.data.some(
-        (d) => d.y !== props.chatItem.content.data[0].y,
-      );
-    const localData = props.chatItem.content.data.map((item) => {
-      const out: Record<string, unknown> = { ...item };
-      if (
-        props.chatItem.content.xLabel &&
-        "x" in item &&
-        !out[props.chatItem.content.xLabel]
-      ) {
-        out[props.chatItem.content.xLabel] = item.x;
-        delete out.x;
-      }
-      if (
-        props.chatItem.content.yLabel &&
-        "y" in item &&
-        !out[props.chatItem.content.yLabel]
-      ) {
-        out[props.chatItem.content.yLabel] = item.y;
-        delete out.y;
-      }
-      if (removeX) delete out.x;
-      if (removeY) delete out.y;
-      return out;
-    });
-    setTableData(localData);
-    setTableString(
-      convertToMarkdownTable(localData.slice(0, startingTableRows)),
-    );
-  }, [props.chatItem.content.data]);
 
   if (props.chatItem.content.data?.length === 0) return <></>;
 
@@ -446,7 +404,9 @@ export function GraphVizChatItem(props: {
         >
           <p className="sf-text-xs sf-text-sky-600 sf-mb-1">Plot</p>
           <div className="sf-text-sm sf-text-black">
-            {props.chatItem.content.type !== "value" && "Graph of"}{" "}
+            {props.chatItem.content.type === "table"
+              ? "Table of"
+              : props.chatItem.content.type !== "value" && "Graph of"}{" "}
             <b
               className={classNames(
                 props.width > 640 ? "sf-font-semibold" : "sf-font-medium",
@@ -516,42 +476,7 @@ export function GraphVizChatItem(props: {
             {tabOpen !== "table" ? (
               <Graph {...props.chatItem.content} small={props.width <= 640} />
             ) : (
-              tableData && (
-                <div className="sf-flex sf-flex-col sf-w-full sf-mb-2">
-                  <StyledMarkdown>{tableString}</StyledMarkdown>
-                  {tableData.length > tableNumRows && (
-                    <button
-                      className="sf-w-[calc(100%-2rem)] sf-flex sf-place-items-center sf-justify-center sf-bg-gray-50 sf-mx-4 sf-border-b sf-border-x sf-text-little sf-text-gray-600 sf-py-1.5"
-                      onClick={() => {
-                        const newNumRows = Math.min(
-                          tableNumRows + loadMoreNumRowsToAdd,
-                          tableData.length,
-                        );
-                        setTableNumRows(newNumRows);
-                        setTableString(
-                          convertToMarkdownTable(
-                            tableData.slice(0, newNumRows),
-                          ),
-                        );
-                      }}
-                    >
-                      <ArrowDownIcon className="sf-w-4 sf-h-4 sf-mr-1" />
-                      Load{" "}
-                      {Math.min(
-                        loadMoreNumRowsToAdd,
-                        tableData.length - tableNumRows,
-                      )}{" "}
-                      more
-                    </button>
-                  )}
-                  {props.chatItem.content.data.length > tableNumRows && (
-                    <div className="sf-w-full sf-flex sf-justify-end sf-text-sm sf-text-gray-500 sf-py-0.5 sf-pr-5">
-                      {props.chatItem.content.data.length - tableNumRows} more
-                      rows
-                    </div>
-                  )}
-                </div>
-              )
+              <Table graphData={props.chatItem.content} />
             )}
           </>
         )}
@@ -869,66 +794,6 @@ export function AssistantChatItem(props: {
         </div>
       }
     </div>
-  );
-}
-
-function StyledMarkdown(props: { children: string }) {
-  return (
-    <ReactMarkdown
-      className="sf-px-4 sf-mt-1 sf-text-little sf-text-gray-900 sf-whitespace-pre-line sf-w-full sf-overflow-x-auto"
-      components={{
-        a: ({ node, ...props }) => (
-          <a className="sf-text-blue-500 hover:sf-underline" {...props} />
-        ),
-        li: ({ node, ...props }) => (
-          <li
-            className="marker:sf-text-gray-700 sf-ml-4 sf--my-2 sf-text-gray-900 sf-list-decimal"
-            {...props}
-          />
-        ),
-        p: ({ node, ...props }) => <p className="sf-my-0" {...props} />,
-        h3: ({ node, ...props }) => (
-          <h3
-            className="sf-text-little sm:sf-text-base lg:sf-text-lg sf-text-center sf-w-full sf-font-extrabold sf-text-gray-900 sf-py-2 sf--mb-6 sf-border sf-bg-gray-50 sf-border-gray-300"
-            {...props}
-          />
-        ),
-        table: ({ node, ...props }) => (
-          <table
-            className="sf-text-center sf-border-collapse sf-w-full sf-divide-y sf-divide-gray-300 sf-border sf-border-gray-300"
-            {...props}
-          />
-        ),
-        thead: ({ node, ...props }) => (
-          <thead
-            className="sf-bg-gray-100 sf-text-xs sm:sf-text-sm lg:sf-text-little sf-text-gray-900 sf-py-2"
-            {...props}
-          />
-        ),
-        th: ({ node, ...props }) => (
-          <th
-            className="sf-border sf-border-gray-300 sf-break-keep sf-font-normal sf-px-2 sf-py-2"
-            {...props}
-          />
-        ),
-        tr: ({ node, ...props }) => (
-          <tr
-            className="even:sf-bg-gray-300 sf-border sf-border-gray-300"
-            {...props}
-          />
-        ),
-        td: ({ node, ...props }) => (
-          <td
-            className="sf-bg-gray-200 sf-border sf-border-gray-300 sf-break-keep sf-whitespace-wrap sf-px-2 sf-py-2.5 sf-text-xs md:sf-text-sm sf-text-gray-700 sf-break-words sf-break"
-            style={{ wordBreak: "break-word" }}
-            {...props}
-          />
-        ),
-      }}
-      remarkPlugins={[remarkGfm]}
-    >
-      {props.children}
-    </ReactMarkdown>
   );
 }
 
