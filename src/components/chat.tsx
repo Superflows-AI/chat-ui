@@ -163,7 +163,11 @@ export default function Chat(props: ChatProps) {
   );
 
   const { clearMessageCache, updateDevChatContents, getMessagesFromCache } =
-    useMessageCache(setConversationId, setDevChatContents);
+    useMessageCache(
+      setConversationId,
+      setDevChatContents,
+      props.superflowsApiKey,
+    );
 
   useEffect(() => {
     getMessagesFromCache();
