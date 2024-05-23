@@ -1,11 +1,12 @@
 import { StreamingStepInput } from "./types";
-import React from "react";
+import React, { useCallback } from "react";
 
 export default function useMessageCache(
   setConversationId: React.Dispatch<React.SetStateAction<number>>,
   setDevChatContents: React.Dispatch<
     React.SetStateAction<StreamingStepInput[]>
   >,
+  superflowsApiKey: string,
 ) {
   const TIME_TO_EXPIRE_MINS = 15;
 
@@ -16,8 +17,10 @@ export default function useMessageCache(
     return date < expirationDate;
   }
 
-  const getMessagesFromCache = () => {
-    const cachedConversationString = localStorage.getItem("conversationCache");
+  const getMessagesFromCache = useCallback(() => {
+    const cachedConversationString = localStorage.getItem(
+      `conversationCache_${superflowsApiKey}`,
+    );
 
     if (!cachedConversationString) return;
 
@@ -37,46 +40,46 @@ export default function useMessageCache(
       setConversationId(cachedConversation.conversationId);
       setDevChatContents(cachedConversation.messages);
     }
-  };
+  }, [setConversationId, setDevChatContents, superflowsApiKey]);
 
-  const updateMessagesCache = (
-    conversationId: number | null,
-    messages: StreamingStepInput[],
-  ) => {
-    if (!conversationId) {
-      return;
-    }
+  const updateMessagesCache = useCallback(
+    (conversationId: number | null, messages: StreamingStepInput[]) => {
+      if (!conversationId) {
+        return;
+      }
 
-    const cachedConversation: {
-      conversationId: number;
-      messages: StreamingStepInput[];
-      updated: Date;
-    } = {
-      conversationId: conversationId,
-      messages: messages,
-      updated: new Date(),
-    };
+      const cachedConversation: {
+        conversationId: number;
+        messages: StreamingStepInput[];
+        updated: Date;
+      } = {
+        conversationId: conversationId,
+        messages: messages,
+        updated: new Date(),
+      };
 
-    localStorage.setItem(
-      "conversationCache",
-      JSON.stringify(cachedConversation),
-    );
-  };
+      localStorage.setItem(
+        `conversationCache_${superflowsApiKey}`,
+        JSON.stringify(cachedConversation),
+      );
+    },
+    [superflowsApiKey],
+  );
 
-  const clearMessageCache = () => {
-    localStorage.removeItem("conversationCache");
-  };
+  const clearMessageCache = useCallback(() => {
+    localStorage.removeItem(`conversationCache_${superflowsApiKey}`);
+  }, [superflowsApiKey]);
 
-  const updateDevChatContents = (
-    conversationId: number | null,
-    messages: StreamingStepInput[],
-  ) => {
-    setDevChatContents(messages);
-    updateMessagesCache(
-      conversationId,
-      messages.filter((m) => m.role !== "loading"),
-    );
-  };
+  const updateDevChatContents = useCallback(
+    (conversationId: number | null, messages: StreamingStepInput[]) => {
+      setDevChatContents(messages);
+      updateMessagesCache(
+        conversationId,
+        messages.filter((m) => m.role !== "loading"),
+      );
+    },
+    [setDevChatContents, updateMessagesCache],
+  );
 
   return { clearMessageCache, updateDevChatContents, getMessagesFromCache };
 }
