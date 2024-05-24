@@ -669,7 +669,7 @@ export default function Chat(props: ChatProps) {
           >
             Cancel
           </button>
-          <div className="sf-h-16">
+          <div className="sf-h-16 sf-relative">
             {feedbackButtonsVisible ? (
               <FeedbackButtons
                 feedback={feedback}
@@ -680,27 +680,40 @@ export default function Chat(props: ChatProps) {
                 setShowNegativeTextbox={setShowNegativeFeedbackTextbox}
               />
             ) : props.textBelowInput ? (
-              <div className="sf-text-xs sf-text-gray-500">
-                {props.textBelowInput
-                  .split(/(\[.*]\(\S*\))/)
-                  .map((text, idx) => {
-                    const markdownLinkMatch = text.match(/\[(.*)]\((\S*)\)/);
-                    if (markdownLinkMatch) {
-                      return (
-                        <a
-                          key={idx}
-                          className="sf-text-blue-500 hover:sf-underline"
-                          href={markdownLinkMatch[2]}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {markdownLinkMatch[1]}
-                        </a>
-                      );
-                    }
-                    return text;
-                  })}
-              </div>
+              <>
+                <div className="sf-peer sf-text-xs sf-text-gray-500 sf-mx-1">
+                  {(width < 600
+                    ? props.textBelowInput.slice(0, 100)
+                    : props.textBelowInput
+                  )
+                    .split(/(\[.*]\(\S*\))/)
+                    .map((text, idx) => {
+                      const markdownLinkMatch = text.match(/\[(.*)]\((\S*)\)/);
+                      if (markdownLinkMatch) {
+                        return (
+                          <a
+                            key={idx}
+                            className="sf-text-blue-500 hover:sf-underline"
+                            href={markdownLinkMatch[2]}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {markdownLinkMatch[1]}
+                          </a>
+                        );
+                      }
+                      return text;
+                    })}
+                  {width < 600 && props.textBelowInput.length > 100
+                    ? "..."
+                    : ""}
+                </div>
+                {width < 600 && props.textBelowInput.length > 100 ? (
+                  <div className="popup sf--top-6 sf--left-2 sf-border sf-border-gray-200 sf-text-xs sf-text-gray-500">
+                    {props.textBelowInput}
+                  </div>
+                ) : undefined}
+              </>
             ) : undefined}
           </div>
           <div className={"sf-flex sf-flex-row sf-gap-x-2.5"}>

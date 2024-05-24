@@ -15,6 +15,7 @@ import {
 import { DateTime } from "luxon";
 import { GraphData, Json, SupportedGraphTypes } from "../lib/types";
 
+// Here due to issues with importing from ./utils in tests
 function classNames(
   ...classes: (string | undefined | null | boolean)[]
 ): string {

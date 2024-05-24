@@ -7,7 +7,7 @@
 
 @layer components {
   .popup {
-    @apply sf-opacity-0 peer-hover:sf-opacity-100 sf-absolute sf-bg-gray-600 sf-text-gray-50 sf-px-2 sf-py-1 sf-rounded-md sf-select-none sf-pointer-events-none sf-transition sf-delay-100 sf-duration-300 sf-z-50;
+    @apply sf-opacity-0 peer-hover:sf-opacity-100 sf-absolute sf-bg-white sf-text-gray-900 sf-px-2 sf-py-1 sf-rounded-md sf-select-none sf-pointer-events-none sf-transition sf-delay-100 sf-duration-300 sf-z-50 peer-hover:sf-shadow-md;
   }
 }
 
