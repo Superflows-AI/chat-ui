@@ -19,7 +19,7 @@ export function AutoGrowingTextArea(props: {
     ref.current.style.height = "5px";
 
     const maxH = props.maxHeight ?? 500;
-    const minH = props.minHeight ?? 0;
+    const minH = props.minHeight ?? 36;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ref.current.style.height =
