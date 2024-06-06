@@ -130,6 +130,7 @@ export interface ChatProps {
   mockApiResponses?: boolean;
   styling?: ChatStyle;
   initialMessage?: string;
+  userId?: string;
   welcomeText?: string;
   apiParams?: {
     name: string;
