@@ -215,6 +215,7 @@ export default function Chat(props: ChatProps) {
             stream: true,
             api_params: props.apiParams,
             debug: props.debugMode,
+            user_id: props.userId,
           }),
         });
 
