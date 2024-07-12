@@ -1,6 +1,7 @@
 import {
   ArrowDownIcon,
   ArrowTopRightOnSquareIcon,
+  ChartBarSquareIcon,
   CheckCircleIcon,
   LightBulbIcon,
   MinusIcon,
@@ -469,16 +470,35 @@ export function GraphVizChatItem(props: {
                 props.width > 640 ? "sf-mt-1.5" : "sf-mt-0.5",
               )}
             >
-              <div>
-                {!["table", "value"].includes(props.chatItem.content.type) && (
-                  <Tabs
-                    tabOpen={tabOpen}
-                    setTabOpen={setTabOpen}
-                    small={props.width <= 640}
+              {/*<div>*/}
+              {/*  {!["table", "value"].includes(props.chatItem.content.type) && (*/}
+              {/*    <Tabs*/}
+              {/*      tabOpen={tabOpen}*/}
+              {/*      setTabOpen={setTabOpen}*/}
+              {/*      small={props.width <= 640}*/}
+              {/*    />*/}
+              {/*  )}*/}
+              {/*</div>*/}
+              {props.chatItem.content.type !== "value" && (
+                <button
+                  className={classNames(
+                    "sf-bg-white sf-rounded-lg sf-border hover:sf-bg-gray-50 sf-text-gray-600 hover:sf-text-gray-700 sf-flex sf-flex-row sf-place-items-center sf-gap-x-1 sf-text-sm sf-shadow-sm",
+                    props.width > 640
+                      ? "sf-mb-2 sf-ml-4 sf-px-2 sf-py-2"
+                      : "sf-mb-1.5 sf-ml-2.5 sf-px-1.5 sf-py-1.5",
+                  )}
+                  onClick={() => {}}
+                >
+                  <ChartBarSquareIcon
+                    className={classNames(
+                      "sf-text-gray-800",
+                      props.width > 640 ? "sf-h-4 sf-w-4" : "sf-h-3.5 sf-w-3.5",
+                    )}
                   />
-                )}
-              </div>
-              <div>
+                  Add to Dashboard
+                </button>
+              )}
+              <div className="sf-flex">
                 {props.chatItem.content.type !== "value" && (
                   <button
                     className={classNames(
